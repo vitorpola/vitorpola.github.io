@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gerar Imagens Personalizadas</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Calibri, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(120deg, #ede7f6 0%, #fff 100%);
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(74, 20, 140, 0.08);
+      padding: 32px 36px 36px 36px;
+    }
+    h2, label {
+      color: #4a148c;
+    }
+    h2 {
+      margin-top: 0;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px 24px;
+      margin-bottom: 24px;
+      align-items: end;
+    }
+    form label {
+      font-weight: 500;
+      margin-bottom: 4px;
+      display: block;
+    }
+    form input[type="number"],
+    form input[type="date"],
+    form input[type="text"] {
+      width: 100%;
+      border: 1px solid #b39ddb;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 1rem;
+      background: #f8f6fc;
+      transition: border 0.2s;
+    }
+    form input:focus {
+      border: 1.5px solid #7e57c2;
+      outline: none;
+    }
+    #csvFile {
+      border: none;
+      background: none;
+      font-size: 1rem;
+      color: #4a148c;
+      margin-top: 6px;
+    }
+    #gerar {
+      grid-column: 1 / -1;
+      background: linear-gradient(90deg, #7e57c2 60%, #9575cd 100%);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 12px 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 2px 8px rgba(74, 20, 140, 0.08);
+      transition: background 0.2s;
+    }
+    #gerar:disabled {
+      background: #d1c4e9;
+      color: #888;
+      cursor: not-allowed;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 18px;
+      background: #faf7fd;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(74, 20, 140, 0.06);
+    }
+    th, td {
+      border: 1px solid #e1bee7;
+      padding: 10px 8px;
+      text-align: center;
+      font-size: 1rem;
+    }
+    th {
+      background: #ede7f6;
+      color: #4a148c;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    #resultados {
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    #resultados a {
+      color: #512da8;
+      font-weight: 500;
+      text-decoration: none;
+      margin-right: 10px;
+      transition: color 0.2s;
+    }
+    #resultados a:hover {
+      color: #7e57c2;
+      text-decoration: underline;
+    }
+    #resultados button {
+      background: #7e57c2;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 7px 18px;
+      font-size: 1rem;
+      margin-left: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #resultados button:hover {
+      background: #512da8;
+    }
+    @media (max-width: 700px) {
+      .container {
+        padding: 18px 6vw;
+      }
+      form {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Gerar Imagens Personalizadas</h2>
+    <form>
+      <div>
+        <label>Informe % de Juros:</label>
+        <input type="number" id="juros" value="10.00" step="0.01" min="0" max="100">
+      </div>
+      <div>
+        <label>Data de desembolso:</label>
+        <input type="date" id="dataDesembolso" value="">
+      </div>
+      <div>
+        <label>Data de pagamento:</label>
+        <input type="date" id="dataPagamento" value="">
+      </div>
+      <div>
+        <label>Importar CSV (nome, telefone, valor):</label>
+        <input type="file" id="csvFile" accept=".csv">
+      </div>
+      <button id="gerar" disabled>Gerar Imagens</button>
+    </form>
+    <table id="tabela">
+      <thead>
+        <tr>
+          <th>Telefone</th>
+          <th>Nome</th>
+          <th>Valor Original</th>
+          <th>Valor com Juros</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+      <tfoot>
+        <tr>
+          <td><input type="text" id="novoTelefone" placeholder="Telefone"></td>
+          <td><input type="text" id="novoNome" placeholder="Nome"></td>
+          <td><input type="number" id="novoValor" placeholder="Valor" step="0.01" min="0"></td>
+          <td colspan="2">
+            <button type="button" id="adicionarContato">Adicionar</button>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+    <img id="baseImage" src="template.png" alt="Imagem Base" style="display:none;">
+    <div id="resultados"></div>
+  </div>
+
+  <script>
+    let baseImage = null;
+    let baseImageLoaded = false;
+
+    function enableGerarBtn() {
+      document.getElementById("gerar").disabled = !baseImageLoaded;
+    }
+
+    function calcularValorComJuros(valor, juros) {
+      return valor + (valor * juros);
+    }
+
+    function adicionarLinhaTabela(telefone, nome, valor) {
+      const juros = parseFloat(document.getElementById("juros").value) / 100;
+      const valorNum = parseFloat(valor);
+      if (!nome || !telefone || isNaN(valorNum)) return;
+
+      const valorComJuros = calcularValorComJuros(valorNum, juros);
+
+      const tbody = document.querySelector("#tabela tbody");
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${telefone}</td>
+        <td>${nome}</td>
+        <td data-valor="${valorNum.toFixed(2)}">R$ ${valorNum.toFixed(2)}</td>
+        <td data-valor="${valorComJuros.toFixed(2)}">R$ ${valorComJuros.toFixed(2)}</td>
+        <td><button type="button" class="removerContato">Remover</button></td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    function limparInputsNovoContato() {
+      document.getElementById("novoTelefone").value = "";
+      document.getElementById("novoNome").value = "";
+      document.getElementById("novoValor").value = "";
+    }
+
+    onload = function() {
+      baseImage = document.getElementById("baseImage");
+      baseImage.onload = function() {
+        baseImageLoaded = true;
+        enableGerarBtn();
+      };
+      if (baseImage.complete) {
+        baseImageLoaded = true;
+        enableGerarBtn();
+      }
+      // Preencher datas padrão
+      const hoje = new Date();
+      document.getElementById("dataDesembolso").valueAsDate = hoje;
+      document.getElementById("dataPagamento").valueAsDate = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 30);
+    }
+
+    // Ler CSV
+    document.getElementById("csvFile").addEventListener("change", function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const linhas = event.target.result.split("\n").map(l => l.trim()).filter(l => l);
+        const tbody = document.querySelector("#tabela tbody");
+        tbody.innerHTML = "";
+
+        linhas.forEach((linha, i) => {
+          if (i === 0 && (linha.toLowerCase().includes("telefone") || linha.toLowerCase().includes("nome"))) return;
+
+          const [nome, telefone, valorStr] = linha.split(",");
+          adicionarLinhaTabela(telefone, nome, valorStr);
+        });
+      };
+      reader.readAsText(file);
+    });
+
+    // Adicionar contato manualmente
+    document.getElementById("adicionarContato").addEventListener("click", function() {
+      const telefone = document.getElementById("novoTelefone").value.trim();
+      const nome = document.getElementById("novoNome").value.trim();
+      const valor = document.getElementById("novoValor").value.trim();
+      adicionarLinhaTabela(telefone, nome, valor);
+      limparInputsNovoContato();
+    });
+
+    // Remover contato manualmente
+    document.querySelector("#tabela tbody").addEventListener("click", function(e) {
+      if (e.target.classList.contains("removerContato")) {
+        e.target.closest("tr").remove();
+      }
+    });
+
+    // Gerar imagens
+    document.getElementById("gerar").addEventListener("click", function(e) {
+      e.preventDefault();
+      if (!baseImageLoaded) {
+        alert("Por favor, aguarde o carregamento da imagem base.");
+        return;
+      }
+
+      const linhas = document.querySelectorAll("#tabela tbody tr");
+      const resultados = document.getElementById("resultados");
+      resultados.innerHTML = "";
+
+      linhas.forEach((tr, index) => {
+        const cols = tr.querySelectorAll("td");
+        const telefone = cols[0].textContent;
+        const nome = cols[1].textContent;
+        const receber = cols[2].textContent;
+        const valor = cols[3].dataset.valor;
+
+        // Criar canvas
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = baseImage.width;
+        canvas.height = baseImage.height;
+
+        ctx.drawImage(baseImage, 0, 0);
+
+        ctx.font = "bold 24px Calibri";
+        ctx.fillStyle = "white";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        const juros = document.getElementById("juros").value;
+        const dataDesembolso = document.getElementById("dataDesembolso").value;
+        const dataPagamento = document.getElementById("dataPagamento").value;
+
+        // === Ajustar posições de acordo com a tabela no template ===
+        ctx.fillText(valor, canvas.width * 0.25, canvas.height * 0.42);      // Valor total dos serviços
+        ctx.fillText(juros + "%", canvas.width * 0.75, canvas.height * 0.42);      // Juros
+        ctx.fillText(receber, canvas.width * 0.25, canvas.height * 0.52);    // Receber agora
+        ctx.fillText(dataDesembolso, canvas.width * 0.75, canvas.height * 0.52);    // Data de desembolso
+        ctx.fillText(dataPagamento, canvas.width * 0.25, canvas.height * 0.62);        // Data de pagamento
+
+        // Criar link de download
+        const imgURL = canvas.toDataURL("image/jpeg");
+        const link = document.createElement("a");
+        link.href = imgURL;
+        link.download = `${nome}_valor.jpg`;
+        link.textContent = `Baixar imagem de ${nome} (${telefone})`;
+
+        resultados.appendChild(link);
+
+      });
+
+    });
+  </script>
+</body>
+</html>
