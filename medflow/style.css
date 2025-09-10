@@ -1,0 +1,174 @@
+body {
+  font-family: 'Segoe UI', Calibri, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(120deg, #b5dac9 0%, #fff 100%);
+  min-height: 100vh;
+}
+.container {
+  max-width: 700px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(74, 20, 140, 0.08);
+  padding: 32px 36px 36px 36px;
+}
+h2, label {
+  color: #4a148c;
+}
+h2 {
+  margin-top: 0;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-align: center;
+  font-family: sans-serif;
+}
+h3 {
+  color: #55b08a;
+  margin-top: 0;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+#logo {
+  display: block;
+  margin: 0 auto 20px auto;
+  max-width: 100px;
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(74, 20, 140, 0.08);
+}
+button.next {
+  background: #7e57c2;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  float: right;
+  margin-top: 10px;
+  box-shadow: 0 2px 8px rgba(74, 20, 140, 0.08);
+  transition: background 0.2s;
+}
+
+table input {
+  width: 90%;
+  border: 0;
+  padding: 6px 8px;
+  font-size: 0.9rem;
+  background: #f8f6fc;
+  transition: border 0.2s;
+}
+
+table button {
+  background: #7e57c2;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(74, 20, 140, 0.08);
+  transition: background 0.2s;
+}
+
+
+form {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 18px 24px;
+  margin-bottom: 24px;
+  align-items: end;
+}
+form label {
+  font-weight: 500;
+  margin-bottom: 4px;
+  display: block;
+}
+form input[type="number"],
+form input[type="date"],
+form input[type="text"],
+textarea {
+  border: 1px solid #b39ddb;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 1rem;
+  background: #f8f6fc;
+  transition: border 0.2s;
+}
+form input:focus, textarea:focus {
+  border: 1.5px solid #7e57c2;
+  outline: none;
+}
+#csvFile {
+  border: none;
+  background: none;
+  font-size: 1rem;
+  color: #4a148c;
+  margin-top: 6px;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 18px;
+  background: #faf7fd;
+  border-radius: 10px;
+}
+th, td {
+  border: 1px solid #e1bee7;
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 1rem;
+}
+th {
+  background: #ede7f6;
+  color: #4a148c;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+#resultados {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#resultados b {
+  color: #4a148c;
+}
+
+#resultados button {
+  background: #7e57c2;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 7px 18px;
+  font-size: 1rem;
+  margin-left: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#resultados a {
+  background: #67c561;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 7px 18px;
+  font-size: 1rem;
+  margin-left: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#resultados button:hover {
+  background: #512da8;
+}
+@media (max-width: 700px) {
+  .container {
+    padding: 18px 6vw;
+  }
+  form {
+    grid-template-columns: 1fr;
+  }
+}
