@@ -60,6 +60,10 @@
           <label>Data de pagamento</label>
           <input type="date" id="dataPagamento" value="">
         </div>
+        <div>
+          <label>Empresa</label>
+          <input type="text" id="empresa" value="">
+        </div>
         <button id="calcularValores" class="next" >Avançar</button>
       </form>
     </div>
@@ -68,14 +72,9 @@
     <div id="etapa3" style="display:none;">
       <h3>3. Edite o template da mensagem</h3>
       <label for="template-msg">Mensagem a ser enviada:</label>
-      <textarea id="template-msg" rows="7" style="width:100%;font-size:1.25rem;resize:vertical;">
-Bom dia, {{nome}}!
-Muito prazer, somos da Medflow.
-Nós apoiamos os médicos em relação ao prazo de recebimento dos plantões.
-Segue na imagem uma simulação caso queira receber seus plantões de {{mes}} ainda hoje.
-      </textarea>
+      <textarea id="template-msg" rows="7" style="width:100%;font-size:1.25rem;resize:vertical;"></textarea>
       <div style="margin-top:10px;color:#666;font-size:0.98em;">
-        Variáveis disponíveis <code>{{nome}}</code>, <code>{{valor_plantao}}</code>, <code>{{valor_desembolso}}</code>, <code>{{prazo_dias}}</code> , <code>{{data_desembolso}}</code>, <code>{{data_pagamento}}</code>, <code>{{taxa_juros}}</code>  e <code>{{mes}}</code> para inserir automaticamente
+        Variáveis disponíveis <code>{{nome}}</code>, <code>{{valor_plantao}}</code>, <code>{{valor_desembolso}}</code>, <code>{{prazo_dias}}</code>, <code>{{data_desembolso}}</code>, <code>{{data_pagamento}}</code>, <code>{{taxa_juros}}</code>  e <code>{{mes}}</code> para inserir automaticamente
       </div>
       <button id="avancar3" class="next">Avançar</button>
     </div>

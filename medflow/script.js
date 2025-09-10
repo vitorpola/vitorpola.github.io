@@ -20,7 +20,7 @@ function atualizarTabelaContatos() {
       <td>${contato.nome}</td>
       <td>${contato.telefone}</td>
       <td>R$ ${contato.valor.toFixed(2)}</td>
-      <td><button type="button" class="removerContato" data-idx="${idx}">Remover</button></td>
+      <td><button type="button" class="removerContato" data-idx="${idx}">-</button></td>
     `;
     tbody.appendChild(tr);
   });
@@ -89,7 +89,8 @@ document.getElementById("formEmprestimo").addEventListener("submit", function(e)
   const juros = parseFloat(document.getElementById("juros").value) / 100;
   const dataDesembolso = document.getElementById("dataDesembolso").value;
   const dataPagamento = document.getElementById("dataPagamento").value;
-  if (isNaN(juros) || !dataDesembolso || !dataPagamento) {
+  const empresa = document.getElementById("empresa").value.trim();
+  if (isNaN(juros) || !dataDesembolso || !dataPagamento || !empresa) {
     alert("Preencha todos os campos do empréstimo.");
     return;
   }
@@ -102,6 +103,7 @@ document.getElementById("formEmprestimo").addEventListener("submit", function(e)
       valorDesembolso: valorDesembolso,
       dataDesembolso,
       dataPagamento,
+      empresa,
       juros: (juros * 100)
     };
   });
@@ -210,6 +212,7 @@ document.getElementById("gerar").addEventListener("click", function(e) {
       .replace(/{{\s*data_desembolso\s*}}/gi, formatarDataBR(item.dataDesembolso))
       .replace(/{{\s*data_pagamento\s*}}/gi, formatarDataBR(item.dataPagamento))
       .replace(/{{\s*taxa_juros\s*}}/gi, `${item.juros}%`)
+      .replace(/{{\s*empresa\s*}}/gi, item.empresa)
       .replace(/{{\s*mes\s*}}/gi, mes);
     // Codificar mensagem para URL do WhatsApp
     const mensagemEncoded = encodeURIComponent(mensagem);
@@ -286,6 +289,18 @@ function formatarDinheiroBR(valor) {
 
 // --- INICIALIZAÇÃO ---
 onload = function() {
+  document.getElementById("template-msg").value = `Como está, {{nome}}?
+
+Seu fechamento de {{mes}} da {{empresa}} está disponível para recebimento.
+
+Valor total: {{valor_plantao}}
+Data original: {{data_pagamento}}
+*Receber agora: {{valor_desembolso}}*
+
+Caso deseje receber ainda hoje é só responder essa mensagem.
+Agradecemos a atenção e estamos a disposição 🙏
+`;
+
   baseImage = document.getElementById("baseImage");
   baseImage.onload = function() {
     baseImageLoaded = true;
