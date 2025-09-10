@@ -220,13 +220,14 @@ document.getElementById("gerar").addEventListener("click", function(e) {
     let telefoneLimpo = item.telefone.replace(/\D/g, "");
     if (!telefoneLimpo.startsWith("55")) telefoneLimpo = "55" + telefoneLimpo;
     const waLink = `https://wa.me/+${telefoneLimpo}?text=${mensagemEncoded}`;
+    const waLinkOld = `https://api.whatsapp.com/send/?phone=${telefoneLimpo}&text=${mensagemEncoded}`;
     const div = document.createElement("div");
     div.style.marginBottom = "18px";
     div.innerHTML = `
       <b>${item.nome} (${item.telefone})</b>
       <textarea readonly style="width:0;height:0;padding:0;margin:0;border:none;opacity:0;position:absolute;">${mensagem}</textarea>
       <button onclick="copiarImagemEtapa5(${idx}, this)">Copiar imagem</button>
-      <a href="${waLink}" target="_blank">Enviar no WhatsApp</a>
+      <a href="${waLinkOld}" target="_blank">Enviar no WhatsApp</a>
     `;
     resultados.appendChild(div);
   });
