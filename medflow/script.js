@@ -201,7 +201,7 @@ document.getElementById("gerar").addEventListener("click", function(e) {
   valoresCalculados.forEach((item, idx) => {
     // Montar variáveis para template
     const prazoDias = calcularPrazoDias(item.dataDesembolso, item.dataPagamento);
-    const mes = obterMesExtenso(item.dataPagamento);
+    const mes = obterMesExtenso(item.dataDesembolso);
     const mensagem = template
       .replace(/{{\s*nome\s*}}/gi, item.nome)
       .replace(/{{\s*valor_plantao\s*}}/gi, formatarDinheiroBR(item.valorPlantao))
