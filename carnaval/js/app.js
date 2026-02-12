@@ -166,6 +166,12 @@ function selecionarDia(dia) {
   aplicarFiltroDia();
 }
 
+// Após 3 segundos, reduz o logo pela metade
+setTimeout(() => {
+  const logo = document.querySelector(".logo-carnaval");
+  if (logo) logo.classList.add("reduzido");
+}, 2500);
+
 fetch("data/programacao.json")
   .then((res) => res.json())
   .then((data) => {
