@@ -2,7 +2,7 @@
   {
     "date": "2026-02-13",
     "time": "20:00",
-    "event_name": "Bloco do Lençol",
+    "event_name": "Lençol",
     "location": "",
     "type": "bloco"
   },
@@ -23,7 +23,7 @@
   {
     "date": "2026-02-13",
     "time": "22:00",
-    "event_name": "Banda Arriba Paraitinga",
+    "event_name": "Arriba Paraitinga",
     "location": "Coreto Elpídio dos Santos",
     "type": "show"
   },
@@ -31,8 +31,8 @@
   {
     "date": "2026-02-14",
     "time": "10:00",
-    "event_name": "Bloco Infantil Vaca Ei",
-    "location": "Não informado",
+    "event_name": "Vaca Ei",
+    "location": "Infantil",
     "type": "bloco"
   },
   {
@@ -59,21 +59,21 @@
   {
     "date": "2026-02-14",
     "time": "16:00",
-    "event_name": "Bloco do Sapé",
+    "event_name": "Sapé",
     "location": "",
     "type": "bloco"
   },
   {
     "date": "2026-02-14",
     "time": "17:30",
-    "event_name": "Bloco da Saúde",
-    "location": "Mercado Municipal",
+    "event_name": "Saúde",
+    "location": "",
     "type": "bloco"
   },
   {
     "date": "2026-02-14",
     "time": "19:00",
-    "event_name": "Bloco Bicho de Pé",
+    "event_name": "Bicho de Pé",
     "location": "",
     "type": "bloco"
   },
@@ -94,14 +94,14 @@
   {
     "date": "2026-02-14",
     "time": "22:00",
-    "event_name": "Bloco da Coruja",
+    "event_name": "Coruja",
     "location": "",
     "type": "bloco"
   },
   {
     "date": "2026-02-14",
     "time": "22:00",
-    "event_name": "Banda Estrambelhados",
+    "event_name": "Estrambelhados",
     "location": "Coreto Elpídio dos Santos",
     "type": "show"
   },
@@ -109,8 +109,8 @@
   {
     "date": "2026-02-15",
     "time": "10:00",
-    "event_name": "Bloco Infantil Saci Kids",
-    "location": "Não informado",
+    "event_name": "Saci Kids",
+    "location": "Infantil",
     "type": "bloco"
   },
   {
@@ -201,8 +201,8 @@
   {
     "date": "2026-02-16",
     "time": "10:00",
-    "event_name": "Bloco Infantil Caipira",
-    "location": "Não informado",
+    "event_name": "Caipira",
+    "location": "Infantil",
     "type": "bloco"
   },
   {
@@ -215,7 +215,7 @@
   {
     "date": "2026-02-16",
     "time": "15:00",
-    "event_name": " Meninos da Vó",
+    "event_name": "Meninos da Vó",
     "location": "Coreto Elpídio dos Santos",
     "type": "show"
   },
@@ -223,7 +223,7 @@
     "date": "2026-02-16",
     "time": "16:00",
     "event_name": "Pai do Troço",
-    "location": "Coreto Elpídio dos Santos",
+    "location": "",
     "type": "bloco"
   },
   {
@@ -272,8 +272,8 @@
   {
     "date": "2026-02-17",
     "time": "10:00",
-    "event_name": "Bloco Infantil Encuca Cuca",
-    "location": "Não informado",
+    "event_name": "Encuca Cuca",
+    "location": "Infantil",
     "type": "bloco"
   },
   {
