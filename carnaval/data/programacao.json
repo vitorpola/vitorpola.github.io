@@ -1,0 +1,335 @@
+[
+  {
+    "date": "2026-02-13",
+    "time": "20:00",
+    "event_name": "Bloco do Lençol",
+    "location": "",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-13",
+    "time": "21:00",
+    "event_name": "Rei Canário",
+    "location": "",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-13",
+    "time": "22:00",
+    "event_name": "Lobisomem",
+    "location": "",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-13",
+    "time": "22:00",
+    "event_name": "Banda Arriba Paraitinga",
+    "location": "Coreto Elpídio dos Santos",
+    "type": "show"
+  },
+
+  {
+    "date": "2026-02-14",
+    "time": "10:00",
+    "event_name": "Bloco Infantil Vaca Ei",
+    "location": "Não informado",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-14",
+    "time": "12:00",
+    "event_name": "Bloco Juca Teles",
+    "location": "Não informado",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-14",
+    "time": "14:30",
+    "event_name": "Bloco Maria Gasolina",
+    "location": "Não informado",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-14",
+    "time": "15:00",
+    "event_name": "Banda Los Cunhados",
+    "location": "Mercado Municipal",
+    "type": "show"
+  },
+  {
+    "date": "2026-02-14",
+    "time": "16:00",
+    "event_name": "Bloco do Sapé",
+    "location": "Mercado Municipal",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-14",
+    "time": "17:30",
+    "event_name": "Bloco da Saúde",
+    "location": "Mercado Municipal",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-14",
+    "time": "19:00",
+    "event_name": "Bloco Bicho de Pé",
+    "location": "Coreto Elpídio dos Santos",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-14",
+    "time": "19:00",
+    "event_name": "Baroni e a Loukomotiva Kabereka",
+    "location": "Coreto Elpídio dos Santos",
+    "type": "show"
+  },
+  {
+    "date": "2026-02-14",
+    "time": "20:30",
+    "event_name": "Bloco Etesão",
+    "location": "Coreto Elpídio dos Santos",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-14",
+    "time": "22:00",
+    "event_name": "Bloco da Coruja",
+    "location": "Coreto Elpídio dos Santos",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-14",
+    "time": "22:00",
+    "event_name": "Banda Estrambelhados",
+    "location": "Coreto Elpídio dos Santos",
+    "type": "show"
+  },
+
+  {
+    "date": "2026-02-15",
+    "time": "10:00",
+    "event_name": "Bloco Infantil Saci Kids",
+    "location": "Não informado",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-15",
+    "time": "11:00",
+    "event_name": "BrinCarnaval",
+    "location": "Mercado Municipal",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-15",
+    "time": "14:00",
+    "event_name": "Bloco Águas da Sacada",
+    "location": "Mercado Municipal",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-15",
+    "time": "15:00",
+    "event_name": "Bloco Bebebum",
+    "location": "Mercado Municipal",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-15",
+    "time": "15:00",
+    "event_name": "Grande Banda do Sertão",
+    "location": "Coreto Elpídio dos Santos",
+    "type": "show"
+  },
+  {
+    "date": "2026-02-15",
+    "time": "15:00",
+    "event_name": "Grupo Lume de Paraitinga",
+    "location": "Mercado Municipal",
+    "type": "show"
+  },
+  {
+    "date": "2026-02-15",
+    "time": "17:00",
+    "event_name": "Bloco da Maricota",
+    "location": "Mercado Municipal",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-15",
+    "time": "18:00",
+    "event_name": "Bloco do Misto Quente",
+    "location": "Mercado Municipal",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-15",
+    "time": "19:00",
+    "event_name": "Bloco do Saci",
+    "location": "Mercado Municipal",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-15",
+    "time": "19:00",
+    "event_name": "Banda Sincopado",
+    "location": "Mercado Municipal",
+    "type": "show"
+  },
+  {
+    "date": "2026-02-15",
+    "time": "20:30",
+    "event_name": "Bloco Pé na Cova",
+    "location": "Mercado Municipal",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-15",
+    "time": "22:00",
+    "event_name": "Bloco Balacobaco",
+    "location": "Mercado Municipal",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-15",
+    "time": "22:00",
+    "event_name": "Grupo Paranga",
+    "location": "Coreto Elpídio dos Santos",
+    "type": "show"
+  },
+
+  {
+    "date": "2026-02-16",
+    "time": "10:00",
+    "event_name": "Bloco Infantil Caipira",
+    "location": "Não informado",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-16",
+    "time": "13:00",
+    "event_name": "Bloco do Barbosa",
+    "location": "Não informado",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-16",
+    "time": "15:00",
+    "event_name": " Meninos da Vó",
+    "location": "Coreto Elpídio dos Santos",
+    "type": "show"
+  },
+  {
+    "date": "2026-02-16",
+    "time": "16:00",
+    "event_name": "Bloco Pai do Troço",
+    "location": "Coreto Elpídio dos Santos",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-16",
+    "time": "17:30",
+    "event_name": "Bloco do Caipira",
+    "location": "Coreto Elpídio dos Santos",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-16",
+    "time": "19:00",
+    "event_name": "Bloco Cruz Credo",
+    "location": "Coreto Elpídio dos Santos",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-16",
+    "time": "19:00",
+    "event_name": "Banda Confrete",
+    "location": "Mercado Municipal",
+    "type": "show"
+  },
+  {
+    "date": "2026-02-16",
+    "time": "20:30",
+    "event_name": "Bloco do Caeté",
+    "location": "Mercado Municipal",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-16",
+    "time": "22:00",
+    "event_name": "Bloco Encuca a Cuca",
+    "location": "Mercado Municipal",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-16",
+    "time": "22:00",
+    "event_name": "ia Moradei e Banda",
+    "location": "Coreto Elpídio dos Santos",
+    "type": "show"
+  },
+
+  {
+    "date": "2026-02-17",
+    "time": "10:00",
+    "event_name": "Bloco Infantil Encuca Cuca",
+    "location": "Não informado",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-17",
+    "time": "14:00",
+    "event_name": "Bloco da Pipoca",
+    "location": "Não informado",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-17",
+    "time": "16:00",
+    "event_name": "Bloco Espanta Vaca",
+    "location": "Não informado",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-17",
+    "time": "17:30",
+    "event_name": "Bloco do Beijo",
+    "location": "Não informado",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-17",
+    "time": "18:00",
+    "event_name": "naval de Pé no Chão",
+    "location": "Mercado Municipal",
+    "type": "show"
+  },
+  {
+    "date": "2026-02-17",
+    "time": "19:00",
+    "event_name": "Bloco Casarão",
+    "location": "Mercado Municipal",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-17",
+    "time": "20:30",
+    "event_name": "Bloco Pé na Cova",
+    "location": "Coreto Elpídio dos Santos",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-17",
+    "time": "22:00",
+    "event_name": "Bloco Bico do Corvo",
+    "location": "Coreto Elpídio dos Santos",
+    "type": "bloco"
+  },
+  {
+    "date": "2026-02-17",
+    "time": "22:00",
+    "event_name": "Banda Despirocadas",
+    "location": "Coreto Elpídio dos Santos",
+    "type": "show"
+  }
+]

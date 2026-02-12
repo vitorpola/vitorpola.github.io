@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Programação oficial do Carnaval de Marchinhas 2026 em São Luiz do Paraitinga – SP. Blocos e shows por dia." />
+  <meta name="theme-color" content="#b71c1c" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Carnaval 2026" />
+  <title>Carnaval 2026 — São Luiz do Paraitinga</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400..700&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="apple-touch-icon" href="assets/logo-carnaval-2026.png" />
+</head>
+<body>
+  <header>
+    <img src="assets/logo-carnaval-2026.png" alt="CARNAVAL 2026 São Luiz do Paraitinga" class="logo-carnaval" />
+    <nav id="day-tabs" class="day-tabs" role="tablist" aria-label="Navegar por dia">
+      <div class="search-wrapper">
+        <label for="search" class="sr-only">Buscar bloco, show ou data</label>
+        <input type="search" id="search" placeholder="Buscar bloco, show ou data…" aria-label="Buscar bloco, show ou data" />
+        <button type="button" id="search-btn" aria-label="Abrir busca" aria-expanded="false" aria-controls="search">
+          <svg class="icon-search" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+          <svg class="icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18"/>
+            <path d="m6 6 12 12"/>
+          </svg>
+        </button>
+      </div>
+      <button type="button" role="tab" data-day="2026-02-13" aria-selected="true">
+        <span class="day-num">13</span>
+        <span class="day-abbr">SEX</span>
+      </button>
+      <button type="button" role="tab" data-day="2026-02-14" aria-selected="false">
+        <span class="day-num">14</span>
+        <span class="day-abbr">SAB</span>
+      </button>
+      <button type="button" role="tab" data-day="2026-02-15" aria-selected="false">
+        <span class="day-num">15</span>
+        <span class="day-abbr">DOM</span>
+      </button>
+      <button type="button" role="tab" data-day="2026-02-16" aria-selected="false">
+        <span class="day-num">16</span>
+        <span class="day-abbr">SEG</span>
+      </button>
+      <button type="button" role="tab" data-day="2026-02-17" aria-selected="false">
+        <span class="day-num">17</span>
+        <span class="day-abbr">TER</span>
+      </button>
+    </nav>
+  </header>
+
+  <main id="agenda" role="main"></main>
+
+  <noscript>
+    <p class="noscript">Este site precisa de JavaScript para exibir a programação.</p>
+  </noscript>
+
+  <script src="js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').then(function() {});
+    }
+  </script>
+</body>
+</html>

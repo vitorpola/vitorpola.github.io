@@ -1,0 +1,483 @@
+/* ==========================================================================
+   Carnaval de Marchinhas 2026 - São Luiz do Paraitinga
+   Mobile-first, inspirado nas artes oficiais do evento
+   ========================================================================== */
+
+/* RESET BÁSICO */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* VARIÁVEIS DE COR (paleta carnaval) */
+:root {
+  --vermelho: #b71c1c;
+  --vermelho-claro: #c62828;
+  --amarelo: #ffd44d;
+  --dourado: #ffe8a3;
+  --verde: #1f6f5f;
+  --verde-show: #2e7d32;
+  --creme: #fff7d6;
+  --texto: #2e2e2e;
+  --texto-sec: #4f4f4f;
+  --claro: #fff7cc;
+}
+
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: "DynaPuff", cursive;
+  background-color: #1a8a7a;
+  background-image: url("../assets/background-carnaval.png");
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: var(--texto);
+  min-height: 100%;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Fallback e responsividade: em mobile, attachment scroll evita bugs de performance */
+@media (max-width: 767px) {
+  body {
+    background-attachment: scroll;
+  }
+}
+
+/* Overlay sutil para legibilidade do conteúdo na área central */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse 90% 70% at 50% 50%, transparent 0%, rgba(0, 0, 0, 0.06) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Screen reader only (acessibilidade) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Mensagem sem JavaScript */
+.noscript {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--claro);
+  background: rgba(0, 0, 0, 0.3);
+  margin: 1rem;
+  border-radius: 12px;
+}
+
+/* HEADER */
+header {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* Logotipo do carnaval */
+.logo-carnaval {
+  display: block;
+  max-width: 100%;
+  width: 280px;
+  height: auto;
+  margin: 0 auto 1rem;
+  border-radius: 12px;
+}
+
+@media (min-width: 768px) {
+  .logo-carnaval {
+    width: 320px;
+  }
+}
+
+header h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--amarelo);
+  text-shadow: 2px 2px 0 var(--vermelho);
+}
+
+header p {
+  font-size: 0.95rem;
+  color: var(--claro);
+  margin-top: 0.3rem;
+}
+
+/* WRAPPER DE BUSCA - primeiro item do navbar */
+.day-tabs .search-wrapper {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  order: -1;
+}
+
+/* Botão lupa - área de toque >= 44px */
+.day-tabs .search-wrapper #search-btn {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 12px;
+  margin-right: 0.5rem;
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--vermelho-claro);
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.day-tabs .search-wrapper #search-btn svg {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.day-tabs .search-wrapper #search-btn:hover {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.day-tabs .search-wrapper #search-btn:hover svg {
+  color: var(--vermelho);
+}
+
+/* Alternar ícone lupa / X conforme estado */
+.day-tabs .search-wrapper #search-btn .icon-close {
+  display: none;
+}
+
+.day-tabs .search-wrapper.search-open #search-btn .icon-search {
+  display: none;
+}
+
+.day-tabs .search-wrapper.search-open #search-btn .icon-close {
+  display: block;
+}
+
+/* Input oculto por padrão, expande ao abrir */
+.day-tabs .search-wrapper input[type="search"] {
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+  font-size: 0.9rem;
+  outline: none;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  color: #fff;
+  opacity: 0;
+  transition: width 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+}
+
+/* Ao ativar busca: esconde tabs e campo ocupa todo o navbar */
+.day-tabs .search-wrapper.search-open ~ button[role="tab"] {
+  display: none;
+}
+
+.day-tabs .search-wrapper.search-open {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+.day-tabs .search-wrapper.search-open input[type="search"] {
+  flex: 1;
+  min-width: 80px;
+  padding: 0.5rem 0.75rem;
+  min-height: 40px;
+  opacity: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ÁREA PRINCIPAL - scroll interno, sem scroll na página */
+main {
+  position: relative;
+  z-index: 1;
+  padding: 0 0 1rem;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mensagem quando busca não retorna resultados */
+.msg-vazia {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--claro);
+  font-size: 1rem;
+}
+
+/* Animação de entrada dos eventos */
+@keyframes eventoFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* SEÇÃO POR DIA - transição ao trocar de tab */
+section[data-day] {
+  margin-top: 0.5rem;
+  overflow: hidden;
+  max-height: 2500px;
+  transition: opacity 0.35s ease, max-height 0.4s ease;
+}
+
+section[data-day].section-hidden {
+  opacity: 0;
+  max-height: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0;
+  pointer-events: none;
+}
+
+/* TÍTULO DO DIA */
+section h2 {
+  display: inline-block;
+  background: var(--verde);
+  color: var(--claro);
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* CARD DE EVENTO - bloco (vermelho) por padrão - efeito vidro/transparência */
+.evento {
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(12px);
+  background: linear-gradient(135deg, rgba(255, 247, 214, 0.65) 0%, rgba(255, 232, 163, 0.7) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 16px;
+  padding: 0.75rem 0.9rem 0.75rem calc(2.75rem + 0.9rem);
+  margin-bottom: 0.6rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  border-left: none;
+  min-height: 60px;
+}
+
+/* Animação ao exibir a seção (só quando a tab está visível) */
+section:not(.section-hidden) .evento {
+  animation: eventoFadeIn 0.4s ease forwards;
+}
+
+section:not(.section-hidden) .evento:nth-child(1) { animation-delay: 0.05s; }
+section:not(.section-hidden) .evento:nth-child(2) { animation-delay: 0.1s; }
+section:not(.section-hidden) .evento:nth-child(3) { animation-delay: 0.15s; }
+section:not(.section-hidden) .evento:nth-child(4) { animation-delay: 0.2s; }
+section:not(.section-hidden) .evento:nth-child(5) { animation-delay: 0.25s; }
+section:not(.section-hidden) .evento:nth-child(6) { animation-delay: 0.3s; }
+section:not(.section-hidden) .evento:nth-child(7) { animation-delay: 0.35s; }
+section:not(.section-hidden) .evento:nth-child(8) { animation-delay: 0.4s; }
+section:not(.section-hidden) .evento:nth-child(9) { animation-delay: 0.45s; }
+section:not(.section-hidden) .evento:nth-child(10) { animation-delay: 0.5s; }
+section:not(.section-hidden) .evento:nth-child(n+11) { animation-delay: 0.55s; }
+
+/* Aba lateral "BLOCO" - ::before gradiente vermelho a laranja */
+.evento::before {
+  content: "BLOCO";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2.75rem;
+  height: 100%;
+  background: linear-gradient(to bottom right, var(--vermelho-claro) 0%, #e65100 100%);
+  border-radius: 16px 0 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+/* Show: aba gradiente verde a azul */
+.evento.show::before {
+  content: "SHOW";
+  background: linear-gradient(to top, #1976d2 0%, var(--verde-show) 100%);
+}
+
+/* Evento já passado: desativado (cinza e transparente) */
+.evento.passado {
+  opacity: 0.5;
+  filter: grayscale(0.6);
+  background: linear-gradient(135deg, rgba(255, 247, 214, 0.4) 0%, rgba(255, 232, 163, 0.45) 100%);
+}
+.evento.passado strong,
+.evento.passado small,
+.evento.passado .hora {
+  color: var(--texto-sec);
+}
+.evento.passado::before {
+  opacity: 0.7;
+}
+
+/* Conteúdo: hora (fora do fluxo), nome, local */
+.evento .evento-conteudo {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  padding-left: 5.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-image: url("../assets/estandarte.png");
+  background-size: contain;
+  background-position: right center;
+  background-repeat: no-repeat;
+  min-height: 40px;
+}
+
+/* Show: ícone show.png no lugar do estandarte */
+.evento.show .evento-conteudo {
+  background-image: url("../assets/show.png");
+}
+
+.evento .evento-conteudo .hora {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: 600;
+  font-size: 1.35rem;
+  color: #6a1b9a;
+  white-space: pre-line;
+  text-align: center;
+  line-height: 2;
+}
+
+/* NOME DO EVENTO */
+.evento strong {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--texto);
+  display: block;
+  line-height: 1.2;
+}
+
+/* LOCAL */
+.evento small {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  color: var(--texto-sec);
+}
+
+/* TOP BAR - Navegação por dia (glassmorphism) */
+.day-tabs {
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 0.5rem 0.25rem;
+  margin: 0 0 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.day-tabs button[role="tab"] {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  padding: 0.5rem 0.25rem;
+  min-height: 48px;
+  border: none;
+  background: transparent;
+  color: rgba(30, 30, 30, 0.85);
+  font-family: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: color 0.25s ease, background 0.25s ease, transform 0.2s ease;
+  border-radius: 12px;
+}
+
+.day-tabs button[role="tab"]:hover {
+  color: var(--texto);
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.day-tabs button[role="tab"][aria-selected="true"] {
+  color: var(--vermelho-claro);
+  background: rgba(255, 255, 255, 0.5);
+  font-weight: 700;
+  transform: scale(1.02);
+}
+
+.day-tabs .day-num {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.day-tabs .day-abbr {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
+}
+
+.day-tabs button[role="tab"][aria-selected="true"] .day-num {
+  color: var(--vermelho-claro);
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.75rem;
+  color: var(--claro);
+}
+
+/* RESPONSIVIDADE - telas maiores */
+@media (min-width: 768px) {
+  body {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+}

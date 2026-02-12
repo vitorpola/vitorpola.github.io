@@ -1,0 +1,25 @@
+{
+  "name": "Carnaval 2026 — São Luiz do Paraitinga",
+  "short_name": "Carnaval 2026",
+  "description": "Programação oficial do Carnaval de Marchinhas 2026 em São Luiz do Paraitinga – SP",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#1a8a7a",
+  "theme_color": "#b71c1c",
+  "orientation": "portrait-primary",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "assets/logo-carnaval-2026.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/logo-carnaval-2026.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
