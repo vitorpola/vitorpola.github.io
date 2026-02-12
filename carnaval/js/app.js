@@ -224,6 +224,7 @@ if (searchBtn && searchInput && searchWrapper) {
     searchInput.value = "";
     searchInput.blur();
     searchInput.dispatchEvent(new Event("input"));
+    document.body.classList.remove("keyboard-open");
   }
 
   searchBtn.addEventListener("click", () => {
@@ -238,6 +239,32 @@ if (searchBtn && searchInput && searchWrapper) {
     if (e.relatedTarget === searchBtn) return;
     fecharBusca();
   });
+
+  // Mobile: manter input no topo e itens visíveis quando teclado abre
+  const isMobile = () => window.innerWidth <= 767;
+  searchInput.addEventListener("focus", () => {
+    if (!isMobile()) return;
+    document.body.classList.add("keyboard-open");
+    requestAnimationFrame(() => {
+      searchInput.scrollIntoView({ block: "start", behavior: "instant" });
+    });
+    setTimeout(() => {
+      searchInput.scrollIntoView({ block: "start", behavior: "instant" });
+    }, 300);
+  });
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", () => {
+      if (!isMobile()) return;
+      const h = window.visualViewport.height;
+      if (searchWrapper.classList.contains("search-open")) {
+        document.documentElement.style.setProperty("--viewport-height", `${h}px`);
+        document.body.classList.add("keyboard-open");
+      } else {
+        document.body.classList.remove("keyboard-open");
+      }
+    });
+  }
 }
 
 // Busca em tempo real

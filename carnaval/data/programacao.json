@@ -38,21 +38,21 @@
   {
     "date": "2026-02-14",
     "time": "12:00",
-    "event_name": "Bloco Juca Teles",
+    "event_name": "Juca Teles",
     "location": "Não informado",
     "type": "bloco"
   },
   {
     "date": "2026-02-14",
     "time": "14:30",
-    "event_name": "Bloco Maria Gasolina",
+    "event_name": "Maria Gasolina",
     "location": "Não informado",
     "type": "bloco"
   },
   {
     "date": "2026-02-14",
     "time": "15:00",
-    "event_name": "Banda Los Cunhados",
+    "event_name": "Los Cunhados",
     "location": "Mercado Municipal",
     "type": "show"
   },
@@ -60,7 +60,7 @@
     "date": "2026-02-14",
     "time": "16:00",
     "event_name": "Bloco do Sapé",
-    "location": "Mercado Municipal",
+    "location": "",
     "type": "bloco"
   },
   {
@@ -74,7 +74,7 @@
     "date": "2026-02-14",
     "time": "19:00",
     "event_name": "Bloco Bicho de Pé",
-    "location": "Coreto Elpídio dos Santos",
+    "location": "",
     "type": "bloco"
   },
   {
@@ -87,15 +87,15 @@
   {
     "date": "2026-02-14",
     "time": "20:30",
-    "event_name": "Bloco Etesão",
-    "location": "Coreto Elpídio dos Santos",
+    "event_name": "Etesão",
+    "location": "",
     "type": "bloco"
   },
   {
     "date": "2026-02-14",
     "time": "22:00",
     "event_name": "Bloco da Coruja",
-    "location": "Coreto Elpídio dos Santos",
+    "location": "",
     "type": "bloco"
   },
   {
@@ -118,20 +118,20 @@
     "time": "11:00",
     "event_name": "BrinCarnaval",
     "location": "Mercado Municipal",
-    "type": "bloco"
+    "type": "show"
   },
   {
     "date": "2026-02-15",
     "time": "14:00",
-    "event_name": "Bloco Águas da Sacada",
-    "location": "Mercado Municipal",
+    "event_name": "Águas da Sacada",
+    "location": "",
     "type": "bloco"
   },
   {
     "date": "2026-02-15",
     "time": "15:00",
-    "event_name": "Bloco Bebebum",
-    "location": "Mercado Municipal",
+    "event_name": "Bebebum",
+    "location": "",
     "type": "bloco"
   },
   {
@@ -151,22 +151,22 @@
   {
     "date": "2026-02-15",
     "time": "17:00",
-    "event_name": "Bloco da Maricota",
-    "location": "Mercado Municipal",
+    "event_name": "Maricota",
+    "location": "",
     "type": "bloco"
   },
   {
     "date": "2026-02-15",
     "time": "18:00",
-    "event_name": "Bloco do Misto Quente",
-    "location": "Mercado Municipal",
+    "event_name": "Misto Quente",
+    "location": "",
     "type": "bloco"
   },
   {
     "date": "2026-02-15",
     "time": "19:00",
-    "event_name": "Bloco do Saci",
-    "location": "Mercado Municipal",
+    "event_name": "Saci",
+    "location": "",
     "type": "bloco"
   },
   {
@@ -179,15 +179,15 @@
   {
     "date": "2026-02-15",
     "time": "20:30",
-    "event_name": "Bloco Pé na Cova",
-    "location": "Mercado Municipal",
+    "event_name": "Pé na Cova",
+    "location": "",
     "type": "bloco"
   },
   {
     "date": "2026-02-15",
     "time": "22:00",
-    "event_name": "Bloco Balacobaco",
-    "location": "Mercado Municipal",
+    "event_name": "Balacobaco",
+    "location": "",
     "type": "bloco"
   },
   {
@@ -208,7 +208,7 @@
   {
     "date": "2026-02-16",
     "time": "13:00",
-    "event_name": "Bloco do Barbosa",
+    "event_name": "Barbosa",
     "location": "Não informado",
     "type": "bloco"
   },
@@ -222,22 +222,22 @@
   {
     "date": "2026-02-16",
     "time": "16:00",
-    "event_name": "Bloco Pai do Troço",
+    "event_name": "Pai do Troço",
     "location": "Coreto Elpídio dos Santos",
     "type": "bloco"
   },
   {
     "date": "2026-02-16",
     "time": "17:30",
-    "event_name": "Bloco do Caipira",
-    "location": "Coreto Elpídio dos Santos",
+    "event_name": "Caipira",
+    "location": "",
     "type": "bloco"
   },
   {
     "date": "2026-02-16",
     "time": "19:00",
-    "event_name": "Bloco Cruz Credo",
-    "location": "Coreto Elpídio dos Santos",
+    "event_name": "Cruz Credo",
+    "location": "",
     "type": "bloco"
   },
   {
@@ -251,20 +251,20 @@
     "date": "2026-02-16",
     "time": "20:30",
     "event_name": "Bloco do Caeté",
-    "location": "Mercado Municipal",
+    "location": "",
     "type": "bloco"
   },
   {
     "date": "2026-02-16",
     "time": "22:00",
-    "event_name": "Bloco Encuca a Cuca",
-    "location": "Mercado Municipal",
+    "event_name": "Encuca a Cuca",
+    "location": "",
     "type": "bloco"
   },
   {
     "date": "2026-02-16",
     "time": "22:00",
-    "event_name": "ia Moradei e Banda",
+    "event_name": "Tânia Moradei e Banda",
     "location": "Coreto Elpídio dos Santos",
     "type": "show"
   },
@@ -279,50 +279,50 @@
   {
     "date": "2026-02-17",
     "time": "14:00",
-    "event_name": "Bloco da Pipoca",
+    "event_name": "Pipoca",
     "location": "Não informado",
     "type": "bloco"
   },
   {
     "date": "2026-02-17",
     "time": "16:00",
-    "event_name": "Bloco Espanta Vaca",
+    "event_name": "Espanta Vaca",
     "location": "Não informado",
     "type": "bloco"
   },
   {
     "date": "2026-02-17",
     "time": "17:30",
-    "event_name": "Bloco do Beijo",
+    "event_name": "Beijo",
     "location": "Não informado",
     "type": "bloco"
   },
   {
     "date": "2026-02-17",
     "time": "18:00",
-    "event_name": "naval de Pé no Chão",
+    "event_name": "Carnaval de Pé no Chão",
     "location": "Mercado Municipal",
     "type": "show"
   },
   {
     "date": "2026-02-17",
     "time": "19:00",
-    "event_name": "Bloco Casarão",
+    "event_name": "Casarão",
     "location": "Mercado Municipal",
     "type": "bloco"
   },
   {
     "date": "2026-02-17",
     "time": "20:30",
-    "event_name": "Bloco Pé na Cova",
-    "location": "Coreto Elpídio dos Santos",
+    "event_name": "Pé na Cova",
+    "location": "",
     "type": "bloco"
   },
   {
     "date": "2026-02-17",
     "time": "22:00",
-    "event_name": "Bloco Bico do Corvo",
-    "location": "Coreto Elpídio dos Santos",
+    "event_name": "Bico do Corvo",
+    "location": "",
     "type": "bloco"
   },
   {

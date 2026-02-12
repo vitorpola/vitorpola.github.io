@@ -22,6 +22,8 @@
   --texto: #2e2e2e;
   --texto-sec: #4f4f4f;
   --claro: #fff7cc;
+  --transicao-duracao: 0.3s;
+  --transicao-easing: ease;
 }
 
 html {
@@ -39,6 +41,7 @@ body {
   color: var(--texto);
   min-height: 100%;
   height: 100vh;
+  height: 100dvh; /* Ajusta quando teclado abre no mobile */
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -48,6 +51,22 @@ body {
 @media (max-width: 767px) {
   body {
     background-attachment: scroll;
+  }
+
+  /* Teclado aberto: manter input no topo e itens visíveis na área restante */
+  body.keyboard-open {
+    height: var(--viewport-height, 100dvh);
+    min-height: var(--viewport-height, 100dvh);
+  }
+
+  body.keyboard-open header {
+    flex-shrink: 0;
+  }
+
+  body.keyboard-open main {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
   }
 }
 
@@ -227,10 +246,11 @@ header p {
 main {
   position: relative;
   z-index: 1;
-  padding: 0 0 1rem;
+  padding: 0 0 calc(1rem + env(safe-area-inset-bottom, 0));
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -250,12 +270,12 @@ main {
   }
 }
 
-/* SEÇÃO POR DIA - transição ao trocar de tab */
+/* SEÇÃO POR DIA - transição ao trocar de tab (sempre a mesma) */
 section[data-day] {
   margin-top: 0.5rem;
   overflow: hidden;
-  max-height: 2500px;
-  transition: opacity 0.35s ease, max-height 0.4s ease;
+  max-height: 10000px;
+  transition: opacity var(--transicao-duracao) var(--transicao-easing);
 }
 
 section[data-day].section-hidden {
@@ -265,6 +285,8 @@ section[data-day].section-hidden {
   margin-bottom: 0;
   padding: 0;
   pointer-events: none;
+  /* max-height colapsa após o fade para transição sempre igual */
+  transition: opacity var(--transicao-duracao) var(--transicao-easing), max-height 0s linear var(--transicao-duracao);
 }
 
 /* TÍTULO DO DIA */
@@ -302,22 +324,10 @@ section h2 {
   min-height: 60px;
 }
 
-/* Animação ao exibir a seção (só quando a tab está visível) */
+/* Animação ao exibir a seção (sempre a mesma duração) */
 section:not(.section-hidden) .evento {
-  animation: eventoFadeIn 0.4s ease forwards;
+  animation: eventoFadeIn var(--transicao-duracao) var(--transicao-easing) forwards;
 }
-
-section:not(.section-hidden) .evento:nth-child(1) { animation-delay: 0.05s; }
-section:not(.section-hidden) .evento:nth-child(2) { animation-delay: 0.1s; }
-section:not(.section-hidden) .evento:nth-child(3) { animation-delay: 0.15s; }
-section:not(.section-hidden) .evento:nth-child(4) { animation-delay: 0.2s; }
-section:not(.section-hidden) .evento:nth-child(5) { animation-delay: 0.25s; }
-section:not(.section-hidden) .evento:nth-child(6) { animation-delay: 0.3s; }
-section:not(.section-hidden) .evento:nth-child(7) { animation-delay: 0.35s; }
-section:not(.section-hidden) .evento:nth-child(8) { animation-delay: 0.4s; }
-section:not(.section-hidden) .evento:nth-child(9) { animation-delay: 0.45s; }
-section:not(.section-hidden) .evento:nth-child(10) { animation-delay: 0.5s; }
-section:not(.section-hidden) .evento:nth-child(n+11) { animation-delay: 0.55s; }
 
 /* Aba lateral "BLOCO" - ::before gradiente vermelho a laranja */
 .evento::before {
