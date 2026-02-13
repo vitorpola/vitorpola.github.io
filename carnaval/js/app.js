@@ -136,9 +136,26 @@ function atualizarEventosPassados() {
   });
 }
 
+/** Delay entre cada item na animação staggered (ms) */
+const STAGGER_DELAY = 80;
+const EVENTO_ANIM_DURATION = 400;
+
+/**
+ * Dispara animação de entrada com itens aparecendo um a um.
+ */
+function dispararAnimacaoStaggered(section) {
+  const eventos = section.querySelectorAll(".evento");
+  eventos.forEach((el, i) => {
+    el.style.animation = "none";
+    el.offsetHeight; // força reflow para permitir re-execução
+    el.style.animation = `eventoFadeIn ${EVENTO_ANIM_DURATION}ms ease ${i * STAGGER_DELAY}ms forwards`;
+  });
+}
+
 /**
  * Mostra/oculta seções conforme o dia selecionado.
  * Quando há busca ativa, mostra todos os dias (resultados da pesquisa).
+ * Ao exibir uma seção, anima os itens um a um.
  */
 function aplicarFiltroDia() {
   const sections = document.querySelectorAll("#agenda section[data-day]");
@@ -146,10 +163,14 @@ function aplicarFiltroDia() {
   const emBusca = termoBusca.length > 0;
 
   sections.forEach((s) => {
+    const estavaOculta = s.classList.contains("section-hidden");
     if (emBusca) {
       s.classList.remove("section-hidden");
+      dispararAnimacaoStaggered(s);
     } else {
-      s.classList.toggle("section-hidden", s.dataset.day !== diaSelecionado);
+      const deveMostrar = s.dataset.day === diaSelecionado;
+      s.classList.toggle("section-hidden", !deveMostrar);
+      if (deveMostrar) dispararAnimacaoStaggered(s);
     }
   });
 }
@@ -189,6 +210,7 @@ fetch("data/programacao.json")
       diaSelecionado = datasDisponiveis.includes(hoje) ? hoje : dias[0].dia;
     }
     render(dias);
+    document.querySelectorAll("#agenda section[data-day]").forEach((s) => s.classList.add("section-hidden"));
     selecionarDia(diaSelecionado);
 
     // Atualiza eventos passados a cada minuto (ex.: 20:00 vira "passado" após o horário)

@@ -250,7 +250,7 @@
   {
     "date": "2026-02-16",
     "time": "20:30",
-    "event_name": "Bloco do Caeté",
+    "event_name": "Caeté",
     "location": "",
     "type": "bloco"
   },
@@ -308,7 +308,7 @@
     "date": "2026-02-17",
     "time": "19:00",
     "event_name": "Casarão",
-    "location": "Mercado Municipal",
+    "location": "",
     "type": "bloco"
   },
   {
