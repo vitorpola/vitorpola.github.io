@@ -552,7 +552,7 @@ function main() {
       const empty = document.createElement("p");
       empty.className = "empty-lane";
       empty.style.cssText = "margin:0;color:var(--muted);font-size:0.875rem;";
-      empty.textContent = "Nenhum cromo com estes filtros neste grupo.";
+      empty.textContent = "-";
       groupEl.appendChild(empty);
     }
 
@@ -591,7 +591,7 @@ function main() {
       const empty = document.createElement("p");
       empty.className = "empty-lane";
       empty.style.cssText = "margin:0;color:var(--muted);font-size:0.875rem;";
-      empty.textContent = "Nenhum cromo com estes filtros neste grupo.";
+      empty.textContent = "-";
       groupEl.appendChild(empty);
     }
 

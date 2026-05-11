@@ -111,22 +111,156 @@
     return s;
   }
 
+  /** Siglas do álbum (checklist) + FWC — manter sincronizado com `data/checklist.json`. */
+  const ALBUM_CODE_STRINGS = [
+    "MEX",
+    "RSA",
+    "KOR",
+    "CZE",
+    "CAN",
+    "BIH",
+    "QAT",
+    "SUI",
+    "BRA",
+    "MAR",
+    "HAI",
+    "SCO",
+    "USA",
+    "PAR",
+    "AUS",
+    "TUR",
+    "GER",
+    "CUW",
+    "CIV",
+    "ECU",
+    "NED",
+    "JPN",
+    "SWE",
+    "TUN",
+    "BEL",
+    "EGY",
+    "IRN",
+    "NZL",
+    "ESP",
+    "CPV",
+    "KSA",
+    "URU",
+    "FRA",
+    "SEN",
+    "IRQ",
+    "NOR",
+    "ARG",
+    "ALG",
+    "AUT",
+    "JOR",
+    "POR",
+    "COD",
+    "UZB",
+    "COL",
+    "ENG",
+    "CRO",
+    "GHA",
+    "PAN",
+    "FWC",
+  ];
+
+  /**
+   * Uma substituição por posição: letra lida como dígito (ou o inverso no texto OCR).
+   * Chave = letra correcta na sigla; valor = carácter frequentemente lido no OCR.
+   */
+  const OCR_LETTER_TO_CONFUSED_CHAR = {
+    O: "0",
+    I: "1",
+    J: "1",
+    Q: "0",
+    S: "5",
+    B: "8",
+    G: "6",
+    Z: "2",
+    E: "3",
+    A: "4",
+  };
+
+  /** @type {Map<string, string> | null} */
+  let ocrWrongCodeToCanonical = null;
+
+  function buildOcrWrongCodeToCanonical() {
+    const m = new Map();
+    for (const code of ALBUM_CODE_STRINGS) {
+      const letters = code.split("");
+      for (let i = 0; i < 3; i++) {
+        const ch = letters[i];
+        const confused = OCR_LETTER_TO_CONFUSED_CHAR[ch];
+        if (!confused) continue;
+        const w = letters.slice();
+        w[i] = confused;
+        const wrong = w.join("");
+        if (wrong === code) continue;
+        if (m.has(wrong) && m.get(wrong) !== code) continue;
+        m.set(wrong, code);
+      }
+    }
+    return m;
+  }
+
+  function getOcrWrongCodeToCanonical() {
+    if (!ocrWrongCodeToCanonical) ocrWrongCodeToCanonical = buildOcrWrongCodeToCanonical();
+    return ocrWrongCodeToCanonical;
+  }
+
   /**
    * Corrige leituras típicas do verso Panini (texto branco em fundo escuro após inverter
    * pode vir como HAII6 em vez de HAI 16, TUNG em vez de TUN 4, etc.).
+   * Inclui variantes geradas para todas as siglas do álbum + correções manuais extra.
    */
   function normalizeStickerCodes(t) {
     let s = normalizeOcrText(t);
     s = s.replace(/\b([A-Z]{3})II(\d)\b/g, "$1 1$2");
     s = s.replace(/\b([A-Z]{3})ll(\d)\b/g, "$1 1$2");
     s = s.replace(/\b([A-Z]{3})lI(\d)\b/g, "$1 1$2");
-    s = s.replace(/\bTUNG\b/g, "TUN 4");
-    s = s.replace(/\bTUN\s*G\s*(\||\s)/g, "TUN 4 $1");
-    s = s.replace(/\bP0R\b/g, "POR");
-    s = s.replace(/\b8RA\b/g, "BRA");
-    s = s.replace(/\bC0N\b/g, "CAN");
-    s = s.replace(/\bN3D\b/g, "NED");
-    s = s.replace(/\bA1G\b/g, "ALG");
+    s = s.replace(/\bTUNG\b/g, "TUN");
+    s = s.replace(/\bTUN\s*G\s*(\||\s)/g, "TUN $1");
+
+    const wrongMap = getOcrWrongCodeToCanonical();
+    const sortedWrong = [...wrongMap.keys()].sort((a, b) => b.localeCompare(a));
+    for (const wrong of sortedWrong) {
+      const right = wrongMap.get(wrong);
+      if (!right) continue;
+      s = s.replace(new RegExp(`\\b${wrong}\\b`, "g"), right);
+    }
+
+    /** Troca de forma (U/V, R, etc.) que o mapa por letra↔dígito não cobre. */
+    const manualCodeShapeFixes = [
+      [/\bQ0T\b/g, "QAT"],
+      [/\bFVVC\b/g, "FWC"],
+      [/\bJP0\b/g, "JPN"],
+      [/\b5PN\b/g, "JPN"],
+      [/\bRS5\b/g, "RSA"],
+      [/\bN3L\b/g, "NZL"],
+      [/\bCUV\b/g, "CUW"],
+      [/\bCUU\b/g, "CUW"],
+      [/\bURV\b/g, "URU"],
+      [/\bVRU\b/g, "URU"],
+      [/\bVSA\b/g, "USA"],
+      [/\bUSV\b/g, "USA"],
+      [/\bM4X\b/g, "MEX"],
+      [/\bR5A\b/g, "RSA"],
+      [/\bK0R\b/g, "KOR"],
+      [/\bHRV\b/g, "HAI"],
+      [/\bNQR\b/g, "NOR"],
+      [/\bN3D\b/g, "NED"],
+      [/\bMED\b/g, "NED"],
+      [/\bNLD\b/g, "NED"],
+      [/\bN7L\b/g, "NZL"],
+      [/\bPRR\b/g, "POR"],
+      [/\bPQR\b/g, "POR"],
+      [/\bCQL\b/g, "COL"],
+      [/\bFW0\b/g, "FWC"],
+    ];
+    for (const [re, rep] of manualCodeShapeFixes) {
+      s = s.replace(re, rep);
+    }
+
     return s;
   }
 

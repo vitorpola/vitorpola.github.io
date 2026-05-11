@@ -4,45 +4,62 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Gestão de cromos Panini FIFA World Cup 2026." />
-  <meta name="theme-color" content="#f5f5f5" />
+  <meta name="theme-color" content="#0c1f33" />
   <meta name="color-scheme" content="light" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <title>Cromos — Copa 2026</title>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Álbum — Copa do Mundo FIFA 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-  <main class="main">
-    <div class="panel-scroll" id="panel-scroll">
-    <div class="filter-segment" role="group" aria-label="Filtrar cromos">
-      <button type="button" class="segment-btn is-active" data-filter="all" aria-pressed="true">
-        <span class="segment-inner">
-          <span class="segment-label">Todas</span>
-          <span class="segment-count" id="count-filter-all">—</span>
-        </span>
-      </button>
-      <button type="button" class="segment-btn" data-filter="missing" aria-pressed="false">
-        <span class="segment-inner">
-          <span class="segment-label">Faltantes</span>
-          <span class="segment-count" id="count-filter-missing">—</span>
-        </span>
-      </button>
-      <button type="button" class="segment-btn" data-filter="dupes" aria-pressed="false">
-        <span class="segment-inner">
-          <span class="segment-label">Repetidas</span>
-          <span class="segment-count" id="count-filter-dupes">—</span>
-        </span>
-      </button>
-    </div>
+  <a class="skip-link" href="#panel-scroll">Saltar para o álbum</a>
 
-    <p class="hint" id="load-error" hidden>Não foi possível carregar o checklist. Use HTTP(S) ou GitHub Pages.</p>
+  <div class="app-shell">
+    <div class="app-column">
+      <header class="panini-header">
+        <div class="panini-header-titles">
+          <p class="panini-kicker">Panini · álbum digital</p>
+          <h1 class="panini-title">Copa do Mundo<span class="panini-title-gold"> FIFA</span> 2026</h1>
+        </div>
+        <div class="panini-header-rule" aria-hidden="true"></div>
+      </header>
 
-    <div id="split" class="split">
-      <nav id="group-rail" class="group-rail" aria-label="Grupos A–L e grupo indefinido (#)"></nav>
-      <div id="album" class="album"></div>
+      <main class="main" id="main">
+        <div class="panel-scroll" id="panel-scroll">
+          <div class="filter-segment" role="group" aria-label="Filtrar cromos">
+            <button type="button" class="segment-btn is-active" data-filter="all" aria-pressed="true">
+              <span class="segment-inner">
+                <span class="segment-label">Todas</span>
+                <span class="segment-count" id="count-filter-all">—</span>
+              </span>
+            </button>
+            <button type="button" class="segment-btn" data-filter="missing" aria-pressed="false">
+              <span class="segment-inner">
+                <span class="segment-label">Faltantes</span>
+                <span class="segment-count" id="count-filter-missing">—</span>
+              </span>
+            </button>
+            <button type="button" class="segment-btn" data-filter="dupes" aria-pressed="false">
+              <span class="segment-inner">
+                <span class="segment-label">Repetidas</span>
+                <span class="segment-count" id="count-filter-dupes">—</span>
+              </span>
+            </button>
+          </div>
+
+          <p class="hint" id="load-error" hidden>Não foi possível carregar o checklist. Use HTTP(S) ou GitHub Pages.</p>
+
+          <div id="split" class="split">
+            <nav id="group-rail" class="group-rail" aria-label="Grupos A–L e grupo indefinido (#)"></nav>
+            <div id="album" class="album"></div>
+          </div>
+        </div>
+      </main>
     </div>
-    </div>
-  </main>
+  </div>
 
   <button type="button" id="ocr-fab" class="ocr-fab" aria-label="Ler verso com a câmera" title="OCR — verso" disabled>
     <svg class="ocr-fab-icon" viewBox="0 0 24 24" aria-hidden="true">
