@@ -21,7 +21,7 @@
     confirmList: null,
     btnConfirmAdd: null,
     btnConfirmClose: null,
-    ocrStatus: null,
+    analyzeLoading: null,
   };
 
   /** @type {{ file: File, url: string }[]} */
@@ -111,18 +111,38 @@
     return s;
   }
 
+  /**
+   * Corrige leituras típicas do verso Panini (texto branco em fundo escuro após inverter
+   * pode vir como HAII6 em vez de HAI 16, TUNG em vez de TUN 4, etc.).
+   */
+  function normalizeStickerCodes(t) {
+    let s = normalizeOcrText(t);
+    s = s.replace(/\b([A-Z]{3})II(\d)\b/g, "$1 1$2");
+    s = s.replace(/\b([A-Z]{3})ll(\d)\b/g, "$1 1$2");
+    s = s.replace(/\b([A-Z]{3})lI(\d)\b/g, "$1 1$2");
+    s = s.replace(/\bTUNG\b/g, "TUN 4");
+    s = s.replace(/\bTUN\s*G\s*(\||\s)/g, "TUN 4 $1");
+    s = s.replace(/\bP0R\b/g, "POR");
+    s = s.replace(/\b8RA\b/g, "BRA");
+    s = s.replace(/\bC0N\b/g, "CAN");
+    s = s.replace(/\bN3D\b/g, "NED");
+    s = s.replace(/\bA1G\b/g, "ALG");
+    return s;
+  }
+
   /** @param {string} text */
   function extractMatches(text) {
     if (!api) return [];
     const teamIds = new Set(api.getTeamIds());
-    const raw = normalizeOcrText(text);
+    const raw = normalizeStickerCodes(text);
     const found = [];
 
     function tryPair(code, numStr) {
       const code3 = code.slice(0, 3);
       if (code3.length !== 3) return;
       if (code3 !== "FWC" && !teamIds.has(code3)) return;
-      const id = api.resolveBackCode(code3, numStr);
+      const numClean = String(numStr).replace(/O/g, "0").replace(/[Il]/g, "1");
+      const id = api.resolveBackCode(code3, numClean);
       if (id == null) return;
       const st = api.getStickerById(id);
       const label = st ? `${st.label_pt} (#${id})` : `#${id}`;
@@ -130,7 +150,7 @@
       found.push({
         id,
         code: code3,
-        num: numStr,
+        num: numClean,
         label,
         kind: q === 0 ? "missing" : "dupe",
       });
@@ -145,6 +165,172 @@
     return found;
   }
 
+  /** @param {File} file */
+  function fileToImageCanvas(file) {
+    if (typeof createImageBitmap === "function") {
+      return createImageBitmap(file, { imageOrientation: "from-image" }).then(
+        (bmp) => {
+          const c = document.createElement("canvas");
+          c.width = bmp.width;
+          c.height = bmp.height;
+          c.getContext("2d").drawImage(bmp, 0, 0);
+          bmp.close?.();
+          return c;
+        },
+        () => fileToImageCanvasLegacy(file),
+      );
+    }
+    return fileToImageCanvasLegacy(file);
+  }
+
+  /** @param {File} file */
+  function fileToImageCanvasLegacy(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const c = document.createElement("canvas");
+        c.width = img.naturalWidth;
+        c.height = img.naturalHeight;
+        c.getContext("2d").drawImage(img, 0, 0);
+        resolve(c);
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error("Não foi possível ler a imagem."));
+      };
+      img.src = url;
+    });
+  }
+
+  function scaleCanvas(src, factor) {
+    const c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(src.width * factor));
+    c.height = Math.max(1, Math.round(src.height * factor));
+    const ctx = c.getContext("2d");
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(src, 0, 0, c.width, c.height);
+    return c;
+  }
+
+  /** Redimensiona para caber num quadrado de lado maxDim (mantém proporção). */
+  function resizeMaxCanvas(src, maxDim) {
+    const w = src.width;
+    const h = src.height;
+    const m = Math.max(w, h);
+    if (m <= maxDim) {
+      const c = document.createElement("canvas");
+      c.width = w;
+      c.height = h;
+      c.getContext("2d").drawImage(src, 0, 0);
+      return c;
+    }
+    const s = maxDim / m;
+    return scaleCanvas(src, s);
+  }
+
+  function capMaxDimension(src, cap) {
+    const m = Math.max(src.width, src.height);
+    if (m <= cap) return src;
+    return scaleCanvas(src, cap / m);
+  }
+
+  /** Uma rotação de 90° no sentido horário (eixo Y para baixo, como no canvas). */
+  function rotateOnce90CW(source) {
+    const c = document.createElement("canvas");
+    c.width = source.height;
+    c.height = source.width;
+    const ctx = c.getContext("2d");
+    ctx.translate(c.width, 0);
+    ctx.rotate(Math.PI / 2);
+    ctx.drawImage(source, 0, 0);
+    return c;
+  }
+
+  /**
+   * Roda a imagem em saltos de 90° (sentido horário), para alinhar códigos na vertical
+   * quando o cromo está de lado na fotografia.
+   * @param {HTMLCanvasElement} source
+   * @param {0 | 90 | 180 | 270} degClockwise
+   */
+  function rotateCanvas(source, degClockwise) {
+    let steps = Math.round(degClockwise / 90) % 4;
+    if (steps < 0) steps += 4;
+    if (steps === 0) {
+      const c = document.createElement("canvas");
+      c.width = source.width;
+      c.height = source.height;
+      c.getContext("2d").drawImage(source, 0, 0);
+      return c;
+    }
+    let cur = source;
+    for (let i = 0; i < steps; i++) {
+      cur = rotateOnce90CW(cur);
+    }
+    return cur;
+  }
+
+  /** Cinza + normalização de histograma; opcionalmente inverte (versos Panini: badge claro em fundo escuro). */
+  function canvasGrayNormalize(source, invert) {
+    const c = document.createElement("canvas");
+    c.width = source.width;
+    c.height = source.height;
+    const ctx = c.getContext("2d");
+    ctx.drawImage(source, 0, 0);
+    const im = ctx.getImageData(0, 0, c.width, c.height);
+    const d = im.data;
+    let min = 255;
+    let max = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      const y = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+      if (y < min) min = y;
+      if (y > max) max = y;
+    }
+    const range = max - min || 1;
+    for (let i = 0; i < d.length; i += 4) {
+      let y = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+      y = ((y - min) / range) * 255;
+      const v = invert ? 255 - y : y;
+      d[i] = d[i + 1] = d[i + 2] = v;
+      d[i + 3] = 255;
+    }
+    ctx.putImageData(im, 0, 0);
+    return c;
+  }
+
+  function splitGrid(src, rows, cols) {
+    const tw = Math.floor(src.width / cols);
+    const th = Math.floor(src.height / rows);
+    const out = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const tile = document.createElement("canvas");
+        tile.width = tw;
+        tile.height = th;
+        tile.getContext("2d").drawImage(src, c * tw, r * th, tw, th, 0, 0, tw, th);
+        out.push(tile);
+      }
+    }
+    return out;
+  }
+
+  async function ocrCanvas(worker, canvas, psm) {
+    await worker.setParameters({
+      tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ",
+      tessedit_pageseg_mode: String(psm),
+    });
+    const {
+      data: { text },
+    } = await worker.recognize(canvas);
+    return text;
+  }
+
+  /**
+   * Versos Panini: código em branco sobre cinza — inverter luminância + mosaico ajuda o Tesseract.
+   * Várias passagens; texto agregado (pode haver duplicados na lista final; o utilizador remove no modal).
+   */
   async function runOcrOnPhotos() {
     if (typeof Tesseract === "undefined") {
       throw new Error("Biblioteca de OCR não carregou. Verifique a rede e atualize a página.");
@@ -152,18 +338,47 @@
     const worker = await Tesseract.createWorker("eng", 1, {
       logger: () => {},
     });
+    const allChunks = [];
     try {
-      await worker.setParameters({
-        tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ",
-      });
-      const chunks = [];
       for (const p of sessionPhotos) {
-        const {
-          data: { text },
-        } = await worker.recognize(p.file);
-        chunks.push(text);
+        const base = await fileToImageCanvas(p.file);
+        const work = resizeMaxCanvas(base, 1400);
+        let doubled = scaleCanvas(work, 2);
+        doubled = capMaxDimension(doubled, 2600);
+
+        const ROTATIONS = /** @type {const} */ ([0, 90, 180, 270]);
+        for (const rotDeg of ROTATIONS) {
+          const rotated = rotateCanvas(doubled, rotDeg);
+          const invFull = canvasGrayNormalize(rotated, true);
+          allChunks.push(await ocrCanvas(worker, invFull, 11));
+          if (rotDeg === 0) {
+            allChunks.push(await ocrCanvas(worker, invFull, 3));
+          }
+        }
+
+        const tiles33 = splitGrid(doubled, 3, 3);
+        for (const tile of tiles33) {
+          const tInv = canvasGrayNormalize(tile, true);
+          allChunks.push(await ocrCanvas(worker, tInv, 11));
+        }
+
+        const doubled90 = rotateCanvas(doubled, 90);
+        const tiles90 = splitGrid(doubled90, 3, 3);
+        for (const tile of tiles90) {
+          const tInv = canvasGrayNormalize(tile, true);
+          allChunks.push(await ocrCanvas(worker, tInv, 11));
+        }
+
+        const workAlt = resizeMaxCanvas(base, 1000);
+        let doubledAlt = scaleCanvas(workAlt, 2);
+        doubledAlt = capMaxDimension(doubledAlt, 2400);
+        for (const rotDeg of /** @type {const} */ ([0, 90])) {
+          const rotatedAlt = rotateCanvas(doubledAlt, rotDeg);
+          const invAlt = canvasGrayNormalize(rotatedAlt, true);
+          allChunks.push(await ocrCanvas(worker, invAlt, 11));
+        }
       }
-      return chunks.join("\n\n");
+      return allChunks.join("\n");
     } finally {
       await worker.terminate();
     }
@@ -236,7 +451,7 @@
     els.confirmList = document.getElementById("ocr-confirm-list");
     els.btnConfirmAdd = document.getElementById("ocr-btn-confirm-add");
     els.btnConfirmClose = document.getElementById("ocr-btn-confirm-close");
-    els.ocrStatus = document.getElementById("ocr-status");
+    els.analyzeLoading = document.getElementById("ocr-analyze-loading");
 
     els.fab?.addEventListener("click", () => openStartModal());
 
@@ -271,10 +486,11 @@
       if (!sessionPhotos.length || !api) return;
       if (els.btnAnalyze?.disabled) return;
       els.btnAnalyze.disabled = true;
-      if (els.ocrStatus) {
-        els.ocrStatus.hidden = false;
-        els.ocrStatus.textContent = "A analisar imagens…";
-      }
+      els.btnAddPhoto?.setAttribute("disabled", "true");
+      els.btnSessionBack?.setAttribute("disabled", "true");
+      els.dlgSession?.classList.add("is-analyzing");
+      els.dlgSession?.setAttribute("aria-busy", "true");
+      els.analyzeLoading?.classList.remove("hidden");
       try {
         const text = await runOcrOnPhotos();
         const matches = extractMatches(text);
@@ -284,7 +500,11 @@
         alert(msg);
       } finally {
         els.btnAnalyze.disabled = false;
-        if (els.ocrStatus) els.ocrStatus.hidden = true;
+        els.btnAddPhoto?.removeAttribute("disabled");
+        els.btnSessionBack?.removeAttribute("disabled");
+        els.dlgSession?.classList.remove("is-analyzing");
+        els.dlgSession?.setAttribute("aria-busy", "false");
+        els.analyzeLoading?.classList.add("hidden");
       }
     });
 

@@ -644,10 +644,79 @@ label.btn {
   border-color: var(--text);
 }
 
-.ocr-status {
-  margin: 0 0 0.75rem;
+.ocr-session-wrap {
+  position: relative;
+  min-height: 5rem;
+}
+
+.ocr-session-main {
+  transition: opacity 0.2s ease;
+}
+
+#ocr-dialog-session.is-analyzing .ocr-session-main {
+  opacity: 0.35;
+  pointer-events: none;
+  user-select: none;
+}
+
+.ocr-analyze-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.93);
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 8px;
+}
+
+.ocr-analyze-loading.hidden {
+  display: none !important;
+}
+
+.ocr-analyze-loading-title {
+  margin: 0.25rem 0 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.ocr-analyze-loading-sub {
+  margin: 0;
   font-size: 0.8125rem;
   color: var(--muted);
+  max-width: 16rem;
+  line-height: 1.35;
+}
+
+.ocr-spinner {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 3px solid var(--line);
+  border-top-color: var(--text);
+  border-radius: 50%;
+  animation: ocr-spin 0.75s linear infinite;
+}
+
+@keyframes ocr-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ocr-spinner {
+    animation: none;
+    border-top-color: var(--line);
+    opacity: 0.85;
+  }
 }
 
 .ocr-previews {

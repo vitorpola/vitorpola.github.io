@@ -66,14 +66,22 @@
         </div>
       </div>
 
-      <div id="ocr-dialog-session" class="ocr-dialog hidden" role="dialog" aria-modal="true" aria-labelledby="ocr-session-title">
+      <div id="ocr-dialog-session" class="ocr-dialog hidden" role="dialog" aria-modal="true" aria-labelledby="ocr-session-title" aria-busy="false">
         <h2 id="ocr-session-title" class="ocr-dialog-title">Fotos capturadas</h2>
-        <p id="ocr-status" class="ocr-status hidden" role="status"></p>
-        <div id="ocr-previews" class="ocr-previews"></div>
-        <div class="ocr-dialog-actions ocr-dialog-actions-stack">
-          <button type="button" class="btn" id="ocr-btn-add-photo">Nova foto</button>
-          <button type="button" class="btn btn-primary" id="ocr-btn-analyze">Analisar</button>
-          <button type="button" class="btn" id="ocr-btn-session-back">Cancelar</button>
+        <div class="ocr-session-wrap">
+          <div id="ocr-analyze-loading" class="ocr-analyze-loading hidden" role="status" aria-live="polite">
+            <div class="ocr-spinner" aria-hidden="true"></div>
+            <p class="ocr-analyze-loading-title">A analisar as fotos</p>
+            <p class="ocr-analyze-loading-sub">Leitura OCR em curso — pode demorar alguns segundos.</p>
+          </div>
+          <div class="ocr-session-main">
+            <div id="ocr-previews" class="ocr-previews"></div>
+            <div class="ocr-dialog-actions ocr-dialog-actions-stack">
+              <button type="button" class="btn" id="ocr-btn-add-photo">Nova foto</button>
+              <button type="button" class="btn btn-primary" id="ocr-btn-analyze">Analisar</button>
+              <button type="button" class="btn" id="ocr-btn-session-back">Cancelar</button>
+            </div>
+          </div>
         </div>
       </div>
 
