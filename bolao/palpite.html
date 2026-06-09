@@ -30,8 +30,27 @@
     text-align: center;
     border-bottom: 4px solid var(--yellow);
   }
+  header { position: relative; }
   header h1 { margin: 0; font-size: 1.7rem; }
   header p { margin: 6px 0 0; opacity: 0.9; font-size: 0.95rem; }
+  header .voltar {
+    position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+    color: #fff; text-decoration: none; font-weight: 600; font-size: 0.9rem;
+    opacity: 0.9;
+  }
+  header .voltar:hover { opacity: 1; text-decoration: underline; }
+
+  .banner-consulta {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    background: rgba(0,151,57,0.15);
+    border: 1px solid rgba(0,151,57,0.4);
+    color: #4ade80;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin: 16px 0;
+    font-weight: 600;
+  }
+  .banner-consulta .btn { flex: 0 0 auto; }
   .container { max-width: 760px; margin: 0 auto; padding: 16px; }
 
   .field {
@@ -104,6 +123,34 @@
   .score-box input:focus { outline: 2px solid var(--green); border-color: var(--green); }
   .x { color: var(--muted); font-weight: 700; }
 
+  .extras-title { margin: 30px 0 4px; font-size: 1.3rem; }
+  .sel {
+    width: 100%;
+    padding: 12px;
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 1rem;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238b949e' stroke-width='3'><path d='M6 9l6 6 6-6'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+  .sel:focus { outline: 2px solid var(--yellow); border-color: var(--yellow); }
+  .pos { display: flex; flex-direction: column; gap: 10px; }
+  .pos-row { display: flex; align-items: center; gap: 10px; }
+  .pos-num {
+    flex: 0 0 auto;
+    width: 40px; height: 40px;
+    display: grid; place-items: center;
+    background: var(--yellow); color: var(--blue);
+    border-radius: 8px; font-weight: 800;
+  }
+  .pos-row .sel { flex: 1; }
+
   .bar {
     position: sticky;
     bottom: 0;
@@ -158,6 +205,16 @@
   .modal-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
   .modal-actions .btn { flex: 1; min-width: 120px; }
   .hint { font-size: 0.85rem; color: var(--muted); text-align: center; margin: 10px 0 0; }
+
+  .steps { display: flex; gap: 8px; justify-content: center; margin: 2px 0 14px; }
+  .step {
+    font-size: 0.78rem; font-weight: 700;
+    padding: 5px 12px; border-radius: 999px;
+    background: var(--card-2); color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .step.on { background: var(--yellow); color: var(--blue); border-color: var(--yellow); }
+  .step.done { background: rgba(0,151,57,0.18); color: #4ade80; border-color: rgba(0,151,57,0.4); }
 
   /* Seção Pix */
   .pix {
@@ -222,55 +279,92 @@
 </head>
 <body>
 <header>
+  <a href="index.html" class="voltar">← Meus palpites</a>
   <h1>🏆 Bolão da Copa</h1>
 </header>
 
 <div class="container">
+  <div class="banner-consulta" id="banner-consulta" style="display:none;">
+    🔒 Palpite finalizado — somente consulta.
+    <button type="button" class="btn finalize" id="btn-ver-comprovante">Ver comprovante</button>
+  </div>
+
   <div class="field">
     <label class="lbl" for="nome">Seu nome</label>
     <input type="text" id="nome" placeholder="Digite seu nome" autocomplete="name">
   </div>
 
   <form id="form-palpites"></form>
+
+  <h2 class="extras-title">🏅 Palpites finais</h2>
+
+  <div class="field">
+    <label class="lbl">Classificação final (Top 4)</label>
+    <div class="pos" id="pos-wrap"></div>
+  </div>
+
+  <div class="field">
+    <label class="lbl" for="art-sel">Artilheiro da Copa</label>
+    <select id="art-sel" class="sel"></select>
+    <input type="text" id="art-outro" placeholder="Informe o nome do artilheiro" style="display:none; margin-top:10px;">
+  </div>
 </div>
 
 <div class="bar">
   <div class="progress">Preenchidos: <b id="count">0</b> / 72</div>
   <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
     <button type="button" class="btn ghost" id="btn-limpar">Limpar</button>
-    <button type="button" class="btn ghost" id="btn-salvar">Salvar rascunho</button>
     <button type="button" class="btn finalize" id="btn-finalizar" disabled>Finalizar palpite</button>
   </div>
 </div>
 
 <div class="modal" id="modal">
   <div class="modal-card">
-    <h3>✅ Palpites prontos!</h3>
-    <img id="comprovante-img" alt="Comprovante dos palpites">
-    <p class="hint">Envie esta imagem para o administrador do bolão.</p>
 
-    <div class="pix">
-      <h4>💸 Confirme seu palpite com o Pix</h4>
-      <div class="valor">R$ 50,00</div>
-      <div class="qr" id="pix-qr"></div>
-      <div class="dados">
-        <b>VITOR POLA BAPTISTA COELHO</b><br>
-        Chave Pix (CPF): <b>415.361.888-83</b> — Banco Inter
+    <!-- ETAPA 1: enviar o comprovante dos palpites -->
+    <div id="etapa1">
+      <div class="steps"><span class="step on">1. Enviar palpite</span><span class="step">2. Pagamento</span></div>
+      <h3>📩 Envie seu comprovante de palpite</h3>
+      <img id="comprovante-img" alt="Comprovante dos palpites">
+      <p class="hint">Envie esta imagem para o administrador no WhatsApp <b>(12) 99722-0224</b>.</p>
+      <div class="modal-actions">
+        <button type="button" class="btn" id="btn-compartilhar">📲 Compartilhar / Enviar imagem</button>
+        <button type="button" class="btn ghost" id="btn-baixar">⬇️ Baixar imagem</button>
       </div>
-      <div class="copia">
-        <code id="pix-codigo"></code>
-        <button type="button" class="btn" id="btn-copiar-pix">Copiar</button>
+      <div class="modal-actions">
+        <button type="button" class="btn finalize" id="btn-ir-pagamento" style="flex:1;">Já enviei → Ir para o pagamento</button>
       </div>
-      <p class="hint">Pague pelo QR Code ou pelo código copia-e-cola e envie o comprovante do Pix junto com a imagem dos palpites ao administrador.</p>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" id="btn-fechar-1" style="flex:1;">Fechar</button>
+      </div>
     </div>
 
-    <div class="modal-actions">
-      <button type="button" class="btn" id="btn-compartilhar">📲 Compartilhar / Enviar</button>
-      <button type="button" class="btn ghost" id="btn-baixar">⬇️ Baixar imagem</button>
+    <!-- ETAPA 2: pagamento via Pix -->
+    <div id="etapa2" style="display:none;">
+      <div class="steps"><span class="step done">1. Enviar palpite ✓</span><span class="step on">2. Pagamento</span></div>
+      <div class="pix">
+        <h4>💸 Confirme seu palpite com o Pix</h4>
+        <div class="valor">R$ 50,00</div>
+        <div class="qr" id="pix-qr"></div>
+        <div class="dados">
+          <b>VITOR POLA BAPTISTA COELHO</b><br>
+          Chave Pix (CPF): <b>415.361.888-83</b> — Banco Inter
+        </div>
+        <div class="copia">
+          <code id="pix-codigo"></code>
+          <button type="button" class="btn" id="btn-copiar-pix">Copiar</button>
+        </div>
+        <p class="hint">Pague pelo QR Code ou pelo código copia-e-cola e, em seguida, envie o comprovante do Pix para o WhatsApp <b>(12) 99722-0224</b>.</p>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn" id="btn-enviar-pix-wpp">📲 Enviar comprovante do Pix</button>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" id="btn-voltar-1">← Voltar</button>
+        <button type="button" class="btn ghost" id="btn-fechar-2">Concluir</button>
+      </div>
     </div>
-    <div class="modal-actions">
-      <button type="button" class="btn ghost" id="btn-fechar-modal" style="flex:1;">Fechar</button>
-    </div>
+
   </div>
 </div>
 
@@ -295,6 +389,14 @@ const grupos = {
 
 // Ordem de confrontos do round-robin (índices dos 4 times do grupo)
 const confrontos = [[0,1],[2,3],[0,2],[1,3],[0,3],[1,2]];
+
+// Seleções prováveis para a classificação final (Top 4)
+const SELECOES_TOP = ["Espanha", "França", "Brasil", "Inglaterra", "Portugal", "Argentina"];
+// Todas as 48 seleções (extraídas dos grupos), ordenadas
+const TODAS_SELECOES = [...new Set(Object.values(grupos).flat().map(t => t[1]))]
+  .sort((a, b) => a.localeCompare(b, "pt"));
+// Candidatos a artilheiro (+ opção "Outro")
+const ARTILHEIROS = ["Mbappé", "H. Kane", "Haaland", "Vinícius Júnior", "Messi", "C Ronaldo", "J Alvarez", "L Yamal"];
 
 const form = document.getElementById("form-palpites");
 let totalJogos = 0;
@@ -328,6 +430,34 @@ Object.entries(grupos).forEach(([letra, times]) => {
   });
 });
 
+// ---- Monta os selects de Palpites finais (Top 4 + artilheiro) ----
+function opcoes(lista, placeholder) {
+  return `<option value="">${placeholder}</option>` +
+    lista.map(v => `<option value="${v}">${v}</option>`).join("");
+}
+function opcoesSelecoes(placeholder) {
+  const demais = TODAS_SELECOES.filter(t => !SELECOES_TOP.includes(t));
+  const grupo = (label, lista) =>
+    `<optgroup label="${label}">` + lista.map(v => `<option value="${v}">${v}</option>`).join("") + `</optgroup>`;
+  return `<option value="">${placeholder}</option>` +
+    grupo("Mais prováveis", SELECOES_TOP) +
+    grupo("Todas as seleções", demais);
+}
+const posWrap = document.getElementById("pos-wrap");
+posWrap.innerHTML = [1, 2, 3, 4].map(p => `
+  <div class="pos-row">
+    <span class="pos-num">${p}º</span>
+    <select class="sel" id="pos-${p}" data-pos="${p}">${opcoesSelecoes("Selecione a seleção")}</select>
+  </div>`).join("");
+
+const artSel = document.getElementById("art-sel");
+const artOutro = document.getElementById("art-outro");
+artSel.innerHTML = opcoes(ARTILHEIROS, "Selecione o artilheiro") + `<option value="Outro">Outro…</option>`;
+artSel.addEventListener("change", () => {
+  artOutro.style.display = artSel.value === "Outro" ? "block" : "none";
+  if (artSel.value !== "Outro") artOutro.value = "";
+});
+
 // ---- Apenas números + avanço automático de foco ----
 const scoreInputs = Array.from(document.querySelectorAll(".score-box input"));
 scoreInputs.forEach((inp, idx) => {
@@ -351,10 +481,39 @@ scoreInputs.forEach((inp, idx) => {
   inp.addEventListener("focus", () => inp.select());
 });
 
-// ---- Persistência e progresso ----
-const STORAGE_KEY = "bolao-copa-2026";
+// ---- Persistência (coleção de palpites por id) + progresso ----
+const COLLECTION_KEY = "bolao-palpites";
 const countEl = document.getElementById("count");
 const nomeEl = document.getElementById("nome");
+
+function lerColecao() { try { return JSON.parse(localStorage.getItem(COLLECTION_KEY)) || {}; } catch (e) { return {}; } }
+function salvarColecao(c) { localStorage.setItem(COLLECTION_KEY, JSON.stringify(c)); }
+function novoId() { return "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+// Migra rascunho antigo (chave única) para a nova coleção
+(function migrar() {
+  const antigo = localStorage.getItem("bolao-copa-2026");
+  if (!antigo) return;
+  try {
+    const d = JSON.parse(antigo);
+    const c = lerColecao();
+    const id = novoId();
+    const ts = d.atualizadoEm || new Date().toISOString();
+    c[id] = { id, nome: d.nome || "", palpites: d.palpites || {}, estado: "rascunho", criadoEm: ts, atualizadoEm: ts };
+    salvarColecao(c);
+  } catch (e) {}
+  localStorage.removeItem("bolao-copa-2026");
+})();
+
+// Resolve o palpite atual a partir da URL (?id=)
+let currentId = new URLSearchParams(location.search).get("id");
+let registroAtual = currentId ? lerColecao()[currentId] : null;
+if (!registroAtual) {
+  currentId = novoId();
+  registroAtual = { id: currentId, nome: "", palpites: {}, estado: "rascunho",
+    criadoEm: new Date().toISOString(), atualizadoEm: new Date().toISOString() };
+}
+const somenteLeitura = registroAtual.estado === "feito";
 
 function jogosCompletos() {
   let n = 0;
@@ -367,35 +526,89 @@ function jogosCompletos() {
 function atualizarContador() {
   const n = jogosCompletos();
   countEl.textContent = n;
-  const pronto = n === totalJogos && nomeEl.value.trim() !== "";
+  const pronto = n === totalJogos && nomeEl.value.trim() !== "" && extrasCompletos();
   document.getElementById("btn-finalizar").disabled = !pronto;
 }
 
-function coletar() {
+function coletarPalpites() {
   const palpites = {};
   document.querySelectorAll(".score-box input").forEach(inp => {
-    const key = inp.dataset.jogo + "-" + inp.dataset.lado;
-    palpites[key] = inp.value;
+    palpites[inp.dataset.jogo + "-" + inp.dataset.lado] = inp.value;
   });
-  return { nome: nomeEl.value.trim(), palpites, atualizadoEm: new Date().toISOString() };
+  return palpites;
+}
+
+// ---- Palpites finais (Top 4 + artilheiro) ----
+function coletarExtras() {
+  return {
+    pos: [1, 2, 3, 4].map(p => document.getElementById("pos-" + p).value),
+    artilheiroSel: artSel.value,
+    artilheiroOutro: artOutro.value.trim()
+  };
+}
+function artilheiroFinal() {
+  return artSel.value === "Outro" ? artOutro.value.trim() : artSel.value;
+}
+function posicoesPreenchidas() {
+  return [1, 2, 3, 4].every(p => document.getElementById("pos-" + p).value !== "");
+}
+function posicoesDistintas() {
+  const vals = [1, 2, 3, 4].map(p => document.getElementById("pos-" + p).value);
+  return new Set(vals).size === 4;
+}
+function extrasCompletos() {
+  return posicoesPreenchidas() && artilheiroFinal() !== "";
 }
 
 function salvarLocal() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(coletar()));
+  if (somenteLeitura) return;
+  const c = lerColecao();
+  const reg = c[currentId] || registroAtual;
+  reg.id = currentId;
+  reg.nome = nomeEl.value.trim();
+  reg.palpites = coletarPalpites();
+  reg.extras = coletarExtras();
+  reg.estado = reg.estado || "rascunho";
+  reg.atualizadoEm = new Date().toISOString();
+  if (!reg.criadoEm) reg.criadoEm = reg.atualizadoEm;
+  c[currentId] = reg;
+  salvarColecao(c);
 }
 
 function carregar() {
-  try {
-    const dados = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (!dados) return;
-    if (dados.nome) nomeEl.value = dados.nome;
-    Object.entries(dados.palpites || {}).forEach(([k, v]) => {
-      const lado = k.endsWith("-casa") ? "casa" : "fora";
-      const jogo = k.replace(/-(casa|fora)$/, "");
-      const inp = document.querySelector(`input[data-jogo="${jogo}"][data-lado="${lado}"]`);
-      if (inp) inp.value = v;
-    });
-  } catch (e) { /* ignora */ }
+  if (registroAtual.nome) nomeEl.value = registroAtual.nome;
+  Object.entries(registroAtual.palpites || {}).forEach(([k, v]) => {
+    const lado = k.endsWith("-casa") ? "casa" : "fora";
+    const jogo = k.replace(/-(casa|fora)$/, "");
+    const inp = document.querySelector(`input[data-jogo="${jogo}"][data-lado="${lado}"]`);
+    if (inp) inp.value = v;
+  });
+  const ex = registroAtual.extras;
+  if (ex) {
+    (ex.pos || []).forEach((v, i) => { const s = document.getElementById("pos-" + (i + 1)); if (s) s.value = v; });
+    if (ex.artilheiroSel) {
+      artSel.value = ex.artilheiroSel;
+      if (ex.artilheiroSel === "Outro") { artOutro.style.display = "block"; artOutro.value = ex.artilheiroOutro || ""; }
+    }
+  }
+}
+
+function marcarFeito() {
+  const c = lerColecao();
+  if (c[currentId]) {
+    c[currentId].estado = "feito";
+    c[currentId].atualizadoEm = new Date().toISOString();
+    salvarColecao(c);
+  }
+}
+
+function aplicarSomenteLeitura() {
+  document.getElementById("banner-consulta").style.display = "flex";
+  document.querySelector(".bar").style.display = "none";
+  nomeEl.setAttribute("readonly", "");
+  document.querySelectorAll(".score-box input").forEach(i => i.setAttribute("disabled", ""));
+  document.querySelectorAll(".sel").forEach(s => s.setAttribute("disabled", ""));
+  artOutro.setAttribute("disabled", "");
 }
 
 function toast(msg) {
@@ -408,27 +621,17 @@ function toast(msg) {
 // Salva rascunho automaticamente a cada digitação
 document.addEventListener("input", () => { atualizarContador(); salvarLocal(); });
 
-document.getElementById("btn-salvar").addEventListener("click", () => {
-  if (!nomeEl.value.trim()) {
-    toast("⚠️ Preencha seu nome primeiro");
-    nomeEl.focus();
-    return;
-  }
-  const faltam = totalJogos - jogosCompletos();
-  if (faltam > 0) {
-    if (!confirm(`Faltam ${faltam} jogo(s) sem palpite. Salvar mesmo assim?`)) return;
-  }
-  salvarLocal();
-  toast("✅ Palpites salvos!");
-});
-
 document.getElementById("btn-limpar").addEventListener("click", () => {
   if (!confirm("Tem certeza que deseja limpar todos os palpites?")) return;
   document.querySelectorAll(".score-box input").forEach(i => i.value = "");
-  localStorage.removeItem(STORAGE_KEY);
+  document.querySelectorAll(".sel").forEach(s => s.value = "");
+  artOutro.value = ""; artOutro.style.display = "none";
+  salvarLocal();
   atualizarContador();
   toast("Palpites limpos");
 });
+
+document.getElementById("btn-ver-comprovante").addEventListener("click", () => gerarComprovante());
 
 // ---- Geração do comprovante (imagem via canvas) ----
 let blobComprovante = null;
@@ -446,14 +649,15 @@ function gerarComprovante() {
   const margem = 40;
   const colGap = 40;
   const colW = (W - margem * 2 - colGap) / 2;
-  const headerH = 170;
-  const tituloGrupoH = 46;
-  const linhaH = 32;
-  const grupoH = tituloGrupoH + 6 * linhaH + 18;
+  const headerH = 118;
+  const stripW = 32;          // faixa vertical com o nome do grupo
+  const linhaH = 34;
+  const gapGrupo = 16;
+  const grupoH = 6 * linhaH + gapGrupo;
   const gruposPorColuna = 6;
   const corpoH = gruposPorColuna * grupoH;
-  const footerH = 60;
-  const H = headerH + corpoH + footerH;
+  const extrasH = 150;
+  const H = headerH + corpoH + extrasH;
 
   const canvas = document.createElement("canvas");
   canvas.width = W * escala;
@@ -466,7 +670,7 @@ function gerarComprovante() {
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, W, H);
 
-  // Cabeçalho
+  // Cabeçalho (sem título — apenas participante e data)
   const grad = ctx.createLinearGradient(0, 0, W, headerH);
   grad.addColorStop(0, "#009739");
   grad.addColorStop(1, "#002776");
@@ -477,13 +681,11 @@ function gerarComprovante() {
 
   ctx.fillStyle = "#ffffff";
   ctx.textAlign = "center";
-  ctx.font = "bold 30px -apple-system, Arial, sans-serif";
-  ctx.fillText("Bolao Copa do Mundo 2026 - Palpites", W / 2, 48);
-  ctx.font = "bold 26px -apple-system, Arial, sans-serif";
-  ctx.fillText(nomeEl.value.trim(), W / 2, 92);
+  ctx.font = "bold 28px -apple-system, Arial, sans-serif";
+  ctx.fillText("Participante: " + nomeEl.value.trim(), W / 2, 48);
   ctx.font = "16px -apple-system, Arial, sans-serif";
   const dataStr = new Date().toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
-  ctx.fillText("Fase de grupos - 72 jogos - " + dataStr, W / 2, 128);
+  ctx.fillText("Fase de grupos - 72 jogos - " + dataStr, W / 2, 84);
 
   // Grupos em duas colunas
   const letras = Object.keys(grupos);
@@ -493,51 +695,80 @@ function gerarComprovante() {
     const colX = margem + coluna * (colW + colGap);
     const topo = headerH + linhaGrupo * grupoH;
     const times = grupos[letra];
+    const blocoH = 6 * linhaH;
 
-    // Cabeçalho do grupo
+    // Faixa vertical com o nome do grupo (texto rotacionado)
     ctx.fillStyle = "#ffcc29";
-    ctx.fillRect(colX, topo, colW, tituloGrupoH - 8);
+    ctx.fillRect(colX, topo, stripW, blocoH);
+    ctx.save();
+    ctx.translate(colX + stripW / 2, topo + blocoH / 2);
+    ctx.rotate(-Math.PI / 2);
     ctx.fillStyle = "#002776";
-    ctx.font = "bold 20px -apple-system, Arial, sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("Grupo " + letra, colX + 14, topo + (tituloGrupoH - 8) / 2);
+    ctx.font = "bold 18px -apple-system, Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Grupo " + letra, 0, 0);
+    ctx.restore();
 
-    // Jogos
-    const centerX = colX + colW / 2;
-    const meioScore = 42; // metade da largura reservada ao placar
+    // Área dos jogos (à direita da faixa)
+    const jogosX = colX + stripW;
+    const jogosW = colW - stripW;
+    const centerX = jogosX + jogosW / 2;
+    const meioScore = 46; // metade da largura reservada ao placar
     confrontos.forEach(([i, j], k) => {
-      const y = topo + tituloGrupoH + k * linhaH + linhaH / 2;
+      const y = topo + k * linhaH + linhaH / 2;
       const nh = times[i][1], na = times[j][1];
       const id = `${letra}-${i}-${j}`;
       const ph = document.querySelector(`input[data-jogo="${id}"][data-lado="casa"]`).value || "0";
       const pa = document.querySelector(`input[data-jogo="${id}"][data-lado="fora"]`).value || "0";
 
-      if (k % 2 === 1) { ctx.fillStyle = "#f3f5f7"; ctx.fillRect(colX, y - linhaH / 2, colW, linhaH); }
+      if (k % 2 === 1) { ctx.fillStyle = "#f3f5f7"; ctx.fillRect(jogosX, y - linhaH / 2, jogosW, linhaH); }
 
       ctx.fillStyle = "#1c232c";
-      ctx.font = "16px -apple-system, Arial, sans-serif";
+      ctx.font = "18px -apple-system, Arial, sans-serif";
       ctx.textAlign = "right";
-      ctx.fillText(truncar(ctx, nh, colW / 2 - meioScore - 8), centerX - meioScore, y);
+      ctx.fillText(truncar(ctx, nh, jogosW / 2 - meioScore - 8), centerX - meioScore, y);
       ctx.textAlign = "left";
-      ctx.fillText(truncar(ctx, na, colW / 2 - meioScore - 8), centerX + meioScore, y);
+      ctx.fillText(truncar(ctx, na, jogosW / 2 - meioScore - 8), centerX + meioScore, y);
 
       ctx.fillStyle = "#009739";
-      ctx.font = "bold 17px -apple-system, Arial, sans-serif";
+      ctx.font = "bold 18px -apple-system, Arial, sans-serif";
       ctx.textAlign = "center";
       ctx.fillText(`${ph} x ${pa}`, centerX, y);
     });
   });
 
-  // Rodapé
-  ctx.fillStyle = "#8b949e";
-  ctx.font = "14px -apple-system, Arial, sans-serif";
+  // Palpites finais (Top 4 + artilheiro)
+  const yTop = headerH + corpoH;
+  ctx.strokeStyle = "#d0d7de";
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(margem, yTop + 10); ctx.lineTo(W - margem, yTop + 10); ctx.stroke();
+
   ctx.textAlign = "center";
-  ctx.fillText("Comprovante gerado automaticamente - envie ao administrador do bolao", W / 2, H - footerH / 2);
+  ctx.fillStyle = "#002776";
+  ctx.font = "bold 22px -apple-system, Arial, sans-serif";
+  ctx.fillText("Palpites finais", W / 2, yTop + 42);
+
+  const ex = coletarExtras();
+  const pos = ex.pos.map((v, i) => `${i + 1}o ${v || "—"}`);
+  ctx.fillStyle = "#1c232c";
+  ctx.font = "bold 19px -apple-system, Arial, sans-serif";
+  ctx.fillText("Classificação:  " + pos.join("   •   "), W / 2, yTop + 82);
+
+  ctx.font = "19px -apple-system, Arial, sans-serif";
+  ctx.fillText("Artilheiro:  " + (artilheiroFinal() || "—"), W / 2, yTop + 118);
 
   // Mostra no modal e prepara blob para compartilhar/baixar
   document.getElementById("comprovante-img").src = canvas.toDataURL("image/png");
   canvas.toBlob(b => { blobComprovante = b; }, "image/png");
+  mostrarEtapa(1);
   document.getElementById("modal").classList.add("show");
+}
+
+const ADMIN_WPP = "5512997220224"; // 55 (Brasil) + 12 (DDD) + número
+function mostrarEtapa(n) {
+  document.getElementById("etapa1").style.display = n === 1 ? "" : "none";
+  document.getElementById("etapa2").style.display = n === 2 ? "" : "none";
+  document.querySelector(".modal-card").scrollTop = 0;
 }
 
 function nomeArquivo() {
@@ -545,13 +776,59 @@ function nomeArquivo() {
   return `palpites-bolao-${slug || "copa2026"}.png`;
 }
 
+// ---- Envio automático para a Planilha Google (Apps Script) ----
+// Cole aqui a URL do "app da web" publicado no Apps Script (termina em /exec).
+// Enquanto estiver vazio, nada é enviado e o site funciona normalmente.
+const ENDPOINT_PALPITES = "https://script.google.com/macros/s/AKfycbxAlA5cS5CPc7Ei_RArqdyB2BNiZ9Qo0EVASM8QHvJNITqioK4fVLw7wDwxxwzARF0P/exec";
+
+function montarPayloadPlanilha(estado) {
+  // Gols na ordem canônica (Grupo A jogos 1..6, depois B, ..., L) — cada item [mandante, visitante].
+  // O Apps Script usa essa ordem para escrever nas colunas certas da planilha PALPITES.
+  const jogos = [];
+  Object.entries(grupos).forEach(([letra, times]) => {
+    confrontos.forEach(([i, j]) => {
+      const id = `${letra}-${i}-${j}`;
+      const ph = document.querySelector(`input[data-jogo="${id}"][data-lado="casa"]`).value;
+      const pa = document.querySelector(`input[data-jogo="${id}"][data-lado="fora"]`).value;
+      jogos.push([ph === "" ? "" : Number(ph), pa === "" ? "" : Number(pa)]);
+    });
+  });
+  const ex = coletarExtras();
+  return {
+    id: currentId,
+    data: new Date().toLocaleString("pt-BR"),
+    nome: nomeEl.value.trim(),
+    estado: estado || "feito",
+    jogos: jogos,                 // 72 pares [mandante, visitante]
+    top4: ex.pos.slice(0, 4),     // [1º, 2º, 3º, 4º]
+    artilheiro: artilheiroFinal()
+  };
+}
+
+function enviarParaPlanilha(estado) {
+  if (!ENDPOINT_PALPITES) return;
+  const corpo = JSON.stringify(montarPayloadPlanilha(estado));
+  try {
+    const blob = new Blob([corpo], { type: "text/plain;charset=UTF-8" });
+    if (navigator.sendBeacon(ENDPOINT_PALPITES, blob)) return;
+  } catch (e) { /* tenta o fetch abaixo */ }
+  fetch(ENDPOINT_PALPITES, {
+    method: "POST", mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=UTF-8" }, body: corpo
+  }).catch(() => {});
+}
+
 document.getElementById("btn-finalizar").addEventListener("click", () => {
   if (!nomeEl.value.trim()) { toast("⚠️ Preencha seu nome primeiro"); nomeEl.focus(); return; }
   if (jogosCompletos() < totalJogos) { toast("⚠️ Preencha todos os 72 jogos"); return; }
+  if (!posicoesPreenchidas() || artilheiroFinal() === "") { toast("⚠️ Preencha a classificação final e o artilheiro"); return; }
+  if (!posicoesDistintas()) { toast("⚠️ As 4 seleções da classificação devem ser diferentes"); return; }
   salvarLocal();
+  enviarParaPlanilha("feito");
   gerarComprovante();
 });
 
+// Etapa 1 — compartilhar a imagem do comprovante
 document.getElementById("btn-compartilhar").addEventListener("click", async () => {
   if (!blobComprovante) return;
   const file = new File([blobComprovante], nomeArquivo(), { type: "image/png" });
@@ -559,10 +836,11 @@ document.getElementById("btn-compartilhar").addEventListener("click", async () =
     try {
       await navigator.share({ files: [file], title: "Palpites - Bolão Copa 2026",
         text: `Palpites de ${nomeEl.value.trim()} para o bolão da Copa 2026` });
-    } catch (e) { /* usuário cancelou */ }
+      mostrarEtapa(2); // enviou: avança para o pagamento
+    } catch (e) { /* usuário cancelou: permanece na etapa 1 */ }
   } else {
     baixarImagem();
-    toast("Compartilhamento direto indisponível — imagem baixada");
+    toast("Compartilhamento indisponível — imagem baixada. Envie pelo WhatsApp.");
   }
 });
 
@@ -575,10 +853,28 @@ function baixarImagem() {
   URL.revokeObjectURL(url);
 }
 document.getElementById("btn-baixar").addEventListener("click", baixarImagem);
-document.getElementById("btn-fechar-modal").addEventListener("click", () =>
-  document.getElementById("modal").classList.remove("show"));
+
+// Avançar / voltar entre etapas
+document.getElementById("btn-ir-pagamento").addEventListener("click", () => mostrarEtapa(2));
+document.getElementById("btn-voltar-1").addEventListener("click", () => mostrarEtapa(1));
+
+// Etapa 2 — abrir conversa do WhatsApp do administrador para enviar o comprovante do Pix
+document.getElementById("btn-enviar-pix-wpp").addEventListener("click", () => {
+  const texto = encodeURIComponent(`Olá! Sou ${nomeEl.value.trim()}, segue o comprovante do Pix do bolão da Copa 2026.`);
+  window.open(`https://wa.me/${ADMIN_WPP}?text=${texto}`, "_blank");
+});
+
+// Fechar
+function fecharModal() { document.getElementById("modal").classList.remove("show"); }
+document.getElementById("btn-fechar-1").addEventListener("click", fecharModal);
 document.getElementById("modal").addEventListener("click", (e) => {
-  if (e.target.id === "modal") e.target.classList.remove("show");
+  if (e.target.id === "modal") fecharModal();
+});
+
+// Concluir — marca o palpite como "Feito" e volta para a lista (não se aplica em consulta)
+document.getElementById("btn-fechar-2").addEventListener("click", () => {
+  if (!somenteLeitura) marcarFeito();
+  location.href = "index.html";
 });
 
 // ---- Pix (QR Code gerado localmente + copia-e-cola) ----
@@ -605,6 +901,7 @@ document.getElementById("btn-copiar-pix").addEventListener("click", async () => 
 
 carregar();
 atualizarContador();
+if (somenteLeitura) aplicarSomenteLeitura();
 </script>
 </body>
 </html>

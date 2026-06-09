@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bolão da Copa — Meus palpites</title>
+<style>
+  :root {
+    --green: #009739;
+    --yellow: #ffcc29;
+    --blue: #002776;
+    --bg: #0d1117;
+    --card: #161b22;
+    --card-2: #1c232c;
+    --border: #2b3440;
+    --text: #e6edf3;
+    --muted: #8b949e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  header {
+    background: linear-gradient(135deg, var(--green), var(--blue));
+    padding: 28px 16px;
+    text-align: center;
+    border-bottom: 4px solid var(--yellow);
+  }
+  header h1 { margin: 0; font-size: 1.7rem; }
+  header p { margin: 6px 0 0; opacity: 0.9; font-size: 0.95rem; }
+  .container { max-width: 720px; margin: 0 auto; padding: 16px; }
+
+  .btn {
+    border: none;
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--green);
+    color: #fff;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn.danger { background: transparent; border: 1px solid rgba(248,81,73,0.5); color: #f85149; }
+  .btn.block { width: 100%; }
+
+  .novo { margin: 18px 0; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 12px 0;
+  }
+  .card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .card-nome { font-size: 1.15rem; font-weight: 700; word-break: break-word; }
+  .card-nome.vazio { color: var(--muted); font-style: italic; font-weight: 600; }
+
+  .badge {
+    font-size: 0.72rem; font-weight: 800; letter-spacing: 0.3px;
+    padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+  }
+  .badge.rascunho { background: var(--yellow); color: var(--blue); }
+  .badge.feito { background: rgba(0,151,57,0.18); color: #4ade80; border: 1px solid rgba(0,151,57,0.4); }
+
+  .card-meta { color: var(--muted); font-size: 0.85rem; margin: 8px 0 0; }
+  .card-meta b { color: var(--text); }
+
+  /* barra de progresso */
+  .prog { height: 7px; background: var(--card-2); border-radius: 999px; overflow: hidden; margin: 10px 0 0; }
+  .prog > span { display: block; height: 100%; background: var(--green); }
+
+  .card-actions { display: flex; gap: 8px; margin-top: 14px; }
+  .card-actions .btn { flex: 1; padding: 10px 14px; font-size: 0.95rem; }
+  .card-actions .btn.danger { flex: 0 0 auto; }
+
+  .vazio-estado {
+    text-align: center; color: var(--muted);
+    padding: 40px 16px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    margin: 12px 0;
+  }
+  .vazio-estado p { margin: 0 0 4px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🏆 Bolão da Copa</h1>
+  <p>Meus palpites</p>
+</header>
+
+<div class="container">
+  <div class="novo">
+    <a href="palpite.html" class="btn block">＋ Novo palpite</a>
+  </div>
+  <div id="lista"></div>
+</div>
+
+<script>
+const COLLECTION_KEY = "bolao-palpites";
+const TOTAL_JOGOS = 72;
+
+function lerColecao() { try { return JSON.parse(localStorage.getItem(COLLECTION_KEY)) || {}; } catch (e) { return {}; } }
+function salvarColecao(c) { localStorage.setItem(COLLECTION_KEY, JSON.stringify(c)); }
+function novoId() { return "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+// Migra rascunho antigo (chave única) para a coleção
+(function migrar() {
+  const antigo = localStorage.getItem("bolao-copa-2026");
+  if (!antigo) return;
+  try {
+    const d = JSON.parse(antigo);
+    const c = lerColecao();
+    const id = novoId();
+    const ts = d.atualizadoEm || new Date().toISOString();
+    c[id] = { id, nome: d.nome || "", palpites: d.palpites || {}, estado: "rascunho", criadoEm: ts, atualizadoEm: ts };
+    salvarColecao(c);
+  } catch (e) {}
+  localStorage.removeItem("bolao-copa-2026");
+})();
+
+function progresso(reg) {
+  const p = reg.palpites || {};
+  const jogos = {};
+  Object.keys(p).forEach(k => {
+    const jogo = k.replace(/-(casa|fora)$/, "");
+    jogos[jogo] = jogos[jogo] || {};
+    jogos[jogo][k.endsWith("-casa") ? "casa" : "fora"] = p[k];
+  });
+  let n = 0;
+  Object.values(jogos).forEach(j => { if (j.casa !== "" && j.casa != null && j.fora !== "" && j.fora != null) n++; });
+  return n;
+}
+
+function dataFmt(iso) {
+  try { return new Date(iso).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }); }
+  catch (e) { return ""; }
+}
+
+function excluir(id) {
+  const c = lerColecao();
+  const reg = c[id];
+  const nome = reg && reg.nome ? `"${reg.nome}"` : "este palpite";
+  if (!confirm(`Excluir ${nome}? Esta ação não pode ser desfeita.`)) return;
+  delete c[id];
+  salvarColecao(c);
+  render();
+}
+
+function render() {
+  const c = lerColecao();
+  const itens = Object.values(c).sort((a, b) =>
+    new Date(b.atualizadoEm || 0) - new Date(a.atualizadoEm || 0));
+  const lista = document.getElementById("lista");
+
+  if (itens.length === 0) {
+    lista.innerHTML = `
+      <div class="vazio-estado">
+        <p>Você ainda não tem palpites.</p>
+        <p>Clique em <b>＋ Novo palpite</b> para começar.</p>
+      </div>`;
+    return;
+  }
+
+  lista.innerHTML = itens.map(reg => {
+    const feito = reg.estado === "feito";
+    const n = progresso(reg);
+    const pct = Math.round((n / TOTAL_JOGOS) * 100);
+    const nome = reg.nome
+      ? `<div class="card-nome">${escapeHtml(reg.nome)}</div>`
+      : `<div class="card-nome vazio">Sem nome</div>`;
+    const acoes = feito
+      ? `<a class="btn" href="palpite.html?id=${reg.id}">🔍 Consultar</a>`
+      : `<a class="btn" href="palpite.html?id=${reg.id}">✏️ Continuar</a>`;
+    return `
+      <div class="card">
+        <div class="card-top">
+          ${nome}
+          <span class="badge ${feito ? "feito" : "rascunho"}">${feito ? "FEITO" : "RASCUNHO"}</span>
+        </div>
+        <div class="prog"><span style="width:${pct}%"></span></div>
+        <div class="card-meta"><b>${n}</b> / ${TOTAL_JOGOS} jogos · atualizado ${dataFmt(reg.atualizadoEm)}</div>
+        <div class="card-actions">
+          ${acoes}
+          <button class="btn danger" data-id="${reg.id}" title="Excluir">🗑️</button>
+        </div>
+      </div>`;
+  }).join("");
+
+  lista.querySelectorAll(".btn.danger").forEach(b =>
+    b.addEventListener("click", () => excluir(b.dataset.id)));
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+}
+
+render();
+</script>
+</body>
+</html>
