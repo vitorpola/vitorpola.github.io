@@ -391,12 +391,12 @@ const grupos = {
 const confrontos = [[0,1],[2,3],[0,2],[1,3],[0,3],[1,2]];
 
 // Seleções prováveis para a classificação final (Top 4)
-const SELECOES_TOP = ["Espanha", "França", "Brasil", "Inglaterra", "Portugal", "Argentina"];
+const SELECOES_TOP = ["Espanha", "França", "Brasil", "Inglaterra", "Portugal", "Argentina", "Alemanha", "Holanda", "Uruguai"];
 // Todas as 48 seleções (extraídas dos grupos), ordenadas
 const TODAS_SELECOES = [...new Set(Object.values(grupos).flat().map(t => t[1]))]
   .sort((a, b) => a.localeCompare(b, "pt"));
 // Candidatos a artilheiro (+ opção "Outro")
-const ARTILHEIROS = ["Mbappé (FRA)", "H. Kane (ING)", "Haaland (NOR)", "Vinícius Júnior (BRA)", "Messi (ARG)", "C. Ronaldo (POR)", "J. Alvarez (ARG)", "L. Yamal (ESP)"];
+const ARTILHEIROS = ["Mbappé (FRA)", "H. Kane (ING)", "Haaland (NOR)", "Vinícius Júnior (BRA)", "Endrick (BRA)", "Messi (ARG)", "C. Ronaldo (POR)", "J. Alvarez (ARG)", "Olise (FRA)", "Ferran Torres (ESP)", "L. Yamal (ESP)"];
 
 const form = document.getElementById("form-palpites");
 let totalJogos = 0;
