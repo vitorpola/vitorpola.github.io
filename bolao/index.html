@@ -55,6 +55,30 @@
 
   .novo { margin: 18px 0; }
 
+  .regras {
+    background: linear-gradient(180deg, rgba(0, 39, 118, 0.28), rgba(22, 27, 34, 0.95));
+    border: 1px solid rgba(255, 204, 41, 0.28);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+  }
+  .regras h2 {
+    margin: 0 0 10px;
+    font-size: 1.05rem;
+  }
+  .regras ul {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--text);
+  }
+  .regras li + li { margin-top: 8px; }
+  .regras strong { color: #fff; }
+  .regras .obs {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+
   .card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -101,6 +125,30 @@
 </header>
 
 <div class="container">
+  <section class="card regras" aria-labelledby="regras-title">
+    <h2 id="regras-title">🏆 Regulamento do Bolão da Copa do Mundo 2026 ⚽</h2>
+    <ul>
+      <li>Para validar sua participação no bolão, o <strong>pagamento</strong> e o <strong>envio dos palpites</strong> deverão ser realizados até <strong>11 de junho, às 16h00</strong>.</li>
+      <li>Será permitida <strong>apenas 1 aposta por participante</strong>.</li>
+      <li>Os jogos da fase de <strong>playoffs classificatórios</strong> não serão considerados para fins de pontuação.</li>
+    </ul>
+    <div class="obs">
+      <h3>📊 Sistema de Pontuação</h3>
+      <strong>⚽ Palpites dos Jogos</strong><br>
+      Cada partida poderá render: <strong>5 pontos</strong> para acerto exato do placar, <strong>3 pontos</strong> para acerto do vencedor da partida ou do empate.<br><br>
+      <strong>🥇 Top 4 da Copa</strong><br>
+      Cada participante deverá indicar as <strong>4 seleções que acredita que terminarão entre as quatro melhores da competição</strong>.<br>
+      <strong>10 pontos</strong> para cada seleção acertada na posição exata.<br>
+      <strong>6 pontos</strong> para cada seleção indicada que terminar no Top 4, mas em posição diferente da prevista.<br><br>
+      <strong>👟 Artilheiro da Competição</strong><br>
+      <strong>20 pontos</strong> em caso de acerto do artilheiro da Copa do Mundo 2026.
+    </div>
+    <div class="obs">
+      <strong>🍀 Boa sorte!</strong><br>
+      Que venham muitos gols, zebras, emoções e, claro, muitos pontos no bolão! 🌎🏆⚽
+    </div>
+  </section>
+
   <div class="novo">
     <a href="palpite.html" class="btn block">＋ Novo palpite</a>
   </div>
