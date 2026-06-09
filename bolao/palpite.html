@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bolão da Copa — Palpites</title>
+<style>
+  :root {
+    --green: #009739;
+    --yellow: #ffcc29;
+    --blue: #002776;
+    --bg: #0d1117;
+    --card: #161b22;
+    --card-2: #1c232c;
+    --border: #2b3440;
+    --text: #e6edf3;
+    --muted: #8b949e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  header {
+    background: linear-gradient(135deg, var(--green), var(--blue));
+    padding: 28px 16px;
+    text-align: center;
+    border-bottom: 4px solid var(--yellow);
+  }
+  header h1 { margin: 0; font-size: 1.7rem; }
+  header p { margin: 6px 0 0; opacity: 0.9; font-size: 0.95rem; }
+  .container { max-width: 760px; margin: 0 auto; padding: 16px; }
+
+  .field {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 16px 0;
+  }
+  label.lbl { display: block; font-weight: 600; margin-bottom: 6px; }
+  input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 1rem;
+  }
+  input[type="text"]:focus { outline: 2px solid var(--yellow); border-color: var(--yellow); }
+
+  .group-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 26px 0 10px;
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+  .group-badge {
+    background: var(--yellow);
+    color: var(--blue);
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    display: grid; place-items: center;
+    font-weight: 800;
+  }
+
+  .match {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin: 8px 0;
+  }
+  .team { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .team.home { justify-content: flex-end; text-align: right; }
+  .team.away { justify-content: flex-start; text-align: left; }
+  .flag { font-size: 1.4rem; line-height: 1; }
+  .tname { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .score-box { display: flex; align-items: center; gap: 6px; }
+  .score-box input {
+    width: 48px;
+    padding: 8px;
+    text-align: center;
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 1.1rem;
+    font-weight: 700;
+    -moz-appearance: textfield;
+  }
+  .score-box input::-webkit-outer-spin-button,
+  .score-box input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .score-box input:focus { outline: 2px solid var(--green); border-color: var(--green); }
+  .x { color: var(--muted); font-weight: 700; }
+
+  .bar {
+    position: sticky;
+    bottom: 0;
+    background: rgba(13,17,23,0.92);
+    backdrop-filter: blur(6px);
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .progress { font-size: 0.9rem; color: var(--muted); }
+  .progress b { color: var(--text); }
+  .btn {
+    border: none;
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--green);
+    color: #fff;
+  }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
+
+  .btn.finalize { background: var(--yellow); color: var(--blue); }
+
+  /* Modal de comprovante */
+  .modal {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 16px;
+    z-index: 50;
+  }
+  .modal.show { display: flex; }
+  .modal-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    max-width: 560px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: auto;
+    padding: 16px;
+  }
+  .modal-card h3 { margin: 4px 0 12px; text-align: center; }
+  .modal-card img { width: 100%; border-radius: 10px; display: block; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .modal-actions .btn { flex: 1; min-width: 120px; }
+  .hint { font-size: 0.85rem; color: var(--muted); text-align: center; margin: 10px 0 0; }
+
+  /* Seção Pix */
+  .pix {
+    margin-top: 16px;
+    border-top: 1px dashed var(--border);
+    padding-top: 16px;
+    text-align: center;
+  }
+  .pix h4 { margin: 0 0 4px; font-size: 1.05rem; }
+  .pix .valor { font-size: 1.6rem; font-weight: 800; color: var(--yellow); margin: 2px 0 12px; }
+  .pix .qr {
+    display: inline-block;
+    background: #fff;
+    padding: 12px;
+    border-radius: 12px;
+    line-height: 0;
+  }
+  .pix .qr img, .pix .qr canvas { display: block; width: 200px; height: 200px; }
+  .pix .dados { font-size: 0.85rem; color: var(--muted); margin: 12px 0 4px; }
+  .pix .dados b { color: var(--text); }
+  .pix .copia {
+    display: flex; gap: 8px; margin-top: 10px;
+  }
+  .pix .copia code {
+    flex: 1;
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 0.72rem;
+    color: var(--text);
+    text-align: left;
+    word-break: break-all;
+    max-height: 56px;
+    overflow: auto;
+  }
+  .pix .copia .btn { flex: 0 0 auto; min-width: auto; padding: 10px 14px; }
+
+  .toast {
+    position: fixed;
+    left: 50%; bottom: 80px;
+    transform: translateX(-50%);
+    background: var(--green);
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-6px); }
+
+  @media (max-width: 480px) {
+    .tname { font-size: 0.85rem; }
+    .flag { font-size: 1.1rem; }
+    .score-box input { width: 42px; }
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+</head>
+<body>
+<header>
+  <h1>🏆 Bolão da Copa</h1>
+</header>
+
+<div class="container">
+  <div class="field">
+    <label class="lbl" for="nome">Seu nome</label>
+    <input type="text" id="nome" placeholder="Digite seu nome" autocomplete="name">
+  </div>
+
+  <form id="form-palpites"></form>
+</div>
+
+<div class="bar">
+  <div class="progress">Preenchidos: <b id="count">0</b> / 72</div>
+  <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+    <button type="button" class="btn ghost" id="btn-limpar">Limpar</button>
+    <button type="button" class="btn ghost" id="btn-salvar">Salvar rascunho</button>
+    <button type="button" class="btn finalize" id="btn-finalizar" disabled>Finalizar palpite</button>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-card">
+    <h3>✅ Palpites prontos!</h3>
+    <img id="comprovante-img" alt="Comprovante dos palpites">
+    <p class="hint">Envie esta imagem para o administrador do bolão.</p>
+
+    <div class="pix">
+      <h4>💸 Confirme seu palpite com o Pix</h4>
+      <div class="valor">R$ 50,00</div>
+      <div class="qr" id="pix-qr"></div>
+      <div class="dados">
+        <b>VITOR POLA BAPTISTA COELHO</b><br>
+        Chave Pix (CPF): <b>415.361.888-83</b> — Banco Inter
+      </div>
+      <div class="copia">
+        <code id="pix-codigo"></code>
+        <button type="button" class="btn" id="btn-copiar-pix">Copiar</button>
+      </div>
+      <p class="hint">Pague pelo QR Code ou pelo código copia-e-cola e envie o comprovante do Pix junto com a imagem dos palpites ao administrador.</p>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn" id="btn-compartilhar">📲 Compartilhar / Enviar</button>
+      <button type="button" class="btn ghost" id="btn-baixar">⬇️ Baixar imagem</button>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn ghost" id="btn-fechar-modal" style="flex:1;">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// 12 grupos (A–L) da Copa 2026 — composição oficial do sorteio final (05/12/2025).
+const grupos = {
+  A: [["🇲🇽","México"],["🇿🇦","África do Sul"],["🇰🇷","Coreia do Sul"],["🇨🇿","Tchéquia"]],
+  B: [["🇨🇦","Canadá"],["🇧🇦","Bósnia e Herzegovina"],["🇶🇦","Catar"],["🇨🇭","Suíça"]],
+  C: [["🇧🇷","Brasil"],["🇲🇦","Marrocos"],["🇭🇹","Haiti"],["🏴󠁧󠁢󠁳󠁣󠁴󠁿","Escócia"]],
+  D: [["🇺🇸","EUA"],["🇵🇾","Paraguai"],["🇦🇺","Austrália"],["🇹🇷","Turquia"]],
+  E: [["🇩🇪","Alemanha"],["🇨🇼","Curaçao"],["🇨🇮","Costa do Marfim"],["🇪🇨","Equador"]],
+  F: [["🇳🇱","Holanda"],["🇯🇵","Japão"],["🇸🇪","Suécia"],["🇹🇳","Tunísia"]],
+  G: [["🇧🇪","Bélgica"],["🇪🇬","Egito"],["🇮🇷","Irã"],["🇳🇿","Nova Zelândia"]],
+  H: [["🇪🇸","Espanha"],["🇨🇻","Cabo Verde"],["🇸🇦","Arábia Saudita"],["🇺🇾","Uruguai"]],
+  I: [["🇫🇷","França"],["🇸🇳","Senegal"],["🇮🇶","Iraque"],["🇳🇴","Noruega"]],
+  J: [["🇦🇷","Argentina"],["🇩🇿","Argélia"],["🇦🇹","Áustria"],["🇯🇴","Jordânia"]],
+  K: [["🇵🇹","Portugal"],["🇨🇩","Congo (RD)"],["🇺🇿","Uzbequistão"],["🇨🇴","Colômbia"]],
+  L: [["🏴󠁧󠁢󠁥󠁮󠁧󠁿","Inglaterra"],["🇭🇷","Croácia"],["🇬🇭","Gana"],["🇵🇦","Panamá"]],
+};
+
+// Ordem de confrontos do round-robin (índices dos 4 times do grupo)
+const confrontos = [[0,1],[2,3],[0,2],[1,3],[0,3],[1,2]];
+
+const form = document.getElementById("form-palpites");
+let totalJogos = 0;
+
+Object.entries(grupos).forEach(([letra, times]) => {
+  const titulo = document.createElement("div");
+  titulo.className = "group-title";
+  titulo.innerHTML = `<span class="group-badge">${letra}</span> Grupo ${letra}`;
+  form.appendChild(titulo);
+
+  confrontos.forEach(([i, j]) => {
+    const id = `${letra}-${i}-${j}`;
+    const [fh, nh] = times[i];
+    const [fa, na] = times[j];
+    const div = document.createElement("div");
+    div.className = "match";
+    div.innerHTML = `
+      <div class="team home">
+        <span class="tname">${nh}</span><span class="flag">${fh}</span>
+      </div>
+      <div class="score-box">
+        <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]" data-jogo="${id}" data-lado="casa" aria-label="${nh} gols">
+        <span class="x">×</span>
+        <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]" data-jogo="${id}" data-lado="fora" aria-label="${na} gols">
+      </div>
+      <div class="team away">
+        <span class="flag">${fa}</span><span class="tname">${na}</span>
+      </div>`;
+    form.appendChild(div);
+    totalJogos++;
+  });
+});
+
+// ---- Apenas números + avanço automático de foco ----
+const scoreInputs = Array.from(document.querySelectorAll(".score-box input"));
+scoreInputs.forEach((inp, idx) => {
+  inp.addEventListener("input", () => {
+    const limpo = inp.value.replace(/[^0-9]/g, "").slice(0, 1);
+    if (inp.value !== limpo) inp.value = limpo;
+    if (limpo !== "" && idx < scoreInputs.length - 1) {
+      const prox = scoreInputs[idx + 1];
+      prox.focus();
+      prox.select();
+    }
+  });
+  inp.addEventListener("keydown", (e) => {
+    if (e.key === "Backspace" && inp.value === "" && idx > 0) {
+      e.preventDefault();
+      const ant = scoreInputs[idx - 1];
+      ant.focus();
+      ant.select();
+    }
+  });
+  inp.addEventListener("focus", () => inp.select());
+});
+
+// ---- Persistência e progresso ----
+const STORAGE_KEY = "bolao-copa-2026";
+const countEl = document.getElementById("count");
+const nomeEl = document.getElementById("nome");
+
+function jogosCompletos() {
+  let n = 0;
+  document.querySelectorAll(".match").forEach(m => {
+    const ins = m.querySelectorAll("input");
+    if (ins[0].value !== "" && ins[1].value !== "") n++;
+  });
+  return n;
+}
+function atualizarContador() {
+  const n = jogosCompletos();
+  countEl.textContent = n;
+  const pronto = n === totalJogos && nomeEl.value.trim() !== "";
+  document.getElementById("btn-finalizar").disabled = !pronto;
+}
+
+function coletar() {
+  const palpites = {};
+  document.querySelectorAll(".score-box input").forEach(inp => {
+    const key = inp.dataset.jogo + "-" + inp.dataset.lado;
+    palpites[key] = inp.value;
+  });
+  return { nome: nomeEl.value.trim(), palpites, atualizadoEm: new Date().toISOString() };
+}
+
+function salvarLocal() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(coletar()));
+}
+
+function carregar() {
+  try {
+    const dados = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (!dados) return;
+    if (dados.nome) nomeEl.value = dados.nome;
+    Object.entries(dados.palpites || {}).forEach(([k, v]) => {
+      const lado = k.endsWith("-casa") ? "casa" : "fora";
+      const jogo = k.replace(/-(casa|fora)$/, "");
+      const inp = document.querySelector(`input[data-jogo="${jogo}"][data-lado="${lado}"]`);
+      if (inp) inp.value = v;
+    });
+  } catch (e) { /* ignora */ }
+}
+
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+// Salva rascunho automaticamente a cada digitação
+document.addEventListener("input", () => { atualizarContador(); salvarLocal(); });
+
+document.getElementById("btn-salvar").addEventListener("click", () => {
+  if (!nomeEl.value.trim()) {
+    toast("⚠️ Preencha seu nome primeiro");
+    nomeEl.focus();
+    return;
+  }
+  const faltam = totalJogos - jogosCompletos();
+  if (faltam > 0) {
+    if (!confirm(`Faltam ${faltam} jogo(s) sem palpite. Salvar mesmo assim?`)) return;
+  }
+  salvarLocal();
+  toast("✅ Palpites salvos!");
+});
+
+document.getElementById("btn-limpar").addEventListener("click", () => {
+  if (!confirm("Tem certeza que deseja limpar todos os palpites?")) return;
+  document.querySelectorAll(".score-box input").forEach(i => i.value = "");
+  localStorage.removeItem(STORAGE_KEY);
+  atualizarContador();
+  toast("Palpites limpos");
+});
+
+// ---- Geração do comprovante (imagem via canvas) ----
+let blobComprovante = null;
+
+function truncar(ctx, texto, larguraMax) {
+  if (ctx.measureText(texto).width <= larguraMax) return texto;
+  let t = texto;
+  while (t.length > 1 && ctx.measureText(t + "…").width > larguraMax) t = t.slice(0, -1);
+  return t + "…";
+}
+
+function gerarComprovante() {
+  const escala = 2;            // nitidez (retina)
+  const W = 1080;
+  const margem = 40;
+  const colGap = 40;
+  const colW = (W - margem * 2 - colGap) / 2;
+  const headerH = 170;
+  const tituloGrupoH = 46;
+  const linhaH = 32;
+  const grupoH = tituloGrupoH + 6 * linhaH + 18;
+  const gruposPorColuna = 6;
+  const corpoH = gruposPorColuna * grupoH;
+  const footerH = 60;
+  const H = headerH + corpoH + footerH;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = W * escala;
+  canvas.height = H * escala;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(escala, escala);
+  ctx.textBaseline = "middle";
+
+  // Fundo
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, W, H);
+
+  // Cabeçalho
+  const grad = ctx.createLinearGradient(0, 0, W, headerH);
+  grad.addColorStop(0, "#009739");
+  grad.addColorStop(1, "#002776");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, headerH);
+  ctx.fillStyle = "#ffcc29";
+  ctx.fillRect(0, headerH - 6, W, 6);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.textAlign = "center";
+  ctx.font = "bold 30px -apple-system, Arial, sans-serif";
+  ctx.fillText("Bolao Copa do Mundo 2026 - Palpites", W / 2, 48);
+  ctx.font = "bold 26px -apple-system, Arial, sans-serif";
+  ctx.fillText(nomeEl.value.trim(), W / 2, 92);
+  ctx.font = "16px -apple-system, Arial, sans-serif";
+  const dataStr = new Date().toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+  ctx.fillText("Fase de grupos - 72 jogos - " + dataStr, W / 2, 128);
+
+  // Grupos em duas colunas
+  const letras = Object.keys(grupos);
+  letras.forEach((letra, idx) => {
+    const coluna = idx < gruposPorColuna ? 0 : 1;
+    const linhaGrupo = idx % gruposPorColuna;
+    const colX = margem + coluna * (colW + colGap);
+    const topo = headerH + linhaGrupo * grupoH;
+    const times = grupos[letra];
+
+    // Cabeçalho do grupo
+    ctx.fillStyle = "#ffcc29";
+    ctx.fillRect(colX, topo, colW, tituloGrupoH - 8);
+    ctx.fillStyle = "#002776";
+    ctx.font = "bold 20px -apple-system, Arial, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("Grupo " + letra, colX + 14, topo + (tituloGrupoH - 8) / 2);
+
+    // Jogos
+    const centerX = colX + colW / 2;
+    const meioScore = 42; // metade da largura reservada ao placar
+    confrontos.forEach(([i, j], k) => {
+      const y = topo + tituloGrupoH + k * linhaH + linhaH / 2;
+      const nh = times[i][1], na = times[j][1];
+      const id = `${letra}-${i}-${j}`;
+      const ph = document.querySelector(`input[data-jogo="${id}"][data-lado="casa"]`).value || "0";
+      const pa = document.querySelector(`input[data-jogo="${id}"][data-lado="fora"]`).value || "0";
+
+      if (k % 2 === 1) { ctx.fillStyle = "#f3f5f7"; ctx.fillRect(colX, y - linhaH / 2, colW, linhaH); }
+
+      ctx.fillStyle = "#1c232c";
+      ctx.font = "16px -apple-system, Arial, sans-serif";
+      ctx.textAlign = "right";
+      ctx.fillText(truncar(ctx, nh, colW / 2 - meioScore - 8), centerX - meioScore, y);
+      ctx.textAlign = "left";
+      ctx.fillText(truncar(ctx, na, colW / 2 - meioScore - 8), centerX + meioScore, y);
+
+      ctx.fillStyle = "#009739";
+      ctx.font = "bold 17px -apple-system, Arial, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(`${ph} x ${pa}`, centerX, y);
+    });
+  });
+
+  // Rodapé
+  ctx.fillStyle = "#8b949e";
+  ctx.font = "14px -apple-system, Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("Comprovante gerado automaticamente - envie ao administrador do bolao", W / 2, H - footerH / 2);
+
+  // Mostra no modal e prepara blob para compartilhar/baixar
+  document.getElementById("comprovante-img").src = canvas.toDataURL("image/png");
+  canvas.toBlob(b => { blobComprovante = b; }, "image/png");
+  document.getElementById("modal").classList.add("show");
+}
+
+function nomeArquivo() {
+  const slug = nomeEl.value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return `palpites-bolao-${slug || "copa2026"}.png`;
+}
+
+document.getElementById("btn-finalizar").addEventListener("click", () => {
+  if (!nomeEl.value.trim()) { toast("⚠️ Preencha seu nome primeiro"); nomeEl.focus(); return; }
+  if (jogosCompletos() < totalJogos) { toast("⚠️ Preencha todos os 72 jogos"); return; }
+  salvarLocal();
+  gerarComprovante();
+});
+
+document.getElementById("btn-compartilhar").addEventListener("click", async () => {
+  if (!blobComprovante) return;
+  const file = new File([blobComprovante], nomeArquivo(), { type: "image/png" });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: "Palpites - Bolão Copa 2026",
+        text: `Palpites de ${nomeEl.value.trim()} para o bolão da Copa 2026` });
+    } catch (e) { /* usuário cancelou */ }
+  } else {
+    baixarImagem();
+    toast("Compartilhamento direto indisponível — imagem baixada");
+  }
+});
+
+function baixarImagem() {
+  if (!blobComprovante) return;
+  const url = URL.createObjectURL(blobComprovante);
+  const a = document.createElement("a");
+  a.href = url; a.download = nomeArquivo();
+  a.click();
+  URL.revokeObjectURL(url);
+}
+document.getElementById("btn-baixar").addEventListener("click", baixarImagem);
+document.getElementById("btn-fechar-modal").addEventListener("click", () =>
+  document.getElementById("modal").classList.remove("show"));
+document.getElementById("modal").addEventListener("click", (e) => {
+  if (e.target.id === "modal") e.target.classList.remove("show");
+});
+
+// ---- Pix (QR Code gerado localmente + copia-e-cola) ----
+const PIX_PAYLOAD = "00020101021126530014br.gov.bcb.pix0111415361888830216Bolao 2026  Nome520400005303986540550.005802BR5916VITOR P B COELHO6013SAO LUIZ DO P62070503***6304F59C";
+document.getElementById("pix-codigo").textContent = PIX_PAYLOAD;
+try {
+  new QRCode(document.getElementById("pix-qr"), {
+    text: PIX_PAYLOAD, width: 200, height: 200,
+    correctLevel: QRCode.CorrectLevel.M
+  });
+} catch (e) { /* biblioteca indisponível: copia-e-cola continua funcionando */ }
+
+document.getElementById("btn-copiar-pix").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(PIX_PAYLOAD);
+    toast("📋 Código Pix copiado!");
+  } catch (e) {
+    const range = document.createRange();
+    range.selectNodeContents(document.getElementById("pix-codigo"));
+    const sel = getSelection(); sel.removeAllRanges(); sel.addRange(range);
+    toast("Selecione e copie o código");
+  }
+});
+
+carregar();
+atualizarContador();
+</script>
+</body>
+</html>
