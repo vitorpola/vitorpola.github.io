@@ -180,6 +180,20 @@
   .btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
 
   .btn.finalize { background: var(--yellow); color: var(--blue); }
+  #btn-ir-pagamento {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    box-shadow: 0 10px 24px rgba(255, 204, 41, 0.28);
+    border: 2px solid rgba(255, 255, 255, 0.18);
+    animation: pulse-callout 1.8s ease-in-out infinite;
+  }
+  #btn-ir-pagamento:hover { transform: translateY(-1px); }
+  @keyframes pulse-callout {
+    0%, 100% { box-shadow: 0 10px 24px rgba(255, 204, 41, 0.28); }
+    50% { box-shadow: 0 14px 30px rgba(255, 204, 41, 0.42); }
+  }
 
   /* Modal de comprovante */
   .modal {
@@ -270,13 +284,68 @@
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(-6px); }
 
+  .success-screen {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: linear-gradient(135deg, #009739, #0b7a2d 55%, #0a5f24);
+    color: #fff;
+    z-index: 80;
+    text-align: center;
+  }
+  .success-screen.show { display: flex; }
+  .success-card {
+    max-width: 520px;
+    width: 100%;
+  }
+  .success-icon {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 18px;
+    border-radius: 999px;
+    border: 6px solid rgba(255,255,255,0.35);
+    display: grid;
+    place-items: center;
+    font-size: 4rem;
+    line-height: 1;
+    background: rgba(255,255,255,0.1);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+  }
+  .success-screen h2 {
+    margin: 0;
+    font-size: clamp(1.7rem, 4vw, 2.4rem);
+    line-height: 1.15;
+  }
+  .success-screen p {
+    margin: 12px 0 0;
+    font-size: 1.1rem;
+    opacity: 0.96;
+  }
+    .success-link {
+      display: inline-flex;
+      margin-top: 22px;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 18px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.14);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      border: 1px solid rgba(255,255,255,0.28);
+    }
+    .success-link:hover { background: rgba(255,255,255,0.2); }
+
   @media (max-width: 480px) {
     .tname { font-size: 0.85rem; }
     .flag { font-size: 1.1rem; }
     .score-box input { width: 42px; }
   }
 </style>
-<script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
 </head>
 <body>
 <header>
@@ -335,9 +404,6 @@
       <div class="modal-actions">
         <button type="button" class="btn finalize" id="btn-ir-pagamento" style="flex:1;">Já enviei → Ir para o pagamento</button>
       </div>
-      <div class="modal-actions">
-        <button type="button" class="btn ghost" id="btn-fechar-1" style="flex:1;">Fechar</button>
-      </div>
     </div>
 
     <!-- ETAPA 2: pagamento via Pix -->
@@ -346,7 +412,9 @@
       <div class="pix">
         <h4>💸 Confirme seu palpite com o Pix</h4>
         <div class="valor">R$ 50,00</div>
-        <div class="qr" id="pix-qr"></div>
+        <div class="qr">
+          <img src="qr-pix.jpeg" alt="QR Code do Pix">
+        </div>
         <div class="dados">
           <b>VITOR POLA BAPTISTA COELHO</b><br>
           Chave Pix (CPF): <b>415.361.888-83</b> — Banco Inter
@@ -358,9 +426,6 @@
         <p class="hint">Pague pelo QR Code ou pelo código copia-e-cola e, em seguida, envie o comprovante do Pix para o WhatsApp <b>(12) 99722-0224</b>.</p>
       </div>
       <div class="modal-actions">
-        <button type="button" class="btn" id="btn-enviar-pix-wpp">📲 Enviar comprovante do Pix</button>
-      </div>
-      <div class="modal-actions">
         <button type="button" class="btn ghost" id="btn-voltar-1">← Voltar</button>
         <button type="button" class="btn ghost" id="btn-fechar-2">Concluir</button>
       </div>
@@ -370,6 +435,15 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<div class="success-screen" id="success-screen" aria-live="polite" aria-atomic="true">
+  <div class="success-card">
+    <div class="success-icon">✓</div>
+    <h2>Palpites registrados com sucesso!</h2>
+    <p>Muito boa sorte!</p>
+    <a class="success-link" id="success-link" href="index.html">Ver palpite realizado</a>
+  </div>
+</div>
 
 <script>
 // 12 grupos (A–L) da Copa 2026 — composição oficial do sorteio final (05/12/2025).
@@ -392,12 +466,12 @@ const grupos = {
 const confrontos = [[0,1],[2,3],[0,2],[1,3],[0,3],[1,2]];
 
 // Seleções prováveis para a classificação final (Top 4)
-const SELECOES_TOP = ["Espanha", "França", "Brasil", "Inglaterra", "Portugal", "Argentina", "Alemanha", "Holanda", "Uruguai"];
+const SELECOES_TOP = ["Alemanha", "Argentina", "Brasil", "Espanha", "França", "Holanda", "Inglaterra", "Portugal", "Uruguai"];
 // Todas as 48 seleções (extraídas dos grupos), ordenadas
 const TODAS_SELECOES = [...new Set(Object.values(grupos).flat().map(t => t[1]))]
   .sort((a, b) => a.localeCompare(b, "pt"));
 // Candidatos a artilheiro (+ opção "Outro")
-const ARTILHEIROS = ["Mbappé (FRA)", "H. Kane (ING)", "Haaland (NOR)", "Vinícius Júnior (BRA)", "Endrick (BRA)", "Messi (ARG)", "C. Ronaldo (POR)", "J. Alvarez (ARG)", "Olise (FRA)", "Ferran Torres (ESP)", "L. Yamal (ESP)"];
+const ARTILHEIROS = ["C. Ronaldo (POR)", "Endrick (BRA)", "Ferran Torres (ESP)", "H. Kane (ING)", "Haaland (NOR)", "J. Alvarez (ARG)", "L. Yamal (ESP)", "Mbappé (FRA)", "Messi (ARG)", "Olise (FRA)", "Vinícius Júnior (BRA)"];
 
 const form = document.getElementById("form-palpites");
 let totalJogos = 0;
@@ -835,13 +909,16 @@ document.getElementById("btn-compartilhar").addEventListener("click", async () =
   const file = new File([blobComprovante], nomeArquivo(), { type: "image/png" });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
-      await navigator.share({ files: [file], title: "Palpites - Bolão Copa 2026",
-        text: `Palpites de ${nomeEl.value.trim()} para o bolão da Copa 2026` });
-      mostrarEtapa(2); // enviou: avança para o pagamento
+      await navigator.share({
+        files: [file],
+        title: "Palpites - Bolão Copa 2026",
+        text: `Palpites de ${nomeEl.value.trim()} para o bolão da Copa 2026`
+      });
+      mostrarEtapa(2);
     } catch (e) { /* usuário cancelou: permanece na etapa 1 */ }
   } else {
-    baixarImagem();
-    toast("Compartilhamento indisponível — imagem baixada. Envie pelo WhatsApp.");
+    const texto = encodeURIComponent(`Olá! Sou ${nomeEl.value.trim()}, segue o comprovante dos palpites do bolão da Copa 2026.`);
+    window.open(`https://wa.me/${ADMIN_WPP}?text=${texto}`, "_blank");
   }
 });
 
@@ -859,15 +936,8 @@ document.getElementById("btn-baixar").addEventListener("click", baixarImagem);
 document.getElementById("btn-ir-pagamento").addEventListener("click", () => mostrarEtapa(2));
 document.getElementById("btn-voltar-1").addEventListener("click", () => mostrarEtapa(1));
 
-// Etapa 2 — abrir conversa do WhatsApp do administrador para enviar o comprovante do Pix
-document.getElementById("btn-enviar-pix-wpp").addEventListener("click", () => {
-  const texto = encodeURIComponent(`Olá! Sou ${nomeEl.value.trim()}, segue o comprovante do Pix do bolão da Copa 2026.`);
-  window.open(`https://wa.me/${ADMIN_WPP}?text=${texto}`, "_blank");
-});
-
 // Fechar
 function fecharModal() { document.getElementById("modal").classList.remove("show"); }
-document.getElementById("btn-fechar-1").addEventListener("click", fecharModal);
 document.getElementById("modal").addEventListener("click", (e) => {
   if (e.target.id === "modal") fecharModal();
 });
@@ -875,18 +945,13 @@ document.getElementById("modal").addEventListener("click", (e) => {
 // Concluir — marca o palpite como "Feito" e volta para a lista (não se aplica em consulta)
 document.getElementById("btn-fechar-2").addEventListener("click", () => {
   if (!somenteLeitura) marcarFeito();
-  location.href = "index.html";
+  document.getElementById("modal").classList.remove("show");
+  document.getElementById("success-screen").classList.add("show");
 });
 
 // ---- Pix (QR Code gerado localmente + copia-e-cola) ----
-const PIX_PAYLOAD = "00020101021126530014br.gov.bcb.pix0111415361888830216Bolao 2026  Nome520400005303986540550.005802BR5916VITOR P B COELHO6013SAO LUIZ DO P62070503***6304F59C";
+const PIX_PAYLOAD = "00020101021126330014br.gov.bcb.pix011141536188883520400005303986540550.005802BR5916VITOR P B COELHO6013SAO LUIZ DO P62070503***6304BC4E";
 document.getElementById("pix-codigo").textContent = PIX_PAYLOAD;
-try {
-  new QRCode(document.getElementById("pix-qr"), {
-    text: PIX_PAYLOAD, width: 200, height: 200,
-    correctLevel: QRCode.CorrectLevel.M
-  });
-} catch (e) { /* biblioteca indisponível: copia-e-cola continua funcionando */ }
 
 document.getElementById("btn-copiar-pix").addEventListener("click", async () => {
   try {
@@ -903,6 +968,7 @@ document.getElementById("btn-copiar-pix").addEventListener("click", async () => 
 carregar();
 atualizarContador();
 if (somenteLeitura) aplicarSomenteLeitura();
+document.getElementById("success-link").href = `palpite.html?id=${currentId}`;
 </script>
 </body>
 </html>
