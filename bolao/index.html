@@ -9,12 +9,19 @@
     --green: #009739;
     --yellow: #ffcc29;
     --blue: #002776;
-    --bg: #0d1117;
-    --card: #161b22;
-    --card-2: #1c232c;
-    --border: #2b3440;
-    --text: #e6edf3;
-    --muted: #8b949e;
+    --bg: #000000;
+    --card: #121317;
+    --card-2: #1b1d24;
+    --border: #2a2d38;
+    --text: #f2f4f8;
+    --muted: #9aa0ad;
+    /* Paleta multicolor FIFA World Cup 26 */
+    --c1: #c2d72e; /* lima */
+    --c2: #f2542d; /* laranja */
+    --c3: #e01f4f; /* vermelho/rosa */
+    --c4: #7b2fb5; /* roxo */
+    --c5: #2d5bd8; /* azul */
+    --c6: #7e72e8; /* violeta */
   }
   * { box-sizing: border-box; }
   body {
@@ -25,14 +32,44 @@
     line-height: 1.5;
   }
   header {
-    background: linear-gradient(135deg, var(--green), var(--blue));
-    padding: 28px 16px;
+    background: #000;
+    padding: 0 16px 5px;
     text-align: center;
-    border-bottom: 4px solid var(--yellow);
   }
-  header h1 { margin: 0; font-size: 1.7rem; }
-  header p { margin: 6px 0 0; opacity: 0.9; font-size: 0.95rem; }
-  .container { max-width: 720px; margin: 0 auto; padding: 16px; }
+  /* Cabeçalho FIFA 26: barras arredondadas multicoloridas empilhadas */
+  .fifa-stack {
+    position: relative;
+    height: 96px;
+  }
+  .fifa-stack .bar {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 0 0 20px 20px;
+  }
+  .fifa-stack .b6 { width: calc(100% - 20px); max-width: 660px; height: 72px; background: var(--c6); z-index: 1; }
+  .fifa-stack .b5 { width: calc(100% - 60px); max-width: 624px; height: 60px; background: var(--c5); z-index: 2; }
+  .fifa-stack .b4 { width: calc(100% - 102px); max-width: 588px; height: 48px; background: var(--c4); z-index: 3; }
+  .fifa-stack .b3 { width: calc(100% - 136px); max-width: 552px; height: 36px; background: var(--c3); z-index: 4; }
+  .fifa-stack .b2 { width: calc(100% - 158px); max-width: 516px; height: 24px; background: var(--c2); z-index: 5; }
+  .fifa-stack .b1 { width: calc(100% - 180px); max-width: 480px; height: 12px; background: var(--c1); z-index: 6; }
+  header h1 {
+    margin: 0;
+    font-size: clamp(1.7rem, 6vw, 2.3rem);
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+  }
+  header p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .container { max-width: 720px; margin: 0 auto; padding: 0px 16px 16px 16px; }
 
   .btn {
     border: none;
@@ -79,6 +116,107 @@
     font-size: 0.92rem;
   }
 
+  /* Regulamento colapsável */
+  details.regras { padding: 0; overflow: hidden; }
+  details.regras > summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 16px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  details.regras > summary::-webkit-details-marker { display: none; }
+  details.regras > summary::after {
+    content: "▾";
+    color: var(--yellow);
+    font-size: 0.9rem;
+    transition: transform 0.2s;
+  }
+  details.regras[open] > summary::after { transform: rotate(180deg); }
+  .regras-body { padding: 0 16px 16px; }
+
+  /* Resumo: participantes + prêmios */
+  .stats { display: grid; gap: 10px; margin: 18px 0; }
+  .stat-part {
+    background: linear-gradient(135deg, rgba(0,151,57,0.25), rgba(0,39,118,0.25));
+    border: 1px solid rgba(255,204,41,0.3);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .stat-label { color: var(--muted); font-size: 0.9rem; font-weight: 600; }
+  .stat-num { font-size: 1.8rem; font-weight: 800; color: var(--yellow); line-height: 1; }
+  .premios { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .premio {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .premio-pos { font-size: 0.85rem; font-weight: 700; color: var(--muted); }
+  .premio-val { font-size: clamp(0.82rem, 3.4vw, 1.05rem); font-weight: 800; }
+  .premio.p1 { border-color: rgba(255,204,41,0.5); }
+  .premio.p1 .premio-val { color: var(--yellow); }
+  .premio.p2 .premio-val { color: #cbd5e1; }
+  .premio.p3 .premio-val { color: #d8a373; }
+
+  /* Classificação embutida */
+  .ranking-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    margin-bottom: 4px;
+  }
+  .ranking-head h2 { margin: 0; font-size: 1.05rem; }
+  .btn-refresh {
+    border: 1px solid var(--border); background: var(--card-2); color: var(--text);
+    border-radius: 999px; padding: 8px 14px; font-size: 0.85rem; font-weight: 700;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-refresh:active { transform: scale(0.97); }
+  .ranking-status { color: var(--muted); font-size: 0.82rem; margin: 4px 2px 10px; min-height: 1.1em; }
+  .ranking-status.erro { color: #f85149; }
+  .ranking table { width: 100%; border-collapse: collapse; }
+  .ranking thead th {
+    text-align: left; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.4px;
+    color: var(--muted); padding: 6px 8px; border-bottom: 1px solid var(--border);
+  }
+  .ranking thead th.num, .ranking tbody td.num { text-align: right; }
+  .ranking thead th.pos, .ranking tbody td.pos { text-align: center; width: 50px; }
+  .ranking tbody td { padding: 11px 8px; border-top: 1px solid var(--border); }
+  .ranking tbody tr:first-child td { border-top: none; }
+  .pos-badge {
+    display: inline-grid; place-items: center;
+    min-width: 30px; height: 30px; padding: 0 6px;
+    border-radius: 8px; font-weight: 800; background: var(--card-2); color: var(--text);
+  }
+  .ranking tr.top1 .pos-badge { background: linear-gradient(135deg,#ffd700,#e6a700); color: #3b2f00; }
+  .ranking tr.top2 .pos-badge { background: linear-gradient(135deg,#cfd6dd,#9aa4ad); color: #1c232c; }
+  .ranking tr.top3 .pos-badge { background: linear-gradient(135deg,#e0a06a,#c2792f); color: #2a1700; }
+  .ranking tr.top1, .ranking tr.top2, .ranking tr.top3 { box-shadow: inset 3px 0 0 var(--yellow); }
+  .ranking .nome { font-weight: 700; word-break: break-word; }
+  .ranking .pontos { font-weight: 800; font-size: 1.05rem; }
+  .ranking .pontos small { color: var(--muted); font-weight: 600; font-size: 0.7rem; }
+  .ranking-vazio {
+    text-align: center; color: var(--muted);
+    padding: 28px 12px; border: 1px dashed var(--border); border-radius: 12px;
+  }
+  .skel {
+    height: 46px; border-radius: 10px; margin: 8px 0;
+    background: linear-gradient(90deg, var(--card-2) 25%, var(--card) 50%, var(--card-2) 75%);
+    background-size: 200% 100%; animation: sk 1.2s infinite;
+  }
+  @keyframes sk { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
   .card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -116,17 +254,97 @@
     margin: 12px 0;
   }
   .vazio-estado p { margin: 0 0 4px; }
+
+  /* Jogo ao vivo / próximo jogo */
+  .jogo-card {
+    background: linear-gradient(135deg, rgba(224,31,79,0.16), rgba(45,91,216,0.16));
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin: 18px 0;
+  }
+  .jogo-status {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 0.72rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 14px;
+  }
+  .jogo-status .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
+  .jogo-card.live { border-color: rgba(224,31,79,0.55); }
+  .jogo-card.live .jogo-status { color: #ff4d6d; }
+  .jogo-card.live .dot { background: #ff4d6d; animation: pulseDot 1.2s infinite; }
+  @keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.3;transform:scale(0.6)} }
+
+  .jogo-confronto { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; }
+  .jogo-confronto + .jogo-confronto { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .jogo-team { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; min-width: 0; }
+  .jogo-team .flag { font-size: 2.1rem; line-height: 1; }
+  .jogo-team .nome { font-weight: 700; font-size: 0.92rem; }
+  .jogo-meio { text-align: center; min-width: 64px; }
+  .jogo-hora { font-size: 1.45rem; font-weight: 800; color: var(--yellow); line-height: 1.1; }
+  .jogo-vs { font-size: 0.78rem; color: var(--muted); font-weight: 700; }
+  .jogo-info {
+    margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);
+    display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: center;
+    color: var(--muted); font-size: 0.85rem;
+  }
+  .jogo-info b { color: var(--text); }
+  .jogo-count { margin-top: 12px; text-align: center; font-weight: 700; color: var(--text); font-size: 0.95rem; }
+  .jogo-count b { color: var(--yellow); font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body>
 <header>
-  <h1>🏆 Bolão da Copa</h1>
-  <p>Meus palpites</p>
+  <div class="fifa-stack" aria-hidden="true">
+    <span class="bar b6"></span>
+    <span class="bar b5"></span>
+    <span class="bar b4"></span>
+    <span class="bar b3"></span>
+    <span class="bar b2"></span>
+    <span class="bar b1"></span>
+  </div>
+  <h1>Bolão da Copa</h1>
+  <p>Meus palpites · 2026</p>
 </header>
 
 <div class="container">
-  <section class="card regras" aria-labelledby="regras-title">
-    <h2 id="regras-title">🏆 Regulamento do Bolão da Copa do Mundo 2026 ⚽</h2>
+  <section class="jogo-card" id="jogo-card" aria-live="polite" style="display:none;">
+    <div class="jogo-status"><span class="dot"></span><span id="jogo-status-text"></span></div>
+    <div id="jogo-corpo"></div>
+  </section>
+
+  <section class="stats" aria-label="Resumo do bolão">
+    <div class="stat-part">
+      <span class="stat-label">Quantidade de participantes</span>
+      <span class="stat-num" id="num-participantes">…</span>
+    </div>
+    <div class="premios">
+      <div class="premio p1">
+        <span class="premio-pos">🥇 1º lugar</span>
+        <span class="premio-val" id="premio-1">—</span>
+      </div>
+      <div class="premio p2">
+        <span class="premio-pos">🥈 2º lugar</span>
+        <span class="premio-val" id="premio-2">—</span>
+      </div>
+      <div class="premio p3">
+        <span class="premio-pos">🥉 3º lugar</span>
+        <span class="premio-val" id="premio-3">—</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card ranking" aria-labelledby="ranking-title">
+    <div class="ranking-head">
+      <h2 id="ranking-title">🏆 Classificação</h2>
+      <button type="button" class="btn-refresh" id="btn-refresh-ranking" title="Atualizar">🔄 Atualizar</button>
+    </div>
+    <div class="ranking-status" id="ranking-status"></div>
+    <div id="ranking-conteudo"></div>
+  </section>
+
+  <details class="card regras" id="regras">
+    <summary>Regulamento</summary>
+    <div class="regras-body">
     <ul>
       <li>O valor de participação no bolão é de <strong>R$50,00</strong>.</li>
       <li>Para validar sua participação no bolão, o <strong>pagamento</strong> e o <strong>envio dos palpites</strong> deverão ser realizados até <strong>11 de junho, às 16h00</strong>.</li>
@@ -151,14 +369,14 @@
       <strong>🥈 2º lugar:</strong> 20% do valor total arrecadado.<br>
       <strong>🥉 3º lugar:</strong> 10% do valor total arrecadado.
     </div>
-    <div class="obs">
-      <strong>🍀 Boa sorte!</strong><br>
-      Que venham muitos gols, zebras, emoções e, claro, muitos pontos no bolão! 🌎🏆⚽
     </div>
-  </section>
+  </details>
 
   <div class="novo">
-    <a href="palpite.html" class="btn block">＋ Novo palpite</a>
+    <a href="palpite.html" class="btn block" id="btn-novo">＋ Novo palpite</a>
+    <p id="prazo-aviso" style="display:none; margin:8px 0 0; color:var(--muted); font-size:0.9rem; text-align:center;">
+      🔒 Prazo de envio encerrado em <b>11/06/2026 às 16h00</b>. Os palpites podem apenas ser consultados.
+    </p>
   </div>
   <div id="lista"></div>
 </div>
@@ -166,6 +384,129 @@
 <script>
 const COLLECTION_KEY = "bolao-palpites";
 const TOTAL_JOGOS = 72;
+
+// Prazo máximo para envio de palpites: 11/06/2026 às 16h00 (horário de Brasília).
+// Após esse momento, os palpites só podem ser consultados.
+const PRAZO_FINAL = new Date("2026-06-11T16:00:00-03:00");
+function prazoEncerrado() { return Date.now() > PRAZO_FINAL.getTime(); }
+
+// ---- Resumo: nº de participantes (via doGet do Apps Script) + prêmios ----
+const ENDPOINT_PALPITES = "https://script.google.com/macros/s/AKfycbxAlA5cS5CPc7Ei_RArqdyB2BNiZ9Qo0EVASM8QHvJNITqioK4fVLw7wDwxxwzARF0P/exec";
+const VALOR_PARTICIPACAO = 50; // R$ por participante
+const RATEIO = { 1: 0.70, 2: 0.20, 3: 0.10 };
+
+function brl(v) {
+  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+function renderPremios(n) {
+  const num = Number.isFinite(n) ? n : 0;
+  document.getElementById("num-participantes").textContent = num;
+  const total = num * VALOR_PARTICIPACAO;
+  [1, 2, 3].forEach(pos => {
+    document.getElementById("premio-" + pos).textContent = brl(total * RATEIO[pos]);
+  });
+}
+
+// ---- Classificação embutida (via JSONP do doGet, evita CORS em site estático) ----
+// O mesmo retorno fornece a lista de participantes, usada para o nº de participantes e prêmios.
+(function classificacao() {
+  const AUTO_REFRESH_MS = 300000; // 5 minutos
+  const statusEl = document.getElementById("ranking-status");
+  const conteudoEl = document.getElementById("ranking-conteudo");
+  let dados = [];
+  let carregando = false;
+
+  function setStatus(msg, erro) {
+    statusEl.textContent = msg || "";
+    statusEl.classList.toggle("erro", !!erro);
+  }
+  function skeleton() {
+    conteudoEl.innerHTML = Array.from({ length: 5 }).map(() => '<div class="skel"></div>').join("");
+  }
+  function fetchRanking() {
+    if (carregando || !ENDPOINT_PALPITES) return;
+    carregando = true;
+    setStatus("Atualizando…");
+    if (!dados.length) skeleton();
+    const cb = "__rankCb_" + Date.now();
+    const s = document.createElement("script");
+    let done = false;
+    const cleanup = () => { try { delete window[cb]; } catch (e) { window[cb] = undefined; } s.remove(); clearTimeout(to); carregando = false; };
+    const to = setTimeout(() => { if (!done) { cleanup(); onErro(); } }, 12000);
+    window[cb] = (data) => { done = true; cleanup(); onDados(data); };
+    s.onerror = () => { if (!done) { cleanup(); onErro(); } };
+    s.src = ENDPOINT_PALPITES + "?callback=" + cb + "&t=" + Date.now();
+    document.body.appendChild(s);
+  }
+  function onErro() {
+    if (!dados.length) {
+      document.getElementById("num-participantes").textContent = "—";
+      setStatus("Não foi possível carregar a classificação.", true);
+      conteudoEl.innerHTML = '<div class="ranking-vazio">Erro ao buscar os dados.<br>Toque em <b>🔄 Atualizar</b> para tentar de novo.</div>';
+    } else {
+      setStatus("Não foi possível atualizar agora. Mostrando última versão.", true);
+    }
+  }
+  function onDados(data) {
+    if (!data || data.ok === false) {
+      setStatus(data && data.erro ? data.erro : "Resposta inválida do servidor.", true);
+      if (!dados.length) {
+        document.getElementById("num-participantes").textContent = "—";
+        conteudoEl.innerHTML = '<div class="ranking-vazio">' + ((data && data.erro) || "Classificação indisponível.") + '</div>';
+      }
+      return;
+    }
+    dados = normalizar(data.ranking || []);
+    // nº de participantes: usa o informado pelo doGet, senão o tamanho da lista
+    const nPart = Number(data.participantes ?? data.total ?? dados.length);
+    renderPremios(Number.isFinite(nPart) ? nPart : dados.length);
+    const quando = data.atualizadoEm ? new Date(data.atualizadoEm) : new Date();
+    setStatus("Atualizado às " + quando.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }));
+    renderTabela();
+  }
+  // Ordena e atribui posições (com empates) caso a planilha não traga "pos"
+  function normalizar(lista) {
+    const arr = lista.map(r => ({
+      nome: (r.nome || "").toString().trim(),
+      pontos: Number(r.pontos) || 0,
+      pos: (r.pos === 0 || r.pos) ? Number(r.pos) : null
+    })).filter(r => r.nome !== "");
+    const temPos = arr.length && arr.every(r => r.pos != null);
+    if (temPos) {
+      arr.sort((a, b) => a.pos - b.pos || b.pontos - a.pontos);
+    } else {
+      arr.sort((a, b) => b.pontos - a.pontos);
+      let ultimo = null, ultimaPos = 0;
+      arr.forEach((r, i) => {
+        if (ultimo === null || r.pontos < ultimo) { ultimaPos = i + 1; ultimo = r.pontos; }
+        r.pos = ultimaPos;
+      });
+    }
+    return arr;
+  }
+  function renderTabela() {
+    if (!dados.length) {
+      conteudoEl.innerHTML = '<div class="ranking-vazio">A classificação ainda não está disponível.<br>Ela aparece aqui assim que os primeiros resultados forem lançados.</div>';
+      return;
+    }
+    const corpo = dados.map(r => {
+      const cls = r.pos <= 3 ? "top" + r.pos : "";
+      const medalha = r.pos === 1 ? "🥇" : r.pos === 2 ? "🥈" : r.pos === 3 ? "🥉" : r.pos + "º";
+      return `<tr class="${cls}">
+        <td class="pos"><span class="pos-badge">${medalha}</span></td>
+        <td class="nome">${escapeHtml(r.nome)}</td>
+        <td class="num pontos">${r.pontos}<small> pts</small></td>
+      </tr>`;
+    }).join("");
+    conteudoEl.innerHTML = `<table>
+      <thead><tr><th class="pos">#</th><th>Participante</th><th class="num">Pontos</th></tr></thead>
+      <tbody>${corpo}</tbody></table>`;
+  }
+  document.getElementById("btn-refresh-ranking").addEventListener("click", fetchRanking);
+  fetchRanking();
+  setInterval(fetchRanking, AUTO_REFRESH_MS);
+})();
 
 function lerColecao() { try { return JSON.parse(localStorage.getItem(COLLECTION_KEY)) || {}; } catch (e) { return {}; } }
 function salvarColecao(c) { localStorage.setItem(COLLECTION_KEY, JSON.stringify(c)); }
@@ -231,12 +572,13 @@ function render() {
 
   lista.innerHTML = itens.map(reg => {
     const feito = reg.estado === "feito";
+    const soConsulta = feito || prazoEncerrado();
     const n = progresso(reg);
     const pct = Math.round((n / TOTAL_JOGOS) * 100);
     const nome = reg.nome
       ? `<div class="card-nome">${escapeHtml(reg.nome)}</div>`
       : `<div class="card-nome vazio">Sem nome</div>`;
-    const acoes = feito
+    const acoes = soConsulta
       ? `<a class="btn" href="palpite.html?id=${reg.id}">🔍 Consultar</a>`
       : `<a class="btn" href="palpite.html?id=${reg.id}">✏️ Continuar</a>`;
     return `
@@ -262,7 +604,195 @@ function escapeHtml(s) {
   return s.replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
 }
 
+if (prazoEncerrado()) {
+  const btnNovo = document.getElementById("btn-novo");
+  btnNovo.removeAttribute("href");
+  btnNovo.setAttribute("aria-disabled", "true");
+  btnNovo.style.opacity = "0.5";
+  btnNovo.style.pointerEvents = "none";
+  document.getElementById("prazo-aviso").style.display = "block";
+}
+
 render();
+</script>
+
+<script>
+// ---- Jogo ao vivo / próximo jogo (fase de grupos da Copa 2026) ----
+// Horários em UTC (ISO). O navegador converte para o fuso local do usuário.
+// Fonte: calendário oficial divulgado após o sorteio (06/12/2025).
+(function jogoAoVivo() {
+  const FLAGS = {
+    "México":"🇲🇽","África do Sul":"🇿🇦","Coreia do Sul":"🇰🇷","Rep Tcheca":"🇨🇿",
+    "Canadá":"🇨🇦","Bósnia":"🇧🇦","Catar":"🇶🇦","Suíça":"🇨🇭",
+    "Brasil":"🇧🇷","Marrocos":"🇲🇦","Haiti":"🇭🇹","Escócia":"🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+    "EUA":"🇺🇸","Paraguai":"🇵🇾","Austrália":"🇦🇺","Turquia":"🇹🇷",
+    "Alemanha":"🇩🇪","Curaçao":"🇨🇼","Costa do Marfim":"🇨🇮","Equador":"🇪🇨",
+    "Holanda":"🇳🇱","Japão":"🇯🇵","Suécia":"🇸🇪","Tunísia":"🇹🇳",
+    "Bélgica":"🇧🇪","Egito":"🇪🇬","Irã":"🇮🇷","Nova Zelândia":"🇳🇿",
+    "Espanha":"🇪🇸","Cabo Verde":"🇨🇻","Arábia Saudita":"🇸🇦","Uruguai":"🇺🇾",
+    "França":"🇫🇷","Senegal":"🇸🇳","Iraque":"🇮🇶","Noruega":"🇳🇴",
+    "Argentina":"🇦🇷","Argélia":"🇩🇿","Áustria":"🇦🇹","Jordânia":"🇯🇴",
+    "Portugal":"🇵🇹","Congo":"🇨🇩","Uzbequistão":"🇺🇿","Colômbia":"🇨🇴",
+    "Inglaterra":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","Croácia":"🇭🇷","Gana":"🇬🇭","Panamá":"🇵🇦",
+  };
+  // [kickoff UTC, grupo, mandante, visitante, cidade]
+  const JOGOS = [
+    ["2026-06-11T19:00:00Z","A","México","África do Sul","Cidade do México"],
+    ["2026-06-12T02:00:00Z","A","Coreia do Sul","Rep Tcheca","Zapopan"],
+    ["2026-06-12T19:00:00Z","B","Canadá","Bósnia","Toronto"],
+    ["2026-06-13T01:00:00Z","D","EUA","Paraguai","Los Angeles"],
+    ["2026-06-13T19:00:00Z","B","Catar","Suíça","San Francisco"],
+    ["2026-06-13T22:00:00Z","C","Brasil","Marrocos","Nova Jersey"],
+    ["2026-06-14T01:00:00Z","C","Haiti","Escócia","Boston"],
+    ["2026-06-14T04:00:00Z","D","Austrália","Turquia","Vancouver"],
+    ["2026-06-14T17:00:00Z","E","Alemanha","Curaçao","Houston"],
+    ["2026-06-14T20:00:00Z","F","Holanda","Japão","Dallas"],
+    ["2026-06-14T23:00:00Z","E","Costa do Marfim","Equador","Filadélfia"],
+    ["2026-06-15T02:00:00Z","F","Suécia","Tunísia","Guadalupe"],
+    ["2026-06-15T16:00:00Z","H","Espanha","Cabo Verde","Atlanta"],
+    ["2026-06-15T19:00:00Z","G","Bélgica","Egito","Vancouver"],
+    ["2026-06-15T22:00:00Z","H","Arábia Saudita","Uruguai","Miami"],
+    ["2026-06-16T01:00:00Z","G","Irã","Nova Zelândia","Los Angeles"],
+    ["2026-06-16T19:00:00Z","I","França","Senegal","Nova Jersey"],
+    ["2026-06-16T22:00:00Z","I","Iraque","Noruega","Boston"],
+    ["2026-06-17T01:00:00Z","J","Argentina","Argélia","Kansas City"],
+    ["2026-06-17T04:00:00Z","J","Áustria","Jordânia","San Francisco"],
+    ["2026-06-17T17:00:00Z","K","Portugal","Congo","Houston"],
+    ["2026-06-17T20:00:00Z","L","Inglaterra","Croácia","Dallas"],
+    ["2026-06-17T23:00:00Z","L","Gana","Panamá","Toronto"],
+    ["2026-06-18T02:00:00Z","K","Uzbequistão","Colômbia","Cidade do México"],
+    ["2026-06-18T16:00:00Z","A","Rep Tcheca","África do Sul","Atlanta"],
+    ["2026-06-18T19:00:00Z","B","Suíça","Bósnia","Los Angeles"],
+    ["2026-06-18T22:00:00Z","B","Canadá","Catar","Vancouver"],
+    ["2026-06-19T01:00:00Z","A","México","Coreia do Sul","Zapopan"],
+    ["2026-06-19T19:00:00Z","D","EUA","Austrália","Seattle"],
+    ["2026-06-19T22:00:00Z","C","Escócia","Marrocos","Boston"],
+    ["2026-06-20T00:30:00Z","C","Brasil","Haiti","Filadélfia"],
+    ["2026-06-20T03:00:00Z","D","Turquia","Paraguai","San Francisco"],
+    ["2026-06-20T17:00:00Z","F","Holanda","Suécia","Houston"],
+    ["2026-06-20T20:00:00Z","E","Alemanha","Costa do Marfim","Toronto"],
+    ["2026-06-21T03:00:00Z","E","Equador","Curaçao","Kansas City"],
+    ["2026-06-21T04:00:00Z","F","Tunísia","Japão","Guadalupe"],
+    ["2026-06-21T16:00:00Z","H","Espanha","Arábia Saudita","Atlanta"],
+    ["2026-06-21T19:00:00Z","G","Bélgica","Irã","Los Angeles"],
+    ["2026-06-21T22:00:00Z","H","Uruguai","Cabo Verde","Miami"],
+    ["2026-06-22T01:00:00Z","G","Nova Zelândia","Egito","Vancouver"],
+    ["2026-06-22T17:00:00Z","J","Argentina","Áustria","Dallas"],
+    ["2026-06-22T21:00:00Z","I","França","Iraque","Filadélfia"],
+    ["2026-06-23T00:00:00Z","I","Noruega","Senegal","Nova Jersey"],
+    ["2026-06-23T03:00:00Z","J","Jordânia","Argélia","San Francisco"],
+    ["2026-06-23T17:00:00Z","K","Portugal","Uzbequistão","Houston"],
+    ["2026-06-23T20:00:00Z","L","Inglaterra","Gana","Boston"],
+    ["2026-06-23T23:00:00Z","L","Panamá","Croácia","Toronto"],
+    ["2026-06-24T02:00:00Z","K","Colômbia","Congo","Zapopan"],
+    ["2026-06-24T19:00:00Z","B","Suíça","Canadá","Vancouver"],
+    ["2026-06-24T19:00:00Z","B","Bósnia","Catar","Seattle"],
+    ["2026-06-24T22:00:00Z","C","Escócia","Brasil","Miami"],
+    ["2026-06-24T22:00:00Z","C","Marrocos","Haiti","Atlanta"],
+    ["2026-06-25T01:00:00Z","A","Rep Tcheca","México","Cidade do México"],
+    ["2026-06-25T01:00:00Z","A","África do Sul","Coreia do Sul","Guadalupe"],
+    ["2026-06-25T20:00:00Z","E","Equador","Alemanha","Nova Jersey"],
+    ["2026-06-25T20:00:00Z","E","Curaçao","Costa do Marfim","Filadélfia"],
+    ["2026-06-25T23:00:00Z","F","Japão","Suécia","Dallas"],
+    ["2026-06-25T23:00:00Z","F","Tunísia","Holanda","Kansas City"],
+    ["2026-06-26T02:00:00Z","D","Turquia","EUA","Los Angeles"],
+    ["2026-06-26T02:00:00Z","D","Paraguai","Austrália","San Francisco"],
+    ["2026-06-26T19:00:00Z","I","Noruega","França","Boston"],
+    ["2026-06-26T19:00:00Z","I","Senegal","Iraque","Toronto"],
+    ["2026-06-27T00:00:00Z","H","Uruguai","Espanha","Zapopan"],
+    ["2026-06-27T00:00:00Z","H","Cabo Verde","Arábia Saudita","Houston"],
+    ["2026-06-27T03:00:00Z","G","Egito","Irã","Seattle"],
+    ["2026-06-27T03:00:00Z","G","Nova Zelândia","Bélgica","Vancouver"],
+    ["2026-06-27T21:00:00Z","L","Panamá","Inglaterra","Nova Jersey"],
+    ["2026-06-27T21:00:00Z","L","Croácia","Gana","Filadélfia"],
+    ["2026-06-27T23:30:00Z","K","Colômbia","Portugal","Miami"],
+    ["2026-06-27T23:30:00Z","K","Congo","Uzbequistão","Atlanta"],
+    ["2026-06-28T02:00:00Z","J","Argélia","Áustria","Kansas City"],
+    ["2026-06-28T02:00:00Z","J","Jordânia","Argentina","Dallas"],
+  ].map(j => ({ inicio: new Date(j[0]), grupo: j[1], casa: j[2], fora: j[3], cidade: j[4] }))
+   .sort((a, b) => a.inicio - b.inicio);
+
+  const DURACAO_MS = 115 * 60 * 1000; // ~115 min cobre os 90' + intervalo + acréscimos
+  const card = document.getElementById("jogo-card");
+  const statusText = document.getElementById("jogo-status-text");
+  const corpo = document.getElementById("jogo-corpo");
+
+  function fl(nome) { return FLAGS[nome] || "🏳️"; }
+  function confronto(j, central) {
+    return `<div class="jogo-confronto">
+      <div class="jogo-team">
+        <span class="flag">${fl(j.casa)}</span><span class="nome">${j.casa}</span>
+      </div>
+      <div class="jogo-meio">${central}</div>
+      <div class="jogo-team">
+        <span class="flag">${fl(j.fora)}</span><span class="nome">${j.fora}</span>
+      </div>
+    </div>`;
+  }
+  function infoLinha(j) {
+    const data = j.inicio.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" });
+    return `<div class="jogo-info">
+      <span>Grupo <b>${j.grupo}</b></span>
+      <span><b>${data}</b></span>
+      <span>📍 <b>${j.cidade}</b></span>
+    </div>`;
+  }
+  function hhmm(d) { return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); }
+  function fmtRestante(ms) {
+    let s = Math.max(0, Math.floor(ms / 1000));
+    const d = Math.floor(s / 86400); s -= d * 86400;
+    const h = Math.floor(s / 3600); s -= h * 3600;
+    const m = Math.floor(s / 60); s -= m * 60;
+    if (d > 0) return `${d}d ${h}h ${m}min`;
+    if (h > 0) return `${h}h ${m}min ${s}s`;
+    return `${m}min ${s}s`;
+  }
+
+  function render() {
+    const agora = Date.now();
+    const aoVivo = JOGOS.filter(j => {
+      const t = j.inicio.getTime();
+      return agora >= t && agora < t + DURACAO_MS;
+    });
+    const proximo = JOGOS.find(j => j.inicio.getTime() > agora);
+
+    card.style.display = "block";
+
+    if (aoVivo.length) {
+      card.classList.add("live");
+      statusText.textContent = aoVivo.length > 1 ? "🔴 Ao vivo agora" : "🔴 Ao vivo";
+      corpo.innerHTML = aoVivo.map(j => confronto(j, '<span class="jogo-vs">×</span>') + infoLinha(j)).join("");
+      return;
+    }
+
+    card.classList.remove("live");
+    if (proximo) {
+      statusText.textContent = "⏭️ Próximo jogo";
+      corpo.innerHTML =
+        confronto(proximo, `<div class="jogo-hora">${hhmm(proximo.inicio)}</div>`) +
+        infoLinha(proximo) +
+        `<div class="jogo-count">Começa em <b id="jogo-countdown">${fmtRestante(proximo.inicio.getTime() - agora)}</b></div>`;
+      return;
+    }
+
+    // Acabou a fase de grupos
+    statusText.textContent = "🏁 Fase de grupos encerrada";
+    corpo.innerHTML = `<div style="text-align:center; color:var(--muted); padding:8px 0;">Todos os jogos da fase de grupos já foram disputados.</div>`;
+  }
+
+  render();
+  // Atualiza o cronômetro a cada segundo; re-renderiza ao trocar de estado (vivo/próximo).
+  let ultimoEstado = "";
+  setInterval(() => {
+    const agora = Date.now();
+    const cd = document.getElementById("jogo-countdown");
+    const aoVivo = JOGOS.some(j => agora >= j.inicio.getTime() && agora < j.inicio.getTime() + DURACAO_MS);
+    const proximo = JOGOS.find(j => j.inicio.getTime() > agora);
+    const estado = aoVivo ? "vivo" : (proximo ? "prox:" + proximo.inicio.getTime() : "fim");
+    if (estado !== ultimoEstado) { render(); ultimoEstado = estado; }
+    else if (cd && proximo) { cd.textContent = fmtRestante(proximo.inicio.getTime() - agora); }
+  }, 1000);
+})();
 </script>
 </body>
 </html>

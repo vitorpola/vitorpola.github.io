@@ -9,12 +9,19 @@
     --green: #009739;
     --yellow: #ffcc29;
     --blue: #002776;
-    --bg: #0d1117;
-    --card: #161b22;
-    --card-2: #1c232c;
-    --border: #2b3440;
-    --text: #e6edf3;
-    --muted: #8b949e;
+    --bg: #000000;
+    --card: #121317;
+    --card-2: #1b1d24;
+    --border: #2a2d38;
+    --text: #f2f4f8;
+    --muted: #9aa0ad;
+    /* Paleta multicolor FIFA World Cup 26 */
+    --c1: #c2d72e; /* lima */
+    --c2: #f2542d; /* laranja */
+    --c3: #e01f4f; /* vermelho/rosa */
+    --c4: #7b2fb5; /* roxo */
+    --c5: #2d5bd8; /* azul */
+    --c6: #7e72e8; /* violeta */
   }
   * { box-sizing: border-box; }
   body {
@@ -25,18 +32,40 @@
     line-height: 1.5;
   }
   header {
-    background: linear-gradient(135deg, var(--green), var(--blue));
-    padding: 28px 16px;
+    background: #000;
+    padding: 0 16px 22px;
     text-align: center;
-    border-bottom: 4px solid var(--yellow);
   }
-  header { position: relative; }
-  header h1 { margin: 0; font-size: 1.7rem; }
-  header p { margin: 6px 0 0; opacity: 0.9; font-size: 0.95rem; }
+  /* Cabeçalho FIFA 26: barras arredondadas multicoloridas empilhadas */
+  .fifa-stack {
+    position: relative;
+    height: 96px;
+    margin-bottom: 12px;
+  }
+  .fifa-stack .bar {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 0 0 20px 20px;
+  }
+  .fifa-stack .b6 { width: 100%;             max-width: 660px; height: 96px; background: var(--c6); z-index: 1; }
+  .fifa-stack .b5 { width: calc(100% - 36px); max-width: 624px; height: 81px; background: var(--c5); z-index: 2; }
+  .fifa-stack .b4 { width: calc(100% - 72px); max-width: 588px; height: 66px; background: var(--c4); z-index: 3; }
+  .fifa-stack .b3 { width: calc(100% - 108px); max-width: 552px; height: 51px; background: var(--c3); z-index: 4; }
+  .fifa-stack .b2 { width: calc(100% - 144px); max-width: 516px; height: 36px; background: var(--c2); z-index: 5; }
+  .fifa-stack .b1 { width: calc(100% - 180px); max-width: 480px; height: 22px; background: var(--c1); z-index: 6; }
+  .header-nav { text-align: left; margin-bottom: 6px; }
+  header h1 {
+    margin: 0;
+    font-size: clamp(1.6rem, 6vw, 2.2rem);
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+  }
+  header p { margin: 6px 0 0; color: var(--muted); font-size: 0.9rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
   header .voltar {
-    position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-    color: #fff; text-decoration: none; font-weight: 600; font-size: 0.9rem;
-    opacity: 0.9;
+    color: var(--text); text-decoration: none; font-weight: 700; font-size: 0.85rem; opacity: 0.8;
   }
   header .voltar:hover { opacity: 1; text-decoration: underline; }
 
@@ -60,6 +89,11 @@
     padding: 16px;
     margin: 16px 0;
   }
+  .field.code {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+  }
   label.lbl { display: block; font-weight: 600; margin-bottom: 6px; }
   input[type="text"] {
     width: 100%;
@@ -71,6 +105,26 @@
     font-size: 1rem;
   }
   input[type="text"]:focus { outline: 2px solid var(--yellow); border-color: var(--yellow); }
+  input[readonly] { cursor: default; }
+
+  .code-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(255, 204, 41, 0.14);
+    border: 1px solid rgba(255, 204, 41, 0.35);
+    color: var(--yellow);
+    font-weight: 800;
+    letter-spacing: 0.12em;
+  }
+  .code-chip small {
+    letter-spacing: 0;
+    color: var(--muted);
+    font-weight: 600;
+  }
 
   .group-title {
     display: flex;
@@ -324,6 +378,10 @@
     font-size: 1.1rem;
     opacity: 0.96;
   }
+  .success-screen .code-chip {
+    margin: 18px auto 0;
+    justify-content: center;
+  }
     .success-link {
       display: inline-flex;
       margin-top: 22px;
@@ -349,19 +407,32 @@
 </head>
 <body>
 <header>
-  <a href="index.html" class="voltar">← Meus palpites</a>
-  <h1>🏆 Bolão da Copa</h1>
+  <div class="fifa-stack" aria-hidden="true">
+    <span class="bar b6"></span>
+    <span class="bar b5"></span>
+    <span class="bar b4"></span>
+    <span class="bar b3"></span>
+    <span class="bar b2"></span>
+    <span class="bar b1"></span>
+  </div>
+  <div class="header-nav"><a href="index.html" class="voltar">← Meus palpites</a></div>
+  <h1>Bolão da Copa</h1>
 </header>
 
 <div class="container">
   <div class="banner-consulta" id="banner-consulta" style="display:none;">
-    🔒 Palpite finalizado — somente consulta.
+    <span id="banner-texto">🔒 Palpite finalizado — somente consulta.</span>
     <button type="button" class="btn finalize" id="btn-ver-comprovante">Ver comprovante</button>
   </div>
 
   <div class="field">
     <label class="lbl" for="nome">Seu nome</label>
     <input type="text" id="nome" placeholder="Digite seu nome" autocomplete="name">
+  </div>
+
+  <div class="field code">
+    <label class="lbl">Identificador do palpite</label>
+    <div class="code-chip" id="codigo-palpites">Será gerado ao finalizar</div>
   </div>
 
   <form id="form-palpites"></form>
@@ -391,9 +462,8 @@
 <div class="modal" id="modal">
   <div class="modal-card">
 
-    <!-- ETAPA 1: enviar o comprovante dos palpites -->
+    <!-- Comprovante dos palpites -->
     <div id="etapa1">
-      <div class="steps"><span class="step on">1. Enviar palpite</span><span class="step">2. Pagamento</span></div>
       <h3>📩 Envie seu comprovante de palpite</h3>
       <img id="comprovante-img" alt="Comprovante dos palpites">
       <p class="hint">Envie esta imagem para o administrador no WhatsApp <b>(12) 99722-0224</b>.</p>
@@ -402,32 +472,7 @@
         <button type="button" class="btn ghost" id="btn-baixar">⬇️ Baixar imagem</button>
       </div>
       <div class="modal-actions">
-        <button type="button" class="btn finalize" id="btn-ir-pagamento" style="flex:1;">Já enviei → Ir para o pagamento</button>
-      </div>
-    </div>
-
-    <!-- ETAPA 2: pagamento via Pix -->
-    <div id="etapa2" style="display:none;">
-      <div class="steps"><span class="step done">1. Enviar palpite ✓</span><span class="step on">2. Pagamento</span></div>
-      <div class="pix">
-        <h4>💸 Confirme seu palpite com o Pix</h4>
-        <div class="valor">R$ 50,00</div>
-        <div class="qr">
-          <img src="qr-pix.jpeg" alt="QR Code do Pix">
-        </div>
-        <div class="dados">
-          <b>VITOR POLA BAPTISTA COELHO</b><br>
-          Chave Pix (CPF): <b>415.361.888-83</b> — Banco Inter
-        </div>
-        <div class="copia">
-          <code id="pix-codigo"></code>
-          <button type="button" class="btn" id="btn-copiar-pix">Copiar</button>
-        </div>
-        <p class="hint">Pague pelo QR Code ou pelo código copia-e-cola e, em seguida, envie o comprovante do Pix para o WhatsApp <b>(12) 99722-0224</b>.</p>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn ghost" id="btn-voltar-1">← Voltar</button>
-        <button type="button" class="btn ghost" id="btn-fechar-2">Concluir</button>
+        <button type="button" class="btn finalize" id="btn-concluir" style="flex:1;">Concluir</button>
       </div>
     </div>
 
@@ -441,6 +486,7 @@
     <div class="success-icon">✓</div>
     <h2>Palpites registrados com sucesso!</h2>
     <p>Muito boa sorte!</p>
+    <div class="code-chip" id="success-codigo">Código</div>
     <a class="success-link" id="success-link" href="index.html">Ver palpite realizado</a>
   </div>
 </div>
@@ -475,6 +521,8 @@ const ARTILHEIROS = ["C. Ronaldo (POR)", "Endrick (BRA)", "Ferran Torres (ESP)",
 
 const form = document.getElementById("form-palpites");
 let totalJogos = 0;
+const codigoEl = document.getElementById("codigo-palpites");
+const successCodigoEl = document.getElementById("success-codigo");
 
 Object.entries(grupos).forEach(([letra, times]) => {
   const titulo = document.createElement("div");
@@ -564,6 +612,40 @@ const nomeEl = document.getElementById("nome");
 function lerColecao() { try { return JSON.parse(localStorage.getItem(COLLECTION_KEY)) || {}; } catch (e) { return {}; } }
 function salvarColecao(c) { localStorage.setItem(COLLECTION_KEY, JSON.stringify(c)); }
 function novoId() { return "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function gerarCodigoPalpite() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = new Uint8Array(6);
+  crypto.getRandomValues(bytes);
+  let codigo = "";
+  for (let i = 0; i < bytes.length; i++) {
+    codigo += chars[bytes[i] % chars.length];
+  }
+  return codigo;
+}
+function codigoUnico(codigo, colecao, ignorarId) {
+  return !Object.values(colecao).some(reg => reg && reg.id !== ignorarId && reg.codigo === codigo);
+}
+function atribuirCodigo(registro) {
+  const c = lerColecao();
+  if (registro.codigo && codigoUnico(registro.codigo, c, registro.id)) return registro.codigo;
+  let codigo = "";
+  do {
+    codigo = gerarCodigoPalpite();
+  } while (!codigoUnico(codigo, c, registro.id));
+  registro.codigo = codigo;
+  return codigo;
+}
+function garantirCodigoFinal() {
+  const c = lerColecao();
+  const reg = c[currentId] || registroAtual;
+  const codigo = atribuirCodigo(reg);
+  reg.codigo = codigo;
+  reg.id = currentId;
+  c[currentId] = reg;
+  salvarColecao(c);
+  registroAtual = reg;
+  return codigo;
+}
 
 // Migra rascunho antigo (chave única) para a nova coleção
 (function migrar() {
@@ -574,7 +656,7 @@ function novoId() { return "p" + Date.now().toString(36) + Math.random().toStrin
     const c = lerColecao();
     const id = novoId();
     const ts = d.atualizadoEm || new Date().toISOString();
-    c[id] = { id, nome: d.nome || "", palpites: d.palpites || {}, estado: "rascunho", criadoEm: ts, atualizadoEm: ts };
+    c[id] = { id, codigo: d.codigo || "", nome: d.nome || "", palpites: d.palpites || {}, estado: "rascunho", criadoEm: ts, atualizadoEm: ts };
     salvarColecao(c);
   } catch (e) {}
   localStorage.removeItem("bolao-copa-2026");
@@ -585,10 +667,16 @@ let currentId = new URLSearchParams(location.search).get("id");
 let registroAtual = currentId ? lerColecao()[currentId] : null;
 if (!registroAtual) {
   currentId = novoId();
-  registroAtual = { id: currentId, nome: "", palpites: {}, estado: "rascunho",
+  registroAtual = { id: currentId, codigo: "", nome: "", palpites: {}, estado: "rascunho",
     criadoEm: new Date().toISOString(), atualizadoEm: new Date().toISOString() };
 }
-const somenteLeitura = registroAtual.estado === "feito";
+// Prazo máximo para envio de palpites: 11/06/2026 às 16h00 (horário de Brasília).
+// Após esse momento, o palpite só pode ser consultado e ter o comprovante gerado.
+const PRAZO_FINAL = new Date("2026-06-11T16:00:00-03:00");
+function prazoEncerrado() { return Date.now() > PRAZO_FINAL.getTime(); }
+
+const codigoAtual = registroAtual.codigo || "";
+const somenteLeitura = registroAtual.estado === "feito" || prazoEncerrado();
 
 function jogosCompletos() {
   let n = 0;
@@ -640,6 +728,7 @@ function salvarLocal() {
   const c = lerColecao();
   const reg = c[currentId] || registroAtual;
   reg.id = currentId;
+  reg.codigo = registroAtual.codigo || "";
   reg.nome = nomeEl.value.trim();
   reg.palpites = coletarPalpites();
   reg.extras = coletarExtras();
@@ -651,6 +740,11 @@ function salvarLocal() {
 }
 
 function carregar() {
+  if (somenteLeitura && codigoEl) {
+    codigoEl.parentElement.style.display = "flex";
+  }
+  codigoEl.textContent = somenteLeitura && registroAtual.codigo ? `Código ${registroAtual.codigo}` : "Será gerado ao finalizar";
+  successCodigoEl.textContent = registroAtual.codigo ? `Código ${registroAtual.codigo}` : "Código";
   if (registroAtual.nome) nomeEl.value = registroAtual.nome;
   Object.entries(registroAtual.palpites || {}).forEach(([k, v]) => {
     const lado = k.endsWith("-casa") ? "casa" : "fora";
@@ -675,9 +769,14 @@ function marcarFeito() {
     c[currentId].atualizadoEm = new Date().toISOString();
     salvarColecao(c);
   }
+  codigoEl.parentElement.style.display = "flex";
 }
 
 function aplicarSomenteLeitura() {
+  if (registroAtual.estado !== "feito" && prazoEncerrado()) {
+    document.getElementById("banner-texto").textContent =
+      "🔒 Prazo encerrado (11/06/2026 às 16h00) — somente consulta.";
+  }
   document.getElementById("banner-consulta").style.display = "flex";
   document.querySelector(".bar").style.display = "none";
   nomeEl.setAttribute("readonly", "");
@@ -761,6 +860,10 @@ function gerarComprovante() {
   ctx.font = "16px -apple-system, Arial, sans-serif";
   const dataStr = new Date().toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
   ctx.fillText("Fase de grupos - 72 jogos - " + dataStr, W / 2, 84);
+  ctx.fillStyle = "rgba(255,255,255,0.95)";
+  ctx.font = "bold 18px -apple-system, Arial, sans-serif";
+  const codigoComprovante = registroAtual.codigo || garantirCodigoFinal();
+  ctx.fillText("Código do palpite: " + codigoComprovante, W / 2, 104);
 
   // Grupos em duas colunas
   const letras = Object.keys(grupos);
@@ -835,16 +938,11 @@ function gerarComprovante() {
   // Mostra no modal e prepara blob para compartilhar/baixar
   document.getElementById("comprovante-img").src = canvas.toDataURL("image/png");
   canvas.toBlob(b => { blobComprovante = b; }, "image/png");
-  mostrarEtapa(1);
+  document.querySelector(".modal-card").scrollTop = 0;
   document.getElementById("modal").classList.add("show");
 }
 
 const ADMIN_WPP = "5512997220224"; // 55 (Brasil) + 12 (DDD) + número
-function mostrarEtapa(n) {
-  document.getElementById("etapa1").style.display = n === 1 ? "" : "none";
-  document.getElementById("etapa2").style.display = n === 2 ? "" : "none";
-  document.querySelector(".modal-card").scrollTop = 0;
-}
 
 function nomeArquivo() {
   const slug = nomeEl.value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -871,8 +969,9 @@ function montarPayloadPlanilha(estado) {
   const ex = coletarExtras();
   return {
     id: currentId,
+    codigo: registroAtual.codigo || garantirCodigoFinal(),
     data: new Date().toLocaleString("pt-BR"),
-    nome: nomeEl.value.trim(),
+    nome: `${registroAtual.codigo || garantirCodigoFinal()} - ${nomeEl.value.trim()}`,
     estado: estado || "feito",
     jogos: jogos,                 // 72 pares [mandante, visitante]
     top4: ex.pos.slice(0, 4),     // [1º, 2º, 3º, 4º]
@@ -898,6 +997,7 @@ document.getElementById("btn-finalizar").addEventListener("click", () => {
   if (jogosCompletos() < totalJogos) { toast("⚠️ Preencha todos os 72 jogos"); return; }
   if (!posicoesPreenchidas() || artilheiroFinal() === "") { toast("⚠️ Preencha a classificação final e o artilheiro"); return; }
   if (!posicoesDistintas()) { toast("⚠️ As 4 seleções da classificação devem ser diferentes"); return; }
+  garantirCodigoFinal();
   salvarLocal();
   enviarParaPlanilha("feito");
   gerarComprovante();
@@ -914,8 +1014,7 @@ document.getElementById("btn-compartilhar").addEventListener("click", async () =
         title: "Palpites - Bolão Copa 2026",
         text: `Palpites de ${nomeEl.value.trim()} para o bolão da Copa 2026`
       });
-      mostrarEtapa(2);
-    } catch (e) { /* usuário cancelou: permanece na etapa 1 */ }
+    } catch (e) { /* usuário cancelou: permanece aberto */ }
   } else {
     const texto = encodeURIComponent(`Olá! Sou ${nomeEl.value.trim()}, segue o comprovante dos palpites do bolão da Copa 2026.`);
     window.open(`https://wa.me/${ADMIN_WPP}?text=${texto}`, "_blank");
@@ -932,10 +1031,6 @@ function baixarImagem() {
 }
 document.getElementById("btn-baixar").addEventListener("click", baixarImagem);
 
-// Avançar / voltar entre etapas
-document.getElementById("btn-ir-pagamento").addEventListener("click", () => mostrarEtapa(2));
-document.getElementById("btn-voltar-1").addEventListener("click", () => mostrarEtapa(1));
-
 // Fechar
 function fecharModal() { document.getElementById("modal").classList.remove("show"); }
 document.getElementById("modal").addEventListener("click", (e) => {
@@ -943,26 +1038,10 @@ document.getElementById("modal").addEventListener("click", (e) => {
 });
 
 // Concluir — marca o palpite como "Feito" e volta para a lista (não se aplica em consulta)
-document.getElementById("btn-fechar-2").addEventListener("click", () => {
+document.getElementById("btn-concluir").addEventListener("click", () => {
   if (!somenteLeitura) marcarFeito();
   document.getElementById("modal").classList.remove("show");
-  document.getElementById("success-screen").classList.add("show");
-});
-
-// ---- Pix (QR Code gerado localmente + copia-e-cola) ----
-const PIX_PAYLOAD = "00020101021126330014br.gov.bcb.pix011141536188883520400005303986540550.005802BR5916VITOR P B COELHO6013SAO LUIZ DO P62070503***6304BC4E";
-document.getElementById("pix-codigo").textContent = PIX_PAYLOAD;
-
-document.getElementById("btn-copiar-pix").addEventListener("click", async () => {
-  try {
-    await navigator.clipboard.writeText(PIX_PAYLOAD);
-    toast("📋 Código Pix copiado!");
-  } catch (e) {
-    const range = document.createRange();
-    range.selectNodeContents(document.getElementById("pix-codigo"));
-    const sel = getSelection(); sel.removeAllRanges(); sel.addRange(range);
-    toast("Selecione e copie o código");
-  }
+  if (!somenteLeitura) document.getElementById("success-screen").classList.add("show");
 });
 
 carregar();
