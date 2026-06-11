@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bolão da Copa — Meus palpites</title>
+<title>Bolão da Copa 2026</title>
 <style>
   :root {
     --green: #009739;
@@ -39,7 +39,7 @@
   /* Cabeçalho FIFA 26: barras arredondadas multicoloridas empilhadas */
   .fifa-stack {
     position: relative;
-    height: 96px;
+    height: 64px;
   }
   .fifa-stack .bar {
     position: absolute;
@@ -48,12 +48,12 @@
     transform: translateX(-50%);
     border-radius: 0 0 20px 20px;
   }
-  .fifa-stack .b6 { width: calc(100% - 20px); max-width: 660px; height: 72px; background: var(--c6); z-index: 1; }
-  .fifa-stack .b5 { width: calc(100% - 60px); max-width: 624px; height: 60px; background: var(--c5); z-index: 2; }
-  .fifa-stack .b4 { width: calc(100% - 102px); max-width: 588px; height: 48px; background: var(--c4); z-index: 3; }
-  .fifa-stack .b3 { width: calc(100% - 136px); max-width: 552px; height: 36px; background: var(--c3); z-index: 4; }
-  .fifa-stack .b2 { width: calc(100% - 158px); max-width: 516px; height: 24px; background: var(--c2); z-index: 5; }
-  .fifa-stack .b1 { width: calc(100% - 180px); max-width: 480px; height: 12px; background: var(--c1); z-index: 6; }
+  .fifa-stack .b6 { width: 100%; height: 48px; background: var(--c6); z-index: 1; }
+  .fifa-stack .b5 { width: 100%; height: 40px; background: var(--c5); z-index: 2; }
+  .fifa-stack .b4 { width: 100%; height: 32px; background: var(--c4); z-index: 3; }
+  .fifa-stack .b3 { width: 100%; height: 24px; background: var(--c3); z-index: 4; }
+  .fifa-stack .b2 { width: 100%; height: 16px; background: var(--c2); z-index: 5; }
+  .fifa-stack .b1 { width: 100%; height: 8px; background: var(--c1); z-index: 6; }
   header h1 {
     margin: 0;
     font-size: clamp(1.7rem, 6vw, 2.3rem);
@@ -290,6 +290,24 @@
   .jogo-info b { color: var(--text); }
   .jogo-count { margin-top: 12px; text-align: center; font-weight: 700; color: var(--text); font-size: 0.95rem; }
   .jogo-count b { color: var(--yellow); font-variant-numeric: tabular-nums; }
+  .jogo-resultado {
+    text-align: center;
+    margin-top: 0px;
+    font-size: 1.55rem;
+    font-weight: 900;
+    color: var(--yellow);
+    letter-spacing: 0.02em;
+  }
+  .jogo-resultado-label {
+    text-align: center;
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
 
   .jogo-actions { display: flex; justify-content: center; margin-top: 14px; }
   .jogo-actions .btn { min-width: 180px; }
@@ -354,6 +372,18 @@
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.02);
   }
+  .palpite-item[class~="3-pontos"] {
+    background:
+      linear-gradient(45deg, rgba(155, 41, 255, 0.24) 0%, rgba(155, 41, 255, 0.04) 28%, rgba(255, 255, 255, 0.02) 74%),
+      rgba(255, 255, 255, 0.02);
+    border-color: rgba(155, 41, 255, 0.25);
+  }
+  .palpite-item[class~="5-pontos"] {
+    background:
+      linear-gradient(45deg, rgba(0, 151, 57, 0.38) 0%, rgba(0, 151, 57, 0.18) 30%, rgba(255, 255, 255, 0.02) 76%),
+      rgba(255, 255, 255, 0.02);
+    border-color: rgba(0, 151, 57, 0.5);
+  }
   .palpite-info { min-width: 0; }
   .palpite-nome { font-weight: 800; word-break: break-word; }
   .palpite-meta { margin-top: 4px; color: var(--muted); font-size: 0.84rem; }
@@ -377,8 +407,7 @@
     <span class="bar b2"></span>
     <span class="bar b1"></span>
   </div>
-  <h1>Bolão da Copa</h1>
-  <p>Meus palpites · 2026</p>
+  <h1>Bolão da Copa 2026</h1>
 </header>
 
 <div class="container">
@@ -388,6 +417,15 @@
     <div class="jogo-actions">
       <button type="button" class="btn ghost" id="btn-ver-palpites">👀 Ver palpites</button>
     </div>
+  </section>
+
+  <section class="card ranking" aria-labelledby="ranking-title">
+    <div class="ranking-head">
+      <h2 id="ranking-title">Classificação Geral</h2>
+      <button type="button" class="btn-refresh" id="btn-refresh-ranking" title="Atualizar">🔄 Atualizar</button>
+    </div>
+    <div class="ranking-status" id="ranking-status"></div>
+    <div id="ranking-conteudo"></div>
   </section>
 
   <section class="stats" aria-label="Resumo do bolão">
@@ -409,15 +447,6 @@
         <span class="premio-val" id="premio-3">—</span>
       </div>
     </div>
-  </section>
-
-  <section class="card ranking" aria-labelledby="ranking-title">
-    <div class="ranking-head">
-      <h2 id="ranking-title">🏆 Classificação</h2>
-      <button type="button" class="btn-refresh" id="btn-refresh-ranking" title="Atualizar">🔄 Atualizar</button>
-    </div>
-    <div class="ranking-status" id="ranking-status"></div>
-    <div id="ranking-conteudo"></div>
   </section>
 
   <details class="card regras" id="regras">
@@ -450,12 +479,6 @@
     </div>
   </details>
 
-  <div class="novo">
-    <a href="palpite.html" class="btn block" id="btn-novo">＋ Novo palpite</a>
-    <p id="prazo-aviso" style="display:none; margin:8px 0 0; color:var(--muted); font-size:0.9rem; text-align:center;">
-      🔒 Prazo de envio encerrado em <b>11/06/2026 às 16h00</b>. Os palpites podem apenas ser consultados.
-    </p>
-  </div>
   <div id="lista"></div>
 </div>
 
@@ -500,6 +523,44 @@ function renderPremios(n) {
   [1, 2, 3].forEach(pos => {
     document.getElementById("premio-" + pos).textContent = brl(total * RATEIO[pos]);
   });
+}
+
+function normalizarResultado(valor) {
+  if (valor == null || valor === "") return null;
+  if (Array.isArray(valor) && valor.length >= 2) {
+    const casa = Number(valor[0]);
+    const fora = Number(valor[1]);
+    return Number.isFinite(casa) && Number.isFinite(fora) ? [casa, fora] : null;
+  }
+  if (typeof valor === "object") {
+    const casa = Number(valor.time1 ?? valor.casa ?? valor.local ?? valor[0]);
+    const fora = Number(valor.time2 ?? valor.fora ?? valor.visitante ?? valor[1]);
+    return Number.isFinite(casa) && Number.isFinite(fora) ? [casa, fora] : null;
+  }
+  if (typeof valor === "string") {
+    const texto = valor.replace(/\s+/g, "");
+    const match = texto.match(/^(\d+)x(\d+)$/i) || texto.match(/^(\d+)-(\d+)$/);
+    if (match) return [Number(match[1]), Number(match[2])];
+  }
+  return null;
+}
+
+function textoResultado(resultado) {
+  const normalizado = normalizarResultado(resultado);
+  return normalizado ? `${normalizado[0]} x ${normalizado[1]}` : null;
+}
+
+function pontosPalpite(palpite, resultado) {
+  const jogo = normalizarResultado(resultado);
+  if (!jogo || !Array.isArray(palpite) || palpite.length < 2) return null;
+  const casaPalpite = Number(palpite[0]);
+  const foraPalpite = Number(palpite[1]);
+  if (!Number.isFinite(casaPalpite) || !Number.isFinite(foraPalpite)) return null;
+  if (casaPalpite === jogo[0] && foraPalpite === jogo[1]) return 5;
+  const diffPalpite = casaPalpite - foraPalpite;
+  const diffResultado = jogo[0] - jogo[1];
+  if ((diffPalpite === 0 && diffResultado === 0) || (diffPalpite > 0 && diffResultado > 0) || (diffPalpite < 0 && diffResultado < 0)) return 3;
+  return 0;
 }
 
 // ---- Classificação embutida (via JSONP do doGet, evita CORS em site estático) ----
@@ -700,15 +761,6 @@ function escapeHtml(s) {
   return s.replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
 }
 
-if (prazoEncerrado()) {
-  const btnNovo = document.getElementById("btn-novo");
-  btnNovo.removeAttribute("href");
-  btnNovo.setAttribute("aria-disabled", "true");
-  btnNovo.style.opacity = "0.5";
-  btnNovo.style.pointerEvents = "none";
-  document.getElementById("prazo-aviso").style.display = "block";
-}
-
 render();
 </script>
 
@@ -809,18 +861,27 @@ render();
    .sort((a, b) => a.inicio - b.inicio);
 
   const DURACAO_MS = 115 * 60 * 1000; // ~115 min cobre os 90' + intervalo + acréscimos
+  const ANTECIPACAO_MS = 2 * 60 * 60 * 1000;
   const card = document.getElementById("jogo-card");
   const statusText = document.getElementById("jogo-status-text");
   const corpo = document.getElementById("jogo-corpo");
+  window.addEventListener("bolao-api-data", render);
 
   function fl(nome) { return FLAGS[nome] || "🏳️"; }
   function nomeJogo(j) { return j.casa + " x " + j.fora; }
+  function obterItemApi(jogo) {
+    const jogos = window.__bolaoApiData && window.__bolaoApiData.palpites && Array.isArray(window.__bolaoApiData.palpites.jogos)
+      ? window.__bolaoApiData.palpites.jogos
+      : [];
+    return jogos.find(x => x.time1 === jogo.casa && x.time2 === jogo.fora) || null;
+  }
+  function jogoEmAndamento(jogo, agora = Date.now()) {
+    const inicio = jogo.inicio.getTime();
+    return agora >= inicio - ANTECIPACAO_MS && agora < inicio + DURACAO_MS;
+  }
   function jogoAtualOuProximo() {
     const agora = Date.now();
-    const aoVivo = JOGOS.filter(j => {
-      const t = j.inicio.getTime();
-      return agora >= t && agora < t + DURACAO_MS;
-    });
+    const aoVivo = JOGOS.filter(j => jogoEmAndamento(j, agora));
     if (aoVivo.length) return { tipo: "ao-vivo", jogos: aoVivo };
     const proximo = JOGOS.find(j => j.inicio.getTime() > agora);
     if (proximo) return { tipo: "proximo", jogos: [proximo] };
@@ -856,16 +917,17 @@ render();
     corpoModal.innerHTML = '<div class="modal-loading">Carregando palpites…</div>';
 
     carregarDados(data => {
-      const jogos = data && data.palpites && Array.isArray(data.palpites.jogos) ? data.palpites.jogos : [];
       if (!info.jogos.length) {
         corpoModal.innerHTML = '<div class="modal-empty">Nenhum jogo encontrado para exibir os palpites.</div>';
         return;
       }
       const blocos = info.jogos.map(jogo => {
-        const item = jogos.find(x => x.time1 === jogo.casa && x.time2 === jogo.fora);
+        const item = obterItemApi(jogo);
         if (!item || !item.palpites) {
           return `<div class="modal-empty">Não foi possível localizar palpites para ${escapeHtml(nomeJogo(jogo))}.</div>`;
         }
+        const resultado = normalizarResultado(item.resultado);
+        const aoVivoAgora = jogoEmAndamento(jogo);
         const entradas = Object.entries(item.palpites)
           .map(([nome, palpite]) => ({
             nome,
@@ -873,21 +935,22 @@ render();
             fora: Array.isArray(palpite) ? palpite[1] : null,
           }))
           .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
-        const lista = entradas.map(p => `
-          <div class="palpite-item">
+        const lista = entradas.map(p => {
+          const pontos = resultado ? pontosPalpite([p.casa, p.fora], item.resultado) : null;
+          const resumoPontos = pontos === 5 ? "+5 pontos" : pontos === 3 ? "+3 pontos" : "Não pontuado";
+          return `
+          <div class="palpite-item ${pontos}-pontos">
             <div class="palpite-info">
               <div class="palpite-nome">${escapeHtml(p.nome)}</div>
+              <div class="palpite-meta">${resultado ? escapeHtml(resumoPontos) : "Aguardando resultado"}</div>
             </div>
             <div class="palpite-score">${p.casa} x ${p.fora}</div>
           </div>
-        `).join("");
+        `;
+        }).join("");
         return `
           <section class="card" style="margin: 0 0 12px;">
-            <div class="card-top">
-              <div class="card-nome">${escapeHtml(nomeJogo(jogo))}</div>
-              <span class="badge rascunho">Grupo ${escapeHtml(jogo.grupo)}</span>
-            </div>
-            <div class="card-meta">${escapeHtml(jogo.inicio.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }))} · ${escapeHtml(jogo.cidade)}</div>
+            ${resultado ? `<div class="jogo-resultado">${resultado[0]} x ${resultado[1]}</div><div class="jogo-resultado-label">${aoVivoAgora ? "Placar atual" : "Resultado final"}</div>` : ""}
             <div class="modal-list">${lista}</div>
           </section>
         `;
@@ -939,28 +1002,35 @@ render();
 
   function render() {
     const agora = Date.now();
-    const aoVivo = JOGOS.filter(j => {
-      const t = j.inicio.getTime();
-      return agora >= t && agora < t + DURACAO_MS;
-    });
-    const proximo = JOGOS.find(j => j.inicio.getTime() > agora);
+    const aoVivo = JOGOS.filter(j => jogoEmAndamento(j, agora));
+    const proximo = JOGOS.find(j => j.inicio.getTime() > agora + ANTECIPACAO_MS);
 
     card.style.display = "block";
 
     if (aoVivo.length) {
+      const html = aoVivo.map(j => {
+        const item = obterItemApi(j);
+        const resultado = item ? normalizarResultado(item.resultado) : null;
+        const central = resultado
+          ? `<div><div class="jogo-resultado">${resultado[0]} x ${resultado[1]}</div><div class="jogo-resultado-label">Placar atual</div></div>`
+          : '<span class="jogo-vs">×</span>';
+        return confronto(j, central) + infoLinha(j);
+      }).join("");
       card.classList.add("live");
       statusText.textContent = aoVivo.length > 1 ? "🔴 Ao vivo agora" : "🔴 Ao vivo";
-      corpo.innerHTML = aoVivo.map(j => confronto(j, '<span class="jogo-vs">×</span>') + infoLinha(j)).join("");
+      corpo.innerHTML = html;
       return;
     }
 
     card.classList.remove("live");
     if (proximo) {
-      statusText.textContent = "⏭️ Próximo jogo";
+      const item = obterItemApi(proximo);
+      const resultado = item ? normalizarResultado(item.resultado) : null;
+      statusText.textContent = resultado ? "🏁 Resultado registrado" : "⏭️ Próximo jogo";
       corpo.innerHTML =
-        confronto(proximo, `<div class="jogo-hora">${hhmm(proximo.inicio)}</div>`) +
+        confronto(proximo, resultado ? `<div><div class="jogo-resultado">${resultado[0]} x ${resultado[1]}</div><div class="jogo-resultado-label">Resultado final</div></div>` : `<div class="jogo-hora">${hhmm(proximo.inicio)}</div>`) +
         infoLinha(proximo) +
-        `<div class="jogo-count">Começa em <b id="jogo-countdown">${fmtRestante(proximo.inicio.getTime() - agora)}</b></div>`;
+        (resultado ? "" : `<div class="jogo-count">Começa em <b id="jogo-countdown">${fmtRestante(proximo.inicio.getTime() - agora)}</b></div>`);
       return;
     }
 
@@ -975,8 +1045,8 @@ render();
   setInterval(() => {
     const agora = Date.now();
     const cd = document.getElementById("jogo-countdown");
-    const aoVivo = JOGOS.some(j => agora >= j.inicio.getTime() && agora < j.inicio.getTime() + DURACAO_MS);
-    const proximo = JOGOS.find(j => j.inicio.getTime() > agora);
+    const aoVivo = JOGOS.some(j => jogoEmAndamento(j, agora));
+    const proximo = JOGOS.find(j => j.inicio.getTime() > agora + ANTECIPACAO_MS);
     const estado = aoVivo ? "vivo" : (proximo ? "prox:" + proximo.inicio.getTime() : "fim");
     if (estado !== ultimoEstado) { render(); ultimoEstado = estado; }
     else if (cd && proximo) { cd.textContent = fmtRestante(proximo.inicio.getTime() - agora); }
