@@ -290,6 +290,81 @@
   .jogo-info b { color: var(--text); }
   .jogo-count { margin-top: 12px; text-align: center; font-weight: 700; color: var(--text); font-size: 0.95rem; }
   .jogo-count b { color: var(--yellow); font-variant-numeric: tabular-nums; }
+
+  .jogo-actions { display: flex; justify-content: center; margin-top: 14px; }
+  .jogo-actions .btn { min-width: 180px; }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.72);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 50;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    width: min(760px, 100%);
+    max-height: min(82vh, 760px);
+    overflow: hidden;
+    background: linear-gradient(180deg, rgba(27,29,36,0.98), rgba(18,19,23,0.98));
+    border: 1px solid rgba(255, 204, 41, 0.24);
+    border-radius: 18px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 18px 18px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-header h3 { margin: 0; font-size: 1.05rem; }
+  .modal-header p { margin: 6px 0 0; color: var(--muted); font-size: 0.9rem; }
+  .modal-close {
+    border: 1px solid var(--border);
+    background: var(--card-2);
+    color: var(--text);
+    border-radius: 999px;
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+    cursor: pointer;
+    flex: 0 0 auto;
+  }
+  .modal-body { padding: 16px 18px 18px; overflow: auto; }
+  .modal-loading, .modal-empty {
+    color: var(--muted);
+    text-align: center;
+    padding: 26px 10px;
+  }
+  .modal-list { display: grid; gap: 10px; }
+  .palpite-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+  }
+  .palpite-info { min-width: 0; }
+  .palpite-nome { font-weight: 800; word-break: break-word; }
+  .palpite-meta { margin-top: 4px; color: var(--muted); font-size: 0.84rem; }
+  .palpite-score {
+    flex: 0 0 auto;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--yellow);
+    text-align: right;
+    white-space: nowrap;
+  }
 </style>
 </head>
 <body>
@@ -310,6 +385,9 @@
   <section class="jogo-card" id="jogo-card" aria-live="polite" style="display:none;">
     <div class="jogo-status"><span class="dot"></span><span id="jogo-status-text"></span></div>
     <div id="jogo-corpo"></div>
+    <div class="jogo-actions">
+      <button type="button" class="btn ghost" id="btn-ver-palpites">👀 Ver palpites</button>
+    </div>
   </section>
 
   <section class="stats" aria-label="Resumo do bolão">
@@ -381,6 +459,21 @@
   <div id="lista"></div>
 </div>
 
+<div class="modal-backdrop" id="palpite-modal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="palpite-modal-title">
+    <div class="modal-header">
+      <div>
+        <h3 id="palpite-modal-title">Palpites do jogo</h3>
+        <p id="palpite-modal-subtitle"></p>
+      </div>
+      <button type="button" class="modal-close" id="btn-fechar-modal" aria-label="Fechar modal">✕</button>
+    </div>
+    <div class="modal-body" id="palpite-modal-body">
+      <div class="modal-loading">Carregando palpites…</div>
+    </div>
+  </div>
+</div>
+
 <script>
 const COLLECTION_KEY = "bolao-palpites";
 const TOTAL_JOGOS = 72;
@@ -394,6 +487,7 @@ function prazoEncerrado() { return Date.now() > PRAZO_FINAL.getTime(); }
 const ENDPOINT_PALPITES = "https://script.google.com/macros/s/AKfycbxAlA5cS5CPc7Ei_RArqdyB2BNiZ9Qo0EVASM8QHvJNITqioK4fVLw7wDwxxwzARF0P/exec";
 const VALOR_PARTICIPACAO = 50; // R$ por participante
 const RATEIO = { 1: 0.70, 2: 0.20, 3: 0.10 };
+window.__bolaoApiData = window.__bolaoApiData || null;
 
 function brl(v) {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -457,6 +551,8 @@ function renderPremios(n) {
       }
       return;
     }
+    window.__bolaoApiData = data;
+    window.dispatchEvent(new CustomEvent("bolao-api-data", { detail: data }));
     dados = normalizar(data.ranking || []);
     // nº de participantes: usa o informado pelo doGet, senão o tamanho da lista
     const nPart = Number(data.participantes ?? data.total ?? dados.length);
@@ -622,8 +718,8 @@ render();
 // Fonte: calendário oficial divulgado após o sorteio (06/12/2025).
 (function jogoAoVivo() {
   const FLAGS = {
-    "México":"🇲🇽","África do Sul":"🇿🇦","Coreia do Sul":"🇰🇷","Rep Tcheca":"🇨🇿",
-    "Canadá":"🇨🇦","Bósnia":"🇧🇦","Catar":"🇶🇦","Suíça":"🇨🇭",
+    "México":"🇲🇽","África do Sul":"🇿🇦","Coreia do Sul":"🇰🇷","Tchéquia":"🇨🇿",
+    "Canadá":"🇨🇦","Bósnia e Herzegovina":"🇧🇦","Catar":"🇶🇦","Suíça":"🇨🇭",
     "Brasil":"🇧🇷","Marrocos":"🇲🇦","Haiti":"🇭🇹","Escócia":"🏴󠁧󠁢󠁳󠁣󠁴󠁿",
     "EUA":"🇺🇸","Paraguai":"🇵🇾","Austrália":"🇦🇺","Turquia":"🇹🇷",
     "Alemanha":"🇩🇪","Curaçao":"🇨🇼","Costa do Marfim":"🇨🇮","Equador":"🇪🇨",
@@ -632,14 +728,14 @@ render();
     "Espanha":"🇪🇸","Cabo Verde":"🇨🇻","Arábia Saudita":"🇸🇦","Uruguai":"🇺🇾",
     "França":"🇫🇷","Senegal":"🇸🇳","Iraque":"🇮🇶","Noruega":"🇳🇴",
     "Argentina":"🇦🇷","Argélia":"🇩🇿","Áustria":"🇦🇹","Jordânia":"🇯🇴",
-    "Portugal":"🇵🇹","Congo":"🇨🇩","Uzbequistão":"🇺🇿","Colômbia":"🇨🇴",
+    "Portugal":"🇵🇹","Congo (RD)":"🇨🇩","Uzbequistão":"🇺🇿","Colômbia":"🇨🇴",
     "Inglaterra":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","Croácia":"🇭🇷","Gana":"🇬🇭","Panamá":"🇵🇦",
   };
   // [kickoff UTC, grupo, mandante, visitante, cidade]
   const JOGOS = [
     ["2026-06-11T19:00:00Z","A","México","África do Sul","Cidade do México"],
-    ["2026-06-12T02:00:00Z","A","Coreia do Sul","Rep Tcheca","Zapopan"],
-    ["2026-06-12T19:00:00Z","B","Canadá","Bósnia","Toronto"],
+    ["2026-06-12T02:00:00Z","A","Coreia do Sul","Tchéquia","Zapopan"],
+    ["2026-06-12T19:00:00Z","B","Canadá","Bósnia e Herzegovina","Toronto"],
     ["2026-06-13T01:00:00Z","D","EUA","Paraguai","Los Angeles"],
     ["2026-06-13T19:00:00Z","B","Catar","Suíça","San Francisco"],
     ["2026-06-13T22:00:00Z","C","Brasil","Marrocos","Nova Jersey"],
@@ -657,12 +753,12 @@ render();
     ["2026-06-16T22:00:00Z","I","Iraque","Noruega","Boston"],
     ["2026-06-17T01:00:00Z","J","Argentina","Argélia","Kansas City"],
     ["2026-06-17T04:00:00Z","J","Áustria","Jordânia","San Francisco"],
-    ["2026-06-17T17:00:00Z","K","Portugal","Congo","Houston"],
+    ["2026-06-17T17:00:00Z","K","Portugal","Congo (RD)","Houston"],
     ["2026-06-17T20:00:00Z","L","Inglaterra","Croácia","Dallas"],
     ["2026-06-17T23:00:00Z","L","Gana","Panamá","Toronto"],
     ["2026-06-18T02:00:00Z","K","Uzbequistão","Colômbia","Cidade do México"],
-    ["2026-06-18T16:00:00Z","A","Rep Tcheca","África do Sul","Atlanta"],
-    ["2026-06-18T19:00:00Z","B","Suíça","Bósnia","Los Angeles"],
+    ["2026-06-18T16:00:00Z","A","Tchéquia","África do Sul","Atlanta"],
+    ["2026-06-18T19:00:00Z","B","Suíça","Bósnia e Herzegovina","Los Angeles"],
     ["2026-06-18T22:00:00Z","B","Canadá","Catar","Vancouver"],
     ["2026-06-19T01:00:00Z","A","México","Coreia do Sul","Zapopan"],
     ["2026-06-19T19:00:00Z","D","EUA","Austrália","Seattle"],
@@ -684,12 +780,12 @@ render();
     ["2026-06-23T17:00:00Z","K","Portugal","Uzbequistão","Houston"],
     ["2026-06-23T20:00:00Z","L","Inglaterra","Gana","Boston"],
     ["2026-06-23T23:00:00Z","L","Panamá","Croácia","Toronto"],
-    ["2026-06-24T02:00:00Z","K","Colômbia","Congo","Zapopan"],
+    ["2026-06-24T02:00:00Z","K","Colômbia","Congo (RD)","Zapopan"],
     ["2026-06-24T19:00:00Z","B","Suíça","Canadá","Vancouver"],
-    ["2026-06-24T19:00:00Z","B","Bósnia","Catar","Seattle"],
+    ["2026-06-24T19:00:00Z","B","Bósnia e Herzegovina","Catar","Seattle"],
     ["2026-06-24T22:00:00Z","C","Escócia","Brasil","Miami"],
     ["2026-06-24T22:00:00Z","C","Marrocos","Haiti","Atlanta"],
-    ["2026-06-25T01:00:00Z","A","Rep Tcheca","México","Cidade do México"],
+    ["2026-06-25T01:00:00Z","A","Tchéquia","México","Cidade do México"],
     ["2026-06-25T01:00:00Z","A","África do Sul","Coreia do Sul","Guadalupe"],
     ["2026-06-25T20:00:00Z","E","Equador","Alemanha","Nova Jersey"],
     ["2026-06-25T20:00:00Z","E","Curaçao","Costa do Marfim","Filadélfia"],
@@ -706,7 +802,7 @@ render();
     ["2026-06-27T21:00:00Z","L","Panamá","Inglaterra","Nova Jersey"],
     ["2026-06-27T21:00:00Z","L","Croácia","Gana","Filadélfia"],
     ["2026-06-27T23:30:00Z","K","Colômbia","Portugal","Miami"],
-    ["2026-06-27T23:30:00Z","K","Congo","Uzbequistão","Atlanta"],
+    ["2026-06-27T23:30:00Z","K","Congo (RD)","Uzbequistão","Atlanta"],
     ["2026-06-28T02:00:00Z","J","Argélia","Áustria","Kansas City"],
     ["2026-06-28T02:00:00Z","J","Jordânia","Argentina","Dallas"],
   ].map(j => ({ inicio: new Date(j[0]), grupo: j[1], casa: j[2], fora: j[3], cidade: j[4] }))
@@ -718,6 +814,99 @@ render();
   const corpo = document.getElementById("jogo-corpo");
 
   function fl(nome) { return FLAGS[nome] || "🏳️"; }
+  function nomeJogo(j) { return j.casa + " x " + j.fora; }
+  function jogoAtualOuProximo() {
+    const agora = Date.now();
+    const aoVivo = JOGOS.filter(j => {
+      const t = j.inicio.getTime();
+      return agora >= t && agora < t + DURACAO_MS;
+    });
+    if (aoVivo.length) return { tipo: "ao-vivo", jogos: aoVivo };
+    const proximo = JOGOS.find(j => j.inicio.getTime() > agora);
+    if (proximo) return { tipo: "proximo", jogos: [proximo] };
+    return { tipo: "fim", jogos: [] };
+  }
+  function carregarDados(onOk, onErro) {
+    if (window.__bolaoApiData) {
+      onOk(window.__bolaoApiData);
+      return;
+    }
+    const cb = "__palpitesCb_" + Date.now();
+    const s = document.createElement("script");
+    let done = false;
+    const cleanup = () => { try { delete window[cb]; } catch (e) { window[cb] = undefined; } s.remove(); clearTimeout(to); };
+    const to = setTimeout(() => { if (!done) { cleanup(); onErro(); } }, 12000);
+    window[cb] = (data) => { done = true; cleanup(); window.__bolaoApiData = data; window.dispatchEvent(new CustomEvent("bolao-api-data", { detail: data })); onOk(data); };
+    s.onerror = () => { if (!done) { cleanup(); onErro(); } };
+    s.src = ENDPOINT_PALPITES + "?callback=" + cb + "&t=" + Date.now();
+    document.body.appendChild(s);
+  }
+  function abrirModal() {
+    const modal = document.getElementById("palpite-modal");
+    const titulo = document.getElementById("palpite-modal-title");
+    const subtitulo = document.getElementById("palpite-modal-subtitle");
+    const corpoModal = document.getElementById("palpite-modal-body");
+    const info = jogoAtualOuProximo();
+
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    titulo.textContent = info.tipo === "ao-vivo" ? "Palpites do jogo ao vivo" : info.tipo === "proximo" ? "Palpites do próximo jogo" : "Palpites";
+    subtitulo.textContent = info.jogos.length ? nomeJogo(info.jogos[0]) : "Sem jogo disponível no momento";
+    corpoModal.innerHTML = '<div class="modal-loading">Carregando palpites…</div>';
+
+    carregarDados(data => {
+      const jogos = data && data.palpites && Array.isArray(data.palpites.jogos) ? data.palpites.jogos : [];
+      if (!info.jogos.length) {
+        corpoModal.innerHTML = '<div class="modal-empty">Nenhum jogo encontrado para exibir os palpites.</div>';
+        return;
+      }
+      const blocos = info.jogos.map(jogo => {
+        const item = jogos.find(x => x.time1 === jogo.casa && x.time2 === jogo.fora);
+        if (!item || !item.palpites) {
+          return `<div class="modal-empty">Não foi possível localizar palpites para ${escapeHtml(nomeJogo(jogo))}.</div>`;
+        }
+        const entradas = Object.entries(item.palpites)
+          .map(([nome, palpite]) => ({
+            nome,
+            casa: Array.isArray(palpite) ? palpite[0] : null,
+            fora: Array.isArray(palpite) ? palpite[1] : null,
+          }))
+          .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+        const lista = entradas.map(p => `
+          <div class="palpite-item">
+            <div class="palpite-info">
+              <div class="palpite-nome">${escapeHtml(p.nome)}</div>
+            </div>
+            <div class="palpite-score">${p.casa} x ${p.fora}</div>
+          </div>
+        `).join("");
+        return `
+          <section class="card" style="margin: 0 0 12px;">
+            <div class="card-top">
+              <div class="card-nome">${escapeHtml(nomeJogo(jogo))}</div>
+              <span class="badge rascunho">Grupo ${escapeHtml(jogo.grupo)}</span>
+            </div>
+            <div class="card-meta">${escapeHtml(jogo.inicio.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }))} · ${escapeHtml(jogo.cidade)}</div>
+            <div class="modal-list">${lista}</div>
+          </section>
+        `;
+      }).join("");
+      corpoModal.innerHTML = blocos;
+    }, () => {
+      corpoModal.innerHTML = '<div class="modal-empty">Não foi possível carregar os palpites agora.</div>';
+    });
+  }
+  function fecharModal() {
+    const modal = document.getElementById("palpite-modal");
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+  document.getElementById("btn-ver-palpites").addEventListener("click", abrirModal);
+  document.getElementById("btn-fechar-modal").addEventListener("click", fecharModal);
+  document.getElementById("palpite-modal").addEventListener("click", (e) => { if (e.target.id === "palpite-modal") fecharModal(); });
+  window.addEventListener("keydown", (e) => { if (e.key === "Escape") fecharModal(); });
   function confronto(j, central) {
     return `<div class="jogo-confronto">
       <div class="jogo-team">
