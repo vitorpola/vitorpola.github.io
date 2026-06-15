@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Jogos – Bolão da Copa 2026</title>
+<style>
+  :root {
+    --green: #009739;
+    --yellow: #ffcc29;
+    --blue: #002776;
+    --bg: #000000;
+    --card: #121317;
+    --card-2: #1b1d24;
+    --border: #2a2d38;
+    --text: #f2f4f8;
+    --muted: #9aa0ad;
+    --c1: #c2d72e;
+    --c2: #f2542d;
+    --c3: #e01f4f;
+    --c4: #7b2fb5;
+    --c5: #2d5bd8;
+    --c6: #7e72e8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  header { background: #000; padding: 0 16px 5px; text-align: center; }
+  .fifa-stack { position: relative; height: 64px; }
+  .fifa-stack .bar { position: absolute; top: 0; left: 50%; transform: translateX(-50%); border-radius: 0 0 20px 20px; }
+  .fifa-stack .b6 { width: 100%; height: 48px; background: var(--c6); z-index: 1; }
+  .fifa-stack .b5 { width: 100%; height: 40px; background: var(--c5); z-index: 2; }
+  .fifa-stack .b4 { width: 100%; height: 32px; background: var(--c4); z-index: 3; }
+  .fifa-stack .b3 { width: 100%; height: 24px; background: var(--c3); z-index: 4; }
+  .fifa-stack .b2 { width: 100%; height: 16px; background: var(--c2); z-index: 5; }
+  .fifa-stack .b1 { width: 100%; height: 8px; background: var(--c1); z-index: 6; }
+  header h1 { margin: 0; font-size: clamp(1.7rem, 6vw, 2.3rem); font-weight: 900; letter-spacing: -0.5px; text-transform: uppercase; }
+  header p { margin: 6px 0 0; color: var(--muted); font-size: 0.9rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+
+  .container { max-width: 720px; margin: 0 auto; padding: 16px; }
+
+  .nav-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--muted); font-size: 0.9rem; font-weight: 700;
+    text-decoration: none; margin-bottom: 16px;
+    padding: 8px 0;
+  }
+  .nav-back:hover { color: var(--text); }
+
+  .page-header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin-bottom: 6px;
+  }
+  .page-header h2 { margin: 0; font-size: 1.15rem; font-weight: 800; }
+  .api-status { color: var(--muted); font-size: 0.82rem; margin-bottom: 18px; min-height: 1.2em; }
+  .api-status.erro { color: #f85149; }
+
+  /* Filtros por status */
+  .filtros {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 18px;
+  }
+  .filtro-btn {
+    border: 1px solid var(--border); background: var(--card-2); color: var(--muted);
+    border-radius: 999px; padding: 10px 16px; min-height: 44px; font-size: 0.82rem; font-weight: 700;
+    cursor: pointer; transition: all 0.15s; -webkit-tap-highlight-color: transparent;
+  }
+  .filtro-btn:hover { color: var(--text); border-color: var(--text); }
+  .filtro-btn.ativo { background: var(--yellow); color: #1a1200; border-color: var(--yellow); }
+
+  /* Separador de data */
+  .data-sep {
+    font-size: 0.78rem; font-weight: 800; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--muted);
+    padding: 10px 0 6px;
+    border-top: 1px solid var(--border);
+    margin-top: 6px;
+  }
+  .data-sep:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+
+  /* Card de jogo */
+  .jogo-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .jogo-item:hover { border-color: rgba(255,204,41,0.4); background: var(--card-2); }
+  .jogo-item.live { border-color: rgba(224,31,79,0.55); background: linear-gradient(135deg, rgba(224,31,79,0.1), var(--card)); }
+
+  .jogo-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+  .jogo-meta { display: flex; align-items: center; gap: 8px; }
+  .grupo-tag {
+    font-size: 0.72rem; font-weight: 800; letter-spacing: 0.5px;
+    background: var(--card-2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 2px 8px; color: var(--muted);
+  }
+  .jogo-hora-tag { font-size: 0.82rem; font-weight: 700; color: var(--muted); }
+
+  .status-badge {
+    font-size: 0.72rem; font-weight: 800; letter-spacing: 0.5px;
+    padding: 3px 9px; border-radius: 999px; white-space: nowrap;
+  }
+  .status-badge.live { background: rgba(224,31,79,0.2); color: #ff4d6d; border: 1px solid rgba(224,31,79,0.4); }
+  .status-badge.fim  { background: rgba(0,151,57,0.15); color: #4ade80; border: 1px solid rgba(0,151,57,0.35); }
+  .status-badge.em-breve { background: var(--card-2); color: var(--muted); border: 1px solid var(--border); }
+
+  .confronto { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+  .team { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; min-width: 0; }
+  .team .flag { font-size: 1.9rem; line-height: 1; }
+  .team .nome { font-weight: 700; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+  .meio { text-align: center; min-width: 56px; }
+  .placar { font-size: 1.45rem; font-weight: 900; color: var(--yellow); line-height: 1; }
+  .placar-label { font-size: 0.65rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+  .vs-hora { font-size: 1.1rem; font-weight: 800; color: var(--yellow); line-height: 1.1; }
+  .vs-sub { font-size: 0.72rem; color: var(--muted); font-weight: 700; }
+
+  .jogo-rodape {
+    margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    color: var(--muted); font-size: 0.82rem;
+  }
+  .jogo-rodape .data-hora { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: capitalize; }
+  .ver-palpites-hint { font-size: 0.78rem; font-weight: 700; color: var(--muted); white-space: nowrap; }
+  .jogo-item:hover .ver-palpites-hint { color: var(--yellow); }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: none; align-items: center; justify-content: center;
+    padding: 16px; z-index: 50;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    width: min(760px, 100%);
+    max-height: min(88vh, 760px);
+    overflow: hidden;
+    background: linear-gradient(180deg, rgba(27,29,36,0.99), rgba(18,19,23,0.99));
+    border: 1px solid rgba(255,204,41,0.24);
+    border-radius: 18px;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.55);
+    display: flex; flex-direction: column;
+  }
+  .modal-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 14px; padding: 18px 18px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-titulo { margin: 0; font-size: 1.05rem; font-weight: 800; }
+  .modal-subtitulo { margin: 5px 0 0; color: var(--muted); font-size: 0.88rem; }
+  .modal-close {
+    border: 1px solid var(--border); background: var(--card-2); color: var(--text);
+    border-radius: 999px; width: 44px; height: 44px;
+    font-size: 1rem; cursor: pointer; flex: 0 0 auto;
+  }
+  .modal-body { padding: 16px 18px 18px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Resultado no topo do modal */
+  .modal-resultado {
+    text-align: center; margin-bottom: 14px;
+    padding-bottom: 14px; border-bottom: 1px solid var(--border);
+  }
+  .modal-resultado .placar-grande {
+    font-size: 2rem; font-weight: 900; color: var(--yellow);
+  }
+  .modal-resultado .resultado-label {
+    font-size: 0.75rem; color: var(--muted); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px; margin-top: 2px;
+  }
+
+  /* Lista de palpites */
+  .palpites-lista { display: grid; gap: 8px; }
+  .palpite-item {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.02);
+  }
+  .palpite-item.acerto-exato {
+    background: linear-gradient(45deg, rgba(0,151,57,0.35) 0%, rgba(0,151,57,0.12) 40%, rgba(255,255,255,0.02) 80%);
+    border-color: rgba(0,151,57,0.5);
+  }
+  .palpite-item.acerto-resultado {
+    background: linear-gradient(45deg, rgba(155,41,255,0.22) 0%, rgba(155,41,255,0.06) 40%, rgba(255,255,255,0.02) 80%);
+    border-color: rgba(155,41,255,0.3);
+  }
+  .p-nome { font-weight: 800; }
+  .p-pts { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+  .p-score { font-size: 1.05rem; font-weight: 800; color: var(--yellow); white-space: nowrap; }
+
+  .modal-loading, .modal-vazio { text-align: center; color: var(--muted); padding: 28px 12px; }
+
+  .skel { height: 46px; border-radius: 10px; margin: 8px 0;
+    background: linear-gradient(90deg, var(--card-2) 25%, var(--card) 50%, var(--card-2) 75%);
+    background-size: 200% 100%; animation: sk 1.2s infinite; }
+  @keyframes sk { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+</style>
+</head>
+<body>
+<header>
+  <div class="fifa-stack" aria-hidden="true">
+    <span class="bar b6"></span><span class="bar b5"></span><span class="bar b4"></span>
+    <span class="bar b3"></span><span class="bar b2"></span><span class="bar b1"></span>
+  </div>
+  <h1>Bolão da Copa 2026</h1>
+</header>
+
+<div class="container">
+  <a class="nav-back" href="index.html">← Início</a>
+
+  <div class="page-header">
+    <h2>Todos os Jogos</h2>
+  </div>
+  <div class="api-status" id="api-status">Carregando resultados…</div>
+
+  <div class="filtros" id="filtros">
+    <button class="filtro-btn" data-status="fim">🏁 Finalizados</button>
+    <button class="filtro-btn ativo" data-status="live">🔴 Ao vivo</button>
+    <button class="filtro-btn ativo" data-status="em-breve">⏭️ Próximos</button>
+  </div>
+
+  <div id="lista-jogos">
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+    <div class="skel"></div><div class="skel"></div>
+  </div>
+</div>
+
+<!-- Modal palpites -->
+<div class="modal-backdrop" id="modal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+    <div class="modal-header">
+      <div>
+        <h3 class="modal-titulo" id="modal-titulo"></h3>
+        <p class="modal-subtitulo" id="modal-subtitulo"></p>
+      </div>
+      <button class="modal-close" id="btn-fechar" aria-label="Fechar">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbxAlA5cS5CPc7Ei_RArqdyB2BNiZ9Qo0EVASM8QHvJNITqioK4fVLw7wDwxxwzARF0P/exec";
+const DURACAO_MS = 115 * 60 * 1000;
+
+const FLAGS = {
+  "México":"🇲🇽","África do Sul":"🇿🇦","Coreia do Sul":"🇰🇷","Tchéquia":"🇨🇿",
+  "Canadá":"🇨🇦","Bósnia e Herzegovina":"🇧🇦","Catar":"🇶🇦","Suíça":"🇨🇭",
+  "Brasil":"🇧🇷","Marrocos":"🇲🇦","Haiti":"🇭🇹","Escócia":"🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+  "EUA":"🇺🇸","Paraguai":"🇵🇾","Austrália":"🇦🇺","Turquia":"🇹🇷",
+  "Alemanha":"🇩🇪","Curaçao":"🇨🇼","Costa do Marfim":"🇨🇮","Equador":"🇪🇨",
+  "Holanda":"🇳🇱","Japão":"🇯🇵","Suécia":"🇸🇪","Tunísia":"🇹🇳",
+  "Bélgica":"🇧🇪","Egito":"🇪🇬","Irã":"🇮🇷","Nova Zelândia":"🇳🇿",
+  "Espanha":"🇪🇸","Cabo Verde":"🇨🇻","Arábia Saudita":"🇸🇦","Uruguai":"🇺🇾",
+  "França":"🇫🇷","Senegal":"🇸🇳","Iraque":"🇮🇶","Noruega":"🇳🇴",
+  "Argentina":"🇦🇷","Argélia":"🇩🇿","Áustria":"🇦🇹","Jordânia":"🇯🇴",
+  "Portugal":"🇵🇹","Congo (RD)":"🇨🇩","Uzbequistão":"🇺🇿","Colômbia":"🇨🇴",
+  "Inglaterra":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","Croácia":"🇭🇷","Gana":"🇬🇭","Panamá":"🇵🇦",
+};
+
+const JOGOS = [
+  ["2026-06-11T19:00:00Z","A","México","África do Sul","Cidade do México"],
+  ["2026-06-12T02:00:00Z","A","Coreia do Sul","Tchéquia","Zapopan"],
+  ["2026-06-12T19:00:00Z","B","Canadá","Bósnia e Herzegovina","Toronto"],
+  ["2026-06-13T01:00:00Z","D","EUA","Paraguai","Los Angeles"],
+  ["2026-06-13T19:00:00Z","B","Catar","Suíça","San Francisco"],
+  ["2026-06-13T22:00:00Z","C","Brasil","Marrocos","Nova Jersey"],
+  ["2026-06-14T01:00:00Z","C","Haiti","Escócia","Boston"],
+  ["2026-06-14T04:00:00Z","D","Austrália","Turquia","Vancouver"],
+  ["2026-06-14T17:00:00Z","E","Alemanha","Curaçao","Houston"],
+  ["2026-06-14T20:00:00Z","F","Holanda","Japão","Dallas"],
+  ["2026-06-14T23:00:00Z","E","Costa do Marfim","Equador","Filadélfia"],
+  ["2026-06-15T02:00:00Z","F","Suécia","Tunísia","Guadalupe"],
+  ["2026-06-15T16:00:00Z","H","Espanha","Cabo Verde","Atlanta"],
+  ["2026-06-15T19:00:00Z","G","Bélgica","Egito","Vancouver"],
+  ["2026-06-15T22:00:00Z","H","Arábia Saudita","Uruguai","Miami"],
+  ["2026-06-16T01:00:00Z","G","Irã","Nova Zelândia","Los Angeles"],
+  ["2026-06-16T19:00:00Z","I","França","Senegal","Nova Jersey"],
+  ["2026-06-16T22:00:00Z","I","Iraque","Noruega","Boston"],
+  ["2026-06-17T01:00:00Z","J","Argentina","Argélia","Kansas City"],
+  ["2026-06-17T04:00:00Z","J","Áustria","Jordânia","San Francisco"],
+  ["2026-06-17T17:00:00Z","K","Portugal","Congo (RD)","Houston"],
+  ["2026-06-17T20:00:00Z","L","Inglaterra","Croácia","Dallas"],
+  ["2026-06-17T23:00:00Z","L","Gana","Panamá","Toronto"],
+  ["2026-06-18T02:00:00Z","K","Uzbequistão","Colômbia","Cidade do México"],
+  ["2026-06-18T16:00:00Z","A","Tchéquia","África do Sul","Atlanta"],
+  ["2026-06-18T19:00:00Z","B","Suíça","Bósnia e Herzegovina","Los Angeles"],
+  ["2026-06-18T22:00:00Z","B","Canadá","Catar","Vancouver"],
+  ["2026-06-19T01:00:00Z","A","México","Coreia do Sul","Zapopan"],
+  ["2026-06-19T19:00:00Z","D","EUA","Austrália","Seattle"],
+  ["2026-06-19T22:00:00Z","C","Escócia","Marrocos","Boston"],
+  ["2026-06-20T00:30:00Z","C","Brasil","Haiti","Filadélfia"],
+  ["2026-06-20T03:00:00Z","D","Turquia","Paraguai","San Francisco"],
+  ["2026-06-20T17:00:00Z","F","Holanda","Suécia","Houston"],
+  ["2026-06-20T20:00:00Z","E","Alemanha","Costa do Marfim","Toronto"],
+  ["2026-06-21T03:00:00Z","E","Equador","Curaçao","Kansas City"],
+  ["2026-06-21T04:00:00Z","F","Tunísia","Japão","Guadalupe"],
+  ["2026-06-21T16:00:00Z","H","Espanha","Arábia Saudita","Atlanta"],
+  ["2026-06-21T19:00:00Z","G","Bélgica","Irã","Los Angeles"],
+  ["2026-06-21T22:00:00Z","H","Uruguai","Cabo Verde","Miami"],
+  ["2026-06-22T01:00:00Z","G","Nova Zelândia","Egito","Vancouver"],
+  ["2026-06-22T17:00:00Z","J","Argentina","Áustria","Dallas"],
+  ["2026-06-22T21:00:00Z","I","França","Iraque","Filadélfia"],
+  ["2026-06-23T00:00:00Z","I","Noruega","Senegal","Nova Jersey"],
+  ["2026-06-23T03:00:00Z","J","Jordânia","Argélia","San Francisco"],
+  ["2026-06-23T17:00:00Z","K","Portugal","Uzbequistão","Houston"],
+  ["2026-06-23T20:00:00Z","L","Inglaterra","Gana","Boston"],
+  ["2026-06-23T23:00:00Z","L","Panamá","Croácia","Toronto"],
+  ["2026-06-24T02:00:00Z","K","Colômbia","Congo (RD)","Zapopan"],
+  ["2026-06-24T19:00:00Z","B","Suíça","Canadá","Vancouver"],
+  ["2026-06-24T19:00:00Z","B","Bósnia e Herzegovina","Catar","Seattle"],
+  ["2026-06-24T22:00:00Z","C","Escócia","Brasil","Miami"],
+  ["2026-06-24T22:00:00Z","C","Marrocos","Haiti","Atlanta"],
+  ["2026-06-25T01:00:00Z","A","Tchéquia","México","Cidade do México"],
+  ["2026-06-25T01:00:00Z","A","África do Sul","Coreia do Sul","Guadalupe"],
+  ["2026-06-25T20:00:00Z","E","Equador","Alemanha","Nova Jersey"],
+  ["2026-06-25T20:00:00Z","E","Curaçao","Costa do Marfim","Filadélfia"],
+  ["2026-06-25T23:00:00Z","F","Japão","Suécia","Dallas"],
+  ["2026-06-25T23:00:00Z","F","Tunísia","Holanda","Kansas City"],
+  ["2026-06-26T02:00:00Z","D","Turquia","EUA","Los Angeles"],
+  ["2026-06-26T02:00:00Z","D","Paraguai","Austrália","San Francisco"],
+  ["2026-06-26T19:00:00Z","I","Noruega","França","Boston"],
+  ["2026-06-26T19:00:00Z","I","Senegal","Iraque","Toronto"],
+  ["2026-06-27T00:00:00Z","H","Uruguai","Espanha","Zapopan"],
+  ["2026-06-27T00:00:00Z","H","Cabo Verde","Arábia Saudita","Houston"],
+  ["2026-06-27T03:00:00Z","G","Egito","Irã","Seattle"],
+  ["2026-06-27T03:00:00Z","G","Nova Zelândia","Bélgica","Vancouver"],
+  ["2026-06-27T21:00:00Z","L","Panamá","Inglaterra","Nova Jersey"],
+  ["2026-06-27T21:00:00Z","L","Croácia","Gana","Filadélfia"],
+  ["2026-06-27T23:30:00Z","K","Colômbia","Portugal","Miami"],
+  ["2026-06-27T23:30:00Z","K","Congo (RD)","Uzbequistão","Atlanta"],
+  ["2026-06-28T02:00:00Z","J","Argélia","Áustria","Kansas City"],
+  ["2026-06-28T02:00:00Z","J","Jordânia","Argentina","Dallas"],
+].map((j, i) => ({ id: i, inicio: new Date(j[0]), grupo: j[1], casa: j[2], fora: j[3], cidade: j[4] }))
+ .sort((a, b) => a.inicio - b.inicio);
+
+let apiData = null;
+const filtrosAtivos = new Set(["live", "em-breve"]);
+
+function fl(nome) { return FLAGS[nome] || "🏳️"; }
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+function hhmm(d) { return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); }
+function dataBR(d) { return d.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" }); }
+function dataCurta(d) { return d.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" }); }
+function dataChave(d) { return d.toLocaleDateString("pt-BR"); }
+
+function obterResultado(jogo) {
+  if (!apiData || !apiData.palpites) return null;
+  const item = apiData.palpites.jogos.find(x => x.time1 === jogo.casa && x.time2 === jogo.fora);
+  if (!item || !item.resultado) return null;
+  return item.resultado; // [n, n]
+}
+
+function obterPalpites(jogo) {
+  if (!apiData || !apiData.palpites) return null;
+  const item = apiData.palpites.jogos.find(x => x.time1 === jogo.casa && x.time2 === jogo.fora);
+  return item || null;
+}
+
+function statusJogo(jogo) {
+  const agora = Date.now();
+  const t = jogo.inicio.getTime();
+  if (agora >= t && agora < t + DURACAO_MS) return "live";
+  if (agora >= t + DURACAO_MS) return "fim";
+  return "em-breve";
+}
+
+function renderLista() {
+  const filtrados = JOGOS.filter(j => filtrosAtivos.has(statusJogo(j)));
+  const porData = {};
+  filtrados.forEach(j => {
+    const k = dataChave(j.inicio);
+    if (!porData[k]) porData[k] = { label: dataBR(j.inicio), jogos: [] };
+    porData[k].jogos.push(j);
+  });
+
+  const html = Object.values(porData).map(bloco => {
+    const cards = bloco.jogos.map(j => {
+      const st = statusJogo(j);
+      const res = obterResultado(j);
+      const statusLabel = st === "live" ? "🔴 Ao vivo" : st === "fim" ? "Finalizado" : hhmm(j.inicio);
+      const statusCls = st;
+
+      const meio = res
+        ? `<div class="meio"><div class="placar">${res[0]} x ${res[1]}</div><div class="placar-label">${st === "live" ? "Placar atual" : "Resultado"}</div></div>`
+        : `<div class="meio"><div class="vs-hora">${hhmm(j.inicio)}</div><div class="vs-sub">vs</div></div>`;
+
+      return `
+      <div class="jogo-item${st === "live" ? " live" : ""}" data-id="${j.id}" role="button" tabindex="0">
+        <div class="jogo-top">
+          <div class="jogo-meta">
+            <span class="grupo-tag">Grupo ${esc(j.grupo)}</span>
+          </div>
+          <span class="status-badge ${statusCls}">${esc(statusLabel)}</span>
+        </div>
+        <div class="confronto">
+          <div class="team"><span class="flag">${fl(j.casa)}</span><span class="nome">${esc(j.casa)}</span></div>
+          ${meio}
+          <div class="team"><span class="flag">${fl(j.fora)}</span><span class="nome">${esc(j.fora)}</span></div>
+        </div>
+        <div class="jogo-rodape">
+          <span class="data-hora">📅 ${esc(dataCurta(j.inicio))} · ${hhmm(j.inicio)}</span>
+          <span class="ver-palpites-hint">Ver palpites →</span>
+        </div>
+      </div>`;
+    }).join("");
+
+    return `<div class="data-sep">${bloco.label}</div>${cards}`;
+  }).join("");
+
+  document.getElementById("lista-jogos").innerHTML = html || '<p style="color:var(--muted);text-align:center">Nenhum jogo para os filtros selecionados.</p>';
+
+  document.querySelectorAll(".jogo-item").forEach(el => {
+    el.addEventListener("click", () => abrirModal(JOGOS[+el.dataset.id]));
+    el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") abrirModal(JOGOS[+el.dataset.id]); });
+  });
+}
+
+function pontos(palpite, resultado) {
+  if (!resultado || !Array.isArray(palpite)) return null;
+  const [pc, pf] = [Number(palpite[0]), Number(palpite[1])];
+  const [rc, rf] = [Number(resultado[0]), Number(resultado[1])];
+  if (!isFinite(pc) || !isFinite(pf)) return null;
+  if (pc === rc && pf === rf) return 5;
+  const dp = pc - pf, dr = rc - rf;
+  if ((dp === 0 && dr === 0) || (dp > 0 && dr > 0) || (dp < 0 && dr < 0)) return 3;
+  return 0;
+}
+
+function abrirModal(jogo) {
+  const modal = document.getElementById("modal");
+  const titulo = document.getElementById("modal-titulo");
+  const subtitulo = document.getElementById("modal-subtitulo");
+  const body = document.getElementById("modal-body");
+
+  titulo.textContent = `${fl(jogo.casa)} ${jogo.casa}  ×  ${jogo.fora} ${fl(jogo.fora)}`;
+  subtitulo.textContent = `Grupo ${jogo.grupo} · ${jogo.inicio.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })} ${hhmm(jogo.inicio)}`;
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+
+  const item = obterPalpites(jogo);
+  if (!item) {
+    body.innerHTML = '<div class="modal-vazio">Palpites ainda não disponíveis.</div>';
+    return;
+  }
+
+  const resultado = item.resultado;
+  const st = statusJogo(jogo);
+
+  const resHtml = resultado
+    ? `<div class="modal-resultado">
+        <div class="placar-grande">${resultado[0]} x ${resultado[1]}</div>
+        <div class="resultado-label">${st === "live" ? "Placar atual" : "Resultado final"}</div>
+      </div>`
+    : "";
+
+  const entradas = Object.entries(item.palpites || {})
+    .map(([nome, p]) => ({ nome, p }))
+    .sort((a, b) => {
+      if (resultado) {
+        const pa = pontos(a.p, resultado) ?? -1;
+        const pb = pontos(b.p, resultado) ?? -1;
+        if (pb !== pa) return pb - pa;
+      }
+      return a.nome.localeCompare(b.nome, "pt-BR");
+    });
+
+  if (!entradas.length) {
+    body.innerHTML = resHtml + '<div class="modal-vazio">Nenhum palpite registrado.</div>';
+    return;
+  }
+
+  const lista = entradas.map(({ nome, p }) => {
+    const pts = pontos(p, resultado);
+    let cls = "", ptsTxt = "Aguardando resultado";
+    if (resultado) {
+      if (pts === 5)      { cls = "acerto-exato";    ptsTxt = "✅ +5 pontos — placar exato"; }
+      else if (pts === 3) { cls = "acerto-resultado"; ptsTxt = "🟣 +3 pontos — vencedor correto"; }
+      else                { ptsTxt = "❌ Não pontuou"; }
+    }
+    return `<div class="palpite-item ${cls}">
+      <div><div class="p-nome">${esc(nome)}</div><div class="p-pts">${ptsTxt}</div></div>
+      <div class="p-score">${Array.isArray(p) ? p[0] + " × " + p[1] : "—"}</div>
+    </div>`;
+  }).join("");
+
+  body.innerHTML = resHtml + `<div class="palpites-lista">${lista}</div>`;
+}
+
+function fecharModal() {
+  const modal = document.getElementById("modal");
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
+document.getElementById("btn-fechar").addEventListener("click", fecharModal);
+document.getElementById("modal").addEventListener("click", e => { if (e.target.id === "modal") fecharModal(); });
+window.addEventListener("keydown", e => { if (e.key === "Escape") fecharModal(); });
+
+// Filtros por status (seleção múltipla)
+document.getElementById("filtros").addEventListener("click", e => {
+  const btn = e.target.closest(".filtro-btn");
+  if (!btn) return;
+  const status = btn.dataset.status;
+  if (filtrosAtivos.has(status)) filtrosAtivos.delete(status);
+  else filtrosAtivos.add(status);
+  btn.classList.toggle("ativo", filtrosAtivos.has(status));
+  renderLista();
+});
+
+// Carregar dados da API
+(function carregarApi() {
+  const st = document.getElementById("api-status");
+  const cb = "__jogosCb_" + Date.now();
+  const s = document.createElement("script");
+  let done = false;
+  const to = setTimeout(() => { if (!done) { cleanup(); onErro(); } }, 14000);
+  const cleanup = () => { try { delete window[cb]; } catch(e) {} s.remove(); clearTimeout(to); };
+
+  window[cb] = data => {
+    done = true; cleanup();
+    if (!data || data.ok === false) { onErro(data && data.erro); return; }
+    apiData = data;
+    const quando = data.atualizadoEm ? new Date(data.atualizadoEm) : new Date();
+    st.textContent = "Atualizado às " + quando.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    st.classList.remove("erro");
+    renderLista();
+  };
+  s.onerror = () => { if (!done) { cleanup(); onErro(); } };
+  s.src = ENDPOINT + "?tipo=palpites&callback=" + cb + "&t=" + Date.now();
+  document.body.appendChild(s);
+
+  function onErro(msg) {
+    st.textContent = (msg || "Não foi possível carregar os resultados.") + " Os palpites já estão listados, mas sem placar.";
+    st.classList.add("erro");
+    renderLista();
+  }
+})();
+</script>
+</body>
+</html>

@@ -2,7 +2,8 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
 <title>Bolão da Copa — Palpites</title>
 <style>
   :root {
@@ -162,6 +163,7 @@
   .score-box { display: flex; align-items: center; gap: 6px; }
   .score-box input {
     width: 48px;
+    height: 44px;
     padding: 8px;
     text-align: center;
     background: var(--card-2);
@@ -213,6 +215,9 @@
     backdrop-filter: blur(6px);
     border-top: 1px solid var(--border);
     padding: 12px 16px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    padding-left: calc(16px + env(safe-area-inset-left));
+    padding-right: calc(16px + env(safe-area-inset-right));
     display: flex;
     gap: 10px;
     align-items: center;
@@ -940,6 +945,7 @@ function gerarComprovante() {
   canvas.toBlob(b => { blobComprovante = b; }, "image/png");
   document.querySelector(".modal-card").scrollTop = 0;
   document.getElementById("modal").classList.add("show");
+  document.body.style.overflow = "hidden";
 }
 
 const ADMIN_WPP = "5512997220224"; // 55 (Brasil) + 12 (DDD) + número
@@ -1032,7 +1038,7 @@ function baixarImagem() {
 document.getElementById("btn-baixar").addEventListener("click", baixarImagem);
 
 // Fechar
-function fecharModal() { document.getElementById("modal").classList.remove("show"); }
+function fecharModal() { document.getElementById("modal").classList.remove("show"); document.body.style.overflow = ""; }
 document.getElementById("modal").addEventListener("click", (e) => {
   if (e.target.id === "modal") fecharModal();
 });
@@ -1041,6 +1047,7 @@ document.getElementById("modal").addEventListener("click", (e) => {
 document.getElementById("btn-concluir").addEventListener("click", () => {
   if (!somenteLeitura) marcarFeito();
   document.getElementById("modal").classList.remove("show");
+  document.body.style.overflow = "";
   if (!somenteLeitura) document.getElementById("success-screen").classList.add("show");
 });
 
