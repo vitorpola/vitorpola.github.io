@@ -964,7 +964,10 @@ render();
     const jogos = window.__bolaoApiData && window.__bolaoApiData.palpites && Array.isArray(window.__bolaoApiData.palpites.jogos)
       ? window.__bolaoApiData.palpites.jogos
       : [];
-    return jogos.find(x => x.time1 === jogo.casa && x.time2 === jogo.fora) || null;
+    return jogos.find(x =>
+      (x.time1 === jogo.casa && x.time2 === jogo.fora) ||
+      (x.time1 === jogo.fora && x.time2 === jogo.casa)
+    ) || null;
   }
   function jogoEmAndamento(jogo, agora = Date.now()) {
     const inicio = jogo.inicio.getTime();

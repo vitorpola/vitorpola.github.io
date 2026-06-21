@@ -357,17 +357,22 @@ function dataBR(d) { return d.toLocaleDateString("pt-BR", { weekday: "long", day
 function dataCurta(d) { return d.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" }); }
 function dataChave(d) { return d.toLocaleDateString("pt-BR"); }
 
-function obterResultado(jogo) {
+function encontrarItemApi(jogo) {
   if (!apiData || !apiData.palpites) return null;
-  const item = apiData.palpites.jogos.find(x => x.time1 === jogo.casa && x.time2 === jogo.fora);
+  return apiData.palpites.jogos.find(x =>
+    (x.time1 === jogo.casa && x.time2 === jogo.fora) ||
+    (x.time1 === jogo.fora && x.time2 === jogo.casa)
+  ) || null;
+}
+
+function obterResultado(jogo) {
+  const item = encontrarItemApi(jogo);
   if (!item || !item.resultado) return null;
   return item.resultado; // [n, n]
 }
 
 function obterPalpites(jogo) {
-  if (!apiData || !apiData.palpites) return null;
-  const item = apiData.palpites.jogos.find(x => x.time1 === jogo.casa && x.time2 === jogo.fora);
-  return item || null;
+  return encontrarItemApi(jogo);
 }
 
 function statusJogo(jogo) {
