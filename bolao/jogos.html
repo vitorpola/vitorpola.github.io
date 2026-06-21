@@ -359,10 +359,24 @@ function dataChave(d) { return d.toLocaleDateString("pt-BR"); }
 
 function encontrarItemApi(jogo) {
   if (!apiData || !apiData.palpites) return null;
-  return apiData.palpites.jogos.find(x =>
+  const item = apiData.palpites.jogos.find(x =>
     (x.time1 === jogo.casa && x.time2 === jogo.fora) ||
     (x.time1 === jogo.fora && x.time2 === jogo.casa)
-  ) || null;
+  );
+  if (!item) return null;
+  if (item.time1 === jogo.fora && item.time2 === jogo.casa) {
+    const inv = { ...item };
+    if (Array.isArray(item.resultado) && item.resultado.length >= 2)
+      inv.resultado = [item.resultado[1], item.resultado[0]];
+    if (item.palpites && typeof item.palpites === "object") {
+      inv.palpites = {};
+      Object.entries(item.palpites).forEach(([nome, p]) => {
+        inv.palpites[nome] = Array.isArray(p) && p.length >= 2 ? [p[1], p[0]] : p;
+      });
+    }
+    return inv;
+  }
+  return item;
 }
 
 function obterResultado(jogo) {

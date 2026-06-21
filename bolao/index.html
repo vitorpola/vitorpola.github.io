@@ -964,10 +964,24 @@ render();
     const jogos = window.__bolaoApiData && window.__bolaoApiData.palpites && Array.isArray(window.__bolaoApiData.palpites.jogos)
       ? window.__bolaoApiData.palpites.jogos
       : [];
-    return jogos.find(x =>
+    const item = jogos.find(x =>
       (x.time1 === jogo.casa && x.time2 === jogo.fora) ||
       (x.time1 === jogo.fora && x.time2 === jogo.casa)
-    ) || null;
+    );
+    if (!item) return null;
+    if (item.time1 === jogo.fora && item.time2 === jogo.casa) {
+      const inv = { ...item };
+      if (Array.isArray(item.resultado) && item.resultado.length >= 2)
+        inv.resultado = [item.resultado[1], item.resultado[0]];
+      if (item.palpites && typeof item.palpites === "object") {
+        inv.palpites = {};
+        Object.entries(item.palpites).forEach(([nome, p]) => {
+          inv.palpites[nome] = Array.isArray(p) && p.length >= 2 ? [p[1], p[0]] : p;
+        });
+      }
+      return inv;
+    }
+    return item;
   }
   function jogoEmAndamento(jogo, agora = Date.now()) {
     const inicio = jogo.inicio.getTime();
