@@ -371,6 +371,41 @@
   }
   .ver-palpites-hint:hover, .ver-palpites-hint:active { color: var(--yellow); }
 
+  /* Cards agrupados: Em andamento / Últimos jogos / Próximos jogos */
+  .grupo-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin: 12px 0;
+    overflow: hidden;
+  }
+  .grupo-card.live-card { border-color: rgba(224,31,79,0.55); }
+  .grupo-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 16px;
+    font-size: 0.72rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .grupo-card.live-card .grupo-header { color: #ff4d6d; }
+  .grupo-dot-live {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: #ff4d6d; flex-shrink: 0;
+    animation: pulseDot 1.2s infinite;
+  }
+  .grupo-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--muted); flex-shrink: 0;
+  }
+  details.grupo-card > summary { list-style: none; cursor: pointer; }
+  details.grupo-card > summary::-webkit-details-marker { display: none; }
+  details.grupo-card > summary::after {
+    content: "▾"; color: var(--yellow); font-size: 0.9rem;
+    transition: transform 0.2s; margin-left: auto;
+  }
+  details.grupo-card[open] > summary::after { transform: rotate(180deg); }
+  .grupo-body { padding: 0 16px 16px; }
+  .grupo-sep { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
   .modal-backdrop {
     position: fixed;
     inset: 0;
@@ -460,6 +495,7 @@
   .form-dot.verde { background: #4ade80; }
   .form-dot.roxo  { background: #9b29ff; }
   .form-dot.cinza { background: #565c70; }
+  .pontos-live { color: #ff4d6d; font-weight: 800; }
 </style>
 </head>
 <body>
@@ -741,6 +777,33 @@ function pontosPalpite(palpite, resultado) {
     }
     return arr;
   }
+  function pontosAoVivo(nomeParticipante) {
+    if (!window.BOLAO_JOGOS || !window.__bolaoApiData || !window.__bolaoApiData.palpites) return 0;
+    const agora = Date.now();
+    const DUR = window.BOLAO_DURACAO_MS || 122 * 60 * 1000;
+    const jogosApi = window.__bolaoApiData.palpites.jogos || [];
+    let total = 0;
+    for (const j of window.BOLAO_JOGOS) {
+      const inicio = j.inicio.getTime();
+      if (agora < inicio || agora >= inicio + DUR) continue;
+      const item = jogosApi.find(x =>
+        (x.time1 === j.casa && x.time2 === j.fora) ||
+        (x.time1 === j.fora && x.time2 === j.casa)
+      );
+      if (!item) continue;
+      const inv = item.time1 === j.fora;
+      const resRaw = inv && Array.isArray(item.resultado) && item.resultado.length >= 2
+        ? [item.resultado[1], item.resultado[0]] : item.resultado;
+      const resultado = normalizarResultado(resRaw);
+      if (!resultado) continue;
+      const pRaw = item.palpites && item.palpites[nomeParticipante];
+      const pArr = Array.isArray(pRaw) && pRaw.length >= 2 ? pRaw : null;
+      const palpite = pArr ? (inv ? [pArr[1], pArr[0]] : pArr) : null;
+      if (palpite) total += pontosPalpite(palpite, resultado) ?? 0;
+    }
+    return total;
+  }
+
   function dotsUltimosJogos(nomeParticipante) {
     if (!window.BOLAO_JOGOS || !window.__bolaoApiData || !window.__bolaoApiData.palpites) return '';
     const jogosApi = window.__bolaoApiData.palpites.jogos || [];
@@ -776,10 +839,14 @@ function pontosPalpite(palpite, resultado) {
       const cls = r.pos <= 3 ? "top" + r.pos : "";
       const medalha = r.pos === 1 ? "🥇" : r.pos === 2 ? "🥈" : r.pos === 3 ? "🥉" : r.pos + "º";
       const dots = dotsUltimosJogos(r.nome);
+      const livepts = pontosAoVivo(r.nome);
+      const pontosHtml = livepts > 0
+        ? `${r.pontos - livepts} <span class="pontos-live">+${livepts}</span><small> pts</small>`
+        : `${r.pontos}<small> pts</small>`;
       return `<tr class="${cls}">
         <td class="pos"><span class="pos-badge">${medalha}</span></td>
         <td class="nome">${escapeHtml(r.nome)}</td>
-        <td class="num pontos">${r.pontos}<small> pts</small></td>
+        <td class="num pontos">${pontosHtml}</td>
         <td class="form"><div class="form-dots">${dots}</div></td>
       </tr>`;
     }).join("");
@@ -787,6 +854,7 @@ function pontosPalpite(palpite, resultado) {
       <thead><tr><th class="pos">#</th><th>Participante</th><th class="num">Pontos</th><th class="form">Últ. Jogos</th></tr></thead>
       <tbody>${corpo}</tbody></table>`;
   }
+  window.__rankRender = renderTabela;
   document.getElementById("btn-refresh-ranking").addEventListener("click", fetchRanking);
   fetchRanking();
   setInterval(fetchRanking, AUTO_REFRESH_MS);
@@ -1120,33 +1188,26 @@ render();
     return `${m}min ${s}s`;
   }
 
-  function cardJogo(j, tipo) {
+  function jogoItem(j, tipo) {
     const item = obterItemApi(j);
     const resultado = item ? normalizarResultado(item.resultado) : null;
-    let statusTxt, liveCls = "", central, countdown = "";
+    let central;
     if (tipo === "ao-vivo") {
-      liveCls = " live";
-      statusTxt = "Ao vivo";
       central = resultado
         ? `<div><div class="jogo-resultado">${resultado[0]} x ${resultado[1]}</div><div class="jogo-resultado-label">Placar atual</div></div>`
         : '<span class="jogo-vs">×</span>';
     } else if (tipo === "ultimo") {
-      statusTxt = "Último jogo";
       central = resultado
-        ? `<div><div class="jogo-resultado">${resultado[0]} x ${resultado[1]}</div></div>`
+        ? `<div class="jogo-resultado" style="font-size:1.3rem">${resultado[0]} x ${resultado[1]}</div>`
         : '<span class="jogo-vs">×</span>';
     } else {
-      statusTxt = "Próximo jogo";
       central = `<div class="jogo-hora">${hhmm(j.inicio)}</div>`;
     }
     return `
-      <section class="jogo-card${liveCls}">
-        <div class="jogo-status"><span class="dot"></span><span>${statusTxt}</span></div>
-        ${confronto(j, central)}
-        <div class="jogo-rodape">
-          <button type="button" class="ver-palpites-hint" data-palpites="${escapeHtml(j.casa + "|" + j.fora)}">Ver palpites →</button>
-        </div>
-      </section>`;
+      ${confronto(j, central)}
+      <div class="jogo-rodape">
+        <button type="button" class="ver-palpites-hint" data-palpites="${escapeHtml(j.casa + "|" + j.fora)}">Ver palpites →</button>
+      </div>`;
   }
 
   function jogosDestaque(agora = Date.now()) {
@@ -1160,21 +1221,37 @@ render();
   function render() {
     const { ultimos, aoVivo, proximos } = jogosDestaque();
     card.style.display = "block";
+    let html = "";
 
-    // Jogo(s) em andamento ficam em destaque no topo (até 2 simultâneos lado a lado).
-    let html = aoVivo.length >= 2
-      ? `<div class="jogos-grid">${aoVivo.slice(0, 2).map(j => cardJogo(j, "ao-vivo")).join("")}</div>`
-      : aoVivo.map(j => cardJogo(j, "ao-vivo")).join("");
+    // Em andamento
+    if (aoVivo.length) {
+      const itens = aoVivo.slice(0, 2).map(j => jogoItem(j, "ao-vivo")).join('<hr class="grupo-sep">');
+      html += `<section class="grupo-card live-card">
+        <div class="grupo-header"><span class="grupo-dot-live"></span>Em andamento</div>
+        <div class="grupo-body">${itens}</div>
+      </section>`;
+    }
 
-    // Últimos e próximos jogos aparecem lado a lado (até 2 de cada), logo abaixo.
-    const secundarios = [
-      ...ultimos.map(j => cardJogo(j, "ultimo")),
-      ...proximos.map(j => cardJogo(j, "proximo")),
-    ];
-    if (secundarios.length) html += `<div class="jogos-grid">${secundarios.join("")}</div>`;
+    // Últimos jogos (colapsado)
+    if (ultimos.length) {
+      const itens = ultimos.map(j => jogoItem(j, "ultimo")).join('<hr class="grupo-sep">');
+      html += `<details class="grupo-card">
+        <summary class="grupo-header"><span class="grupo-dot"></span>Últimos jogos</summary>
+        <div class="grupo-body">${itens}</div>
+      </details>`;
+    }
+
+    // Próximos jogos (colapsado)
+    if (proximos.length) {
+      const itens = proximos.map(j => jogoItem(j, "proximo")).join('<hr class="grupo-sep">');
+      html += `<details class="grupo-card">
+        <summary class="grupo-header"><span class="grupo-dot"></span>Próximos jogos</summary>
+        <div class="grupo-body">${itens}</div>
+      </details>`;
+    }
 
     corpo.innerHTML = html
-      || `<section class="jogo-card"><div style="text-align:center; color:var(--muted); padding:8px 0;">Todos os jogos da fase de grupos já foram disputados.</div></section>`;
+      || `<section class="grupo-card"><div class="grupo-body" style="text-align:center;color:var(--muted);padding:8px 0;">Todos os jogos da fase de grupos já foram disputados.</div></section>`;
 
     corpo.querySelectorAll("[data-palpites]").forEach(btn => {
       btn.addEventListener("click", () => {
