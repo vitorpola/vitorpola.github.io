@@ -454,6 +454,12 @@
     text-align: right;
     white-space: nowrap;
   }
+  .ranking thead th.form, .ranking tbody td.form { text-align: right; white-space: nowrap; }
+  .ranking .form-dots { display: inline-flex; align-items: center; gap: 2.5px; }
+  .form-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .form-dot.verde { background: #4ade80; }
+  .form-dot.roxo  { background: #9b29ff; }
+  .form-dot.cinza { background: #565c70; }
 </style>
 </head>
 <body>
@@ -735,6 +741,32 @@ function pontosPalpite(palpite, resultado) {
     }
     return arr;
   }
+  function dotsUltimosJogos(nomeParticipante) {
+    if (!window.BOLAO_JOGOS || !window.__bolaoApiData || !window.__bolaoApiData.palpites) return '';
+    const jogosApi = window.__bolaoApiData.palpites.jogos || [];
+    const pts = [];
+    for (const j of window.BOLAO_JOGOS) {
+      const item = jogosApi.find(x =>
+        (x.time1 === j.casa && x.time2 === j.fora) ||
+        (x.time1 === j.fora && x.time2 === j.casa)
+      );
+      if (!item) continue;
+      const inv = item.time1 === j.fora;
+      const resRaw = inv && Array.isArray(item.resultado) && item.resultado.length >= 2
+        ? [item.resultado[1], item.resultado[0]] : item.resultado;
+      const resultado = normalizarResultado(resRaw);
+      if (!resultado) continue;
+      const pRaw = item.palpites && item.palpites[nomeParticipante];
+      const pArr = Array.isArray(pRaw) && pRaw.length >= 2 ? pRaw : null;
+      const palpite = pArr ? (inv ? [pArr[1], pArr[0]] : pArr) : null;
+      pts.push(palpite ? (pontosPalpite(palpite, resultado) ?? 0) : 0);
+    }
+    return pts.slice(-6).map(p => {
+      const cls = p === 5 ? 'verde' : p === 3 ? 'roxo' : 'cinza';
+      return `<span class="form-dot ${cls}" title="${p} pts"></span>`;
+    }).join('');
+  }
+
   function renderTabela() {
     if (!dados.length) {
       conteudoEl.innerHTML = '<div class="ranking-vazio">A classificação ainda não está disponível.<br>Ela aparece aqui assim que os primeiros resultados forem lançados.</div>';
@@ -743,14 +775,16 @@ function pontosPalpite(palpite, resultado) {
     const corpo = dados.map(r => {
       const cls = r.pos <= 3 ? "top" + r.pos : "";
       const medalha = r.pos === 1 ? "🥇" : r.pos === 2 ? "🥈" : r.pos === 3 ? "🥉" : r.pos + "º";
+      const dots = dotsUltimosJogos(r.nome);
       return `<tr class="${cls}">
         <td class="pos"><span class="pos-badge">${medalha}</span></td>
         <td class="nome">${escapeHtml(r.nome)}</td>
         <td class="num pontos">${r.pontos}<small> pts</small></td>
+        <td class="form"><div class="form-dots">${dots}</div></td>
       </tr>`;
     }).join("");
     conteudoEl.innerHTML = `<table>
-      <thead><tr><th class="pos">#</th><th>Participante</th><th class="num">Pontos</th></tr></thead>
+      <thead><tr><th class="pos">#</th><th>Participante</th><th class="num">Pontos</th><th class="form">Últ. Jogos</th></tr></thead>
       <tbody>${corpo}</tbody></table>`;
   }
   document.getElementById("btn-refresh-ranking").addEventListener("click", fetchRanking);
@@ -954,6 +988,8 @@ render();
    .sort((a, b) => a.inicio - b.inicio);
 
   const DURACAO_MS = 122 * 60 * 1000; // ~125 min cobre os 90' + intervalo + acréscimos
+  window.BOLAO_JOGOS = JOGOS;
+  window.BOLAO_DURACAO_MS = DURACAO_MS;
   const card = document.getElementById("jogos-destaque");
   const corpo = document.getElementById("jogos-destaque-corpo");
   window.addEventListener("bolao-api-data", render);
@@ -1116,22 +1152,25 @@ render();
   function jogosDestaque(agora = Date.now()) {
     const aoVivo = JOGOS.filter(j => jogoEmAndamento(j, agora));
     const finalizados = JOGOS.filter(j => j.inicio.getTime() + DURACAO_MS <= agora);
-    const ultimo = finalizados.length ? finalizados[finalizados.length - 1] : null;
-    const proximo = JOGOS.find(j => j.inicio.getTime() > agora);
-    return { ultimo, aoVivo, proximo };
+    const ultimos = finalizados.slice(-2);
+    const proximos = JOGOS.filter(j => j.inicio.getTime() > agora).slice(0, 2);
+    return { ultimos, aoVivo, proximos };
   }
 
   function render() {
-    const { ultimo, aoVivo, proximo } = jogosDestaque();
+    const { ultimos, aoVivo, proximos } = jogosDestaque();
     card.style.display = "block";
 
-    // Jogo(s) em andamento ficam em destaque, em largura total, no topo.
-    let html = aoVivo.map(j => cardJogo(j, "ao-vivo")).join("");
+    // Jogo(s) em andamento ficam em destaque no topo (até 2 simultâneos lado a lado).
+    let html = aoVivo.length >= 2
+      ? `<div class="jogos-grid">${aoVivo.slice(0, 2).map(j => cardJogo(j, "ao-vivo")).join("")}</div>`
+      : aoVivo.map(j => cardJogo(j, "ao-vivo")).join("");
 
-    // Último jogo e próximo jogo aparecem lado a lado, logo abaixo.
-    const secundarios = [];
-    if (ultimo) secundarios.push(cardJogo(ultimo, "ultimo"));
-    if (proximo) secundarios.push(cardJogo(proximo, "proximo"));
+    // Últimos e próximos jogos aparecem lado a lado (até 2 de cada), logo abaixo.
+    const secundarios = [
+      ...ultimos.map(j => cardJogo(j, "ultimo")),
+      ...proximos.map(j => cardJogo(j, "proximo")),
+    ];
     if (secundarios.length) html += `<div class="jogos-grid">${secundarios.join("")}</div>`;
 
     corpo.innerHTML = html
@@ -1151,11 +1190,11 @@ render();
   let ultimoEstado = "";
   setInterval(() => {
     const agora = Date.now();
-    const { ultimo, aoVivo, proximo } = jogosDestaque(agora);
+    const { ultimos, aoVivo, proximos } = jogosDestaque(agora);
     const estado = [
-      ultimo ? ultimo.inicio.getTime() : "",
+      ultimos.map(j => j.inicio.getTime()).join(","),
       aoVivo.map(j => j.inicio.getTime()).join(","),
-      proximo ? proximo.inicio.getTime() : "",
+      proximos.map(j => j.inicio.getTime()).join(","),
     ].join("|");
     if (estado !== ultimoEstado) { render(); ultimoEstado = estado; }
   }, 1000);
