@@ -1,16 +1,22 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><title>GRL Online</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600&family=Barlow+Condensed:ital,wght@0,600;1,700;1,800&family=Share+Tech+Mono&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600&family=Barlow+Condensed:ital,wght@0,600;1,700;1,800&family=Lilita+One&family=Share+Tech+Mono&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='3' y='3' width='58' height='58' rx='16' fill='%23ff8a1c' stroke='%231a2350' stroke-width='5'/%3E%3Ctext x='32' y='47' text-anchor='middle' font-family='Arial Black,Arial,sans-serif' font-weight='900' font-size='40' fill='%23fff' stroke='%231a2350' stroke-width='3' paint-order='stroke'%3EG%3C/text%3E%3C/svg%3E">
 <style>
-/* Visual: o tabuleiro 3D sobre o céu azul, o HUD da corrida em vidro escuro e, fora da corrida, um lobby com a mesma linguagem:
-   painéis de vidro, títulos condensados em itálico e a dupla azul × laranja. As pistas escolhidas aparecem em retratos no centro do menu. */
+/* Visual: o tabuleiro 3D sobre o céu, o HUD da corrida em vidro escuro e, fora da corrida, um tema de brinquedo (12/11, pedido do Vitor):
+   mesa de papelão com faixas quadriculadas, painéis de plástico com contorno grosso e sombra sólida, títulos em Lilita One
+   e a dupla azul × laranja. As pistas escolhidas aparecem em retratos no centro do menu, sob o logo GRL ONLINE. */
 :root{
+  --toy:"Lilita One","Arial Rounded MT Bold","Segoe UI Black",system-ui,sans-serif;   /* títulos e botões grandes do tema de brinquedo */
+  --line:#1a2350;     /* contorno dos brinquedos (painéis, botões, logo) */
+  --drop:#1a235059;   /* sombra sólida sob os painéis */
+  --board:#c99a62; --board-2:#b9864d;   /* papelão da mesa */
   --sea:#6b4592;
   --blue:#2f8cff;     /* lado azul: grid e pilotos */
   --orange:#ff8a1c;   /* lado laranja: pistas e largada */
-  --sheet:rgba(243,247,252,.84);   /* vidro dos painéis */
-  --glass-brd:rgba(255,255,255,.8);
+  --sheet:#fffaf0;    /* plástico creme dos painéis */
+  --glass-brd:var(--line);
   --ink:#1d5687;
   --ink-dim:#71879c;
   --head:#d9540a;
@@ -28,13 +34,14 @@
   --wait-bg:#fff3f3; --wait-pulse:#ffd9d9;
   --dim-back:rgba(12,40,80,.45);
   --prev-glow:#cbd8e4;
-  --vig:rgba(46,22,84,.45);       /* escurecimento das bordas da tela nos menus (roxo do crepúsculo) */
   color-scheme:light;
 }
 /* tema escuro: só as telas fora da corrida (menus, opções, pilotos, diálogos) */
 :root[data-theme="dark"]{
-  --sheet:rgba(14,19,28,.72);
-  --glass-brd:rgba(255,255,255,.2);
+  --sheet:#1d2540;
+  --glass-brd:#070b18;
+  --line:#070b18; --drop:#0009;
+  --board:#4a3423; --board-2:#3b291b;
   --ink:#a9c9e8;
   --ink-dim:#73879b;
   --head:#ff9a3d;
@@ -48,7 +55,6 @@
   --wait-bg:#3a1d1d; --wait-pulse:#5a2626;
   --dim-back:rgba(0,0,0,.55);
   --prev-glow:#243444;
-  --vig:rgba(14,6,30,.72);
   color-scheme:dark;
 }
 [hidden]{display:none!important}
@@ -60,33 +66,43 @@ body{margin:0;overflow:hidden;font-family:var(--mono);color:var(--ink);
 #view{position:fixed;left:0;top:0;width:100%;height:calc(100% - var(--hudh,0px));display:block;outline:none;touch-action:none}
 #ed{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;background:#1d3a52}
 button{font-family:inherit}
-/* telas fora da corrida: vidro sobre o céu, com as bordas da tela escurecidas para o centro ficar em destaque */
+/* telas fora da corrida: brinquedos sobre uma mesa de papelão (ondulado fino, bordas mais escuras) com faixas quadriculadas nos lados */
 .sheet{position:fixed;inset:0;overflow:hidden;padding:12px 16px;box-sizing:border-box;font-family:var(--ui);color:var(--ink);
-  background:radial-gradient(ellipse 75% 70% at 50% 46%,transparent 35%,var(--vig) 100%)}
+  background-color:var(--board);
+  background-image:radial-gradient(ellipse 75% 70% at 50% 46%,transparent 40%,rgba(50,25,5,.38) 100%),
+    radial-gradient(ellipse 40% 30% at 18% 22%,rgba(255,240,210,.16),transparent 70%),
+    repeating-linear-gradient(90deg,transparent 0 7px,rgba(80,45,10,.07) 7px 9px),
+    linear-gradient(170deg,var(--board),var(--board-2))}
+.sheet::before,.sheet::after{content:"";position:absolute;top:0;bottom:0;width:12px;pointer-events:none;
+  background:conic-gradient(var(--line) 25%,#fff 0 50%,var(--line) 0 75%,#fff 0) 0 0/12px 12px;box-shadow:0 0 0 2px var(--line)}
+.sheet::before{left:0}.sheet::after{right:0}
 .sheet .wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;height:100%;box-sizing:border-box;padding:0 10px;
-  background:var(--sheet);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);border:1px solid var(--glass-brd);border-radius:18px;box-shadow:0 12px 34px #0005,inset 0 3px 0 var(--blue)}
+  background:var(--sheet);border:3px solid var(--glass-brd);border-radius:22px;box-shadow:0 7px 0 var(--drop),inset 0 -4px 0 var(--rule)}
 .mhead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;padding:clamp(8px,2vh,20px) 2% clamp(6px,1.2vh,10px);border-bottom:1px solid var(--rule);flex-wrap:wrap}
-.mhead h1{margin:0;font-family:var(--disp);font-style:italic;font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:clamp(24px,2.8vw,34px);line-height:1;color:var(--text)}
-.mhead .brand{font-family:var(--disp);font-style:italic;font-weight:800;font-size:clamp(20px,2.3vw,28px);line-height:1;color:var(--head)}
+.mhead h1{margin:0;font-family:var(--toy);font-weight:400;text-transform:uppercase;letter-spacing:.02em;font-size:clamp(24px,2.8vw,34px);line-height:1;color:var(--text)}
+.mhead .brand{font-family:var(--toy);font-weight:400;font-size:clamp(20px,2.3vw,28px);line-height:1;color:var(--orange);-webkit-text-stroke:1.5px var(--line);paint-order:stroke fill}
 .mbody{flex:1;min-height:0;padding:clamp(8px,1.8vh,18px) 4%;display:flex;flex-direction:column;gap:clamp(6px,1.4vh,14px);overflow-y:auto}
 .mfoot{position:relative;display:flex;justify-content:space-around;gap:8px;flex-wrap:wrap;border-top:1px solid var(--rule);padding:clamp(6px,1.2vh,10px) 2% clamp(8px,1.6vh,14px)}
 .mmsg{position:absolute;left:0;right:0;bottom:100%;margin:0 0 6px;text-align:center;color:var(--head);font-size:16px}
 .lk{all:unset;cursor:pointer;box-sizing:border-box;color:var(--ink);font-family:var(--disp);font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:clamp(17px,1.8vw,22px);padding:4px 14px;border-radius:9px;transition:background .12s,color .12s}
 .lk:hover,.lk:focus-visible{color:var(--head);background:var(--field-hover);outline:none}
 .lk.dim{color:var(--ink-dim)}
-.sq{all:unset;cursor:pointer;width:34px;height:34px;box-sizing:border-box;display:inline-grid;place-items:center;font-size:20px;border:2px solid var(--btn);border-radius:9px;color:var(--btn);background:transparent;flex:none}
-.sq.fill{background:var(--btn);color:var(--on-btn)}
+.sq{all:unset;cursor:pointer;width:34px;height:34px;box-sizing:border-box;display:inline-grid;place-items:center;font-size:20px;font-weight:600;border:2px solid var(--btn);border-radius:10px;color:var(--btn);background:var(--field);box-shadow:0 3px 0 var(--btn);flex:none}
+.sq.fill{background:var(--btn);color:var(--on-btn);border-color:var(--line);box-shadow:0 3px 0 var(--line)}
+.sq:active{transform:translateY(2px);box-shadow:0 1px 0 var(--btn)}
 .sq:focus-visible{outline:2px solid var(--head)}
 .sq:disabled{opacity:.4;cursor:default}
 
 /* ---------------------------------------------------------------- menu principal: o lobby */
 .home{padding:0}
 .hwrap{height:100%;box-sizing:border-box;max-width:1560px;margin:0 auto;padding:14px 16px;display:grid;grid-template-rows:minmax(0,1fr)}
-.glass{background:var(--sheet);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);border:1px solid var(--glass-brd);box-shadow:0 8px 24px #0004}
+.glass{background:var(--sheet);border:3px solid var(--glass-brd);box-shadow:0 6px 0 var(--drop)}
 .htop{display:flex;align-items:center;gap:14px;min-width:0}
-/* marca: letras brancas inclinadas com a faixa azul → laranja por baixo */
-.logo{margin:0 auto;flex:none;align-self:center;position:relative;font-family:var(--disp);font-style:italic;font-weight:800;font-size:clamp(32px,3.6vw,46px);line-height:.95;letter-spacing:.02em;color:#fff;text-shadow:0 2px 0 #2a1446,0 6px 16px #0007;white-space:nowrap;padding-bottom:5px}
-.logo::after{content:"";position:absolute;left:2px;right:-4px;bottom:0;height:5px;border-radius:3px;transform:skewX(-20deg);background:linear-gradient(90deg,var(--blue) 0 48%,transparent 48% 52%,var(--orange) 52%)}
+/* logo (SVG no HTML): G laranja, R amarelo e L azul em plástico brilhante com contorno branco e azul-marinho,
+   "ONLINE" numa placa de carro entre duas bandeiras quadriculadas */
+.logo{margin:0 auto;flex:none;align-self:center;display:block;height:clamp(90px,22vh,190px);aspect-ratio:440/236;max-width:100%;filter:drop-shadow(0 6px 0 var(--drop))}
+.logo svg{display:block;width:100%;height:100%;overflow:visible}
+.logo text{font-family:var(--toy)}
 /* jogo online, dentro do card do grid: abrir sala ou entrar com o código */
 .roomrow{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;margin:0 10px 8px;padding:7px 8px 8px 10px;border-radius:10px;background:var(--field);box-shadow:inset 0 0 0 1px var(--rule);font-size:.92em}
 .roomrow .rlab{flex:1 1 auto;font-family:var(--disp);font-weight:600;text-transform:uppercase;letter-spacing:.06em;font-size:1.05em;color:var(--text);white-space:nowrap}
@@ -98,17 +114,18 @@ button{font-family:inherit}
 .roomrow .codein{flex:1 1 4em;min-width:0;width:auto;font-size:1em;letter-spacing:.18em;padding:3px 8px;border-width:2px;border-radius:8px;font-family:var(--mono)}
 .roomrow .rcode{font-family:var(--mono);font-weight:400;font-size:1.25em;letter-spacing:.18em;color:var(--head)}
 .roomrow .rst{flex:1 1 100%;color:var(--ink-dim);font-size:.92em}
-.navb{all:unset;cursor:pointer;flex:none;box-sizing:border-box;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px 0 12px;border-radius:14px;color:var(--text);font-family:var(--disp);font-weight:600;text-transform:uppercase;letter-spacing:.06em;font-size:clamp(16px,1.5vw,19px);transition:transform .12s}
+.navb{all:unset;cursor:pointer;flex:none;box-sizing:border-box;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px 0 12px;border-radius:14px;color:var(--text);font-family:var(--toy);text-transform:uppercase;letter-spacing:.04em;font-size:clamp(16px,1.5vw,19px);transition:transform .12s}
 .navb svg{width:20px;height:20px;color:var(--btn)}
 .navb:hover{transform:translateY(-1px)}.navb:hover svg{color:var(--head)}
 /* três colunas: grid (azul) | pista ao vivo | percurso, pistas e largada (laranja) */
 .hgrid{display:grid;grid-template-columns:clamp(270px,27vw,360px) minmax(0,1fr) clamp(270px,27vw,360px);gap:14px;min-height:0}
-.pane{display:flex;flex-direction:column;min-height:0;min-width:0;border-radius:16px;overflow:hidden;font-size:clamp(14px,1.25vw,16px)}
-.pane.pb{box-shadow:0 8px 24px #0004,inset 0 3px 0 var(--blue)}
-.pane.po{box-shadow:0 8px 24px #0004,inset 0 3px 0 var(--orange)}
-.pane .ph{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:12px 14px 8px}
-.pane .ph h2{margin:0;font-family:var(--disp);font-style:italic;font-weight:800;text-transform:uppercase;letter-spacing:.03em;font-size:clamp(20px,1.9vw,25px);line-height:1;color:var(--text)}
-.pane .ph .cnt{color:var(--ink-dim);font-size:.9em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pane{display:flex;flex-direction:column;min-height:0;min-width:0;border-radius:20px;overflow:hidden;font-size:clamp(14px,1.25vw,16px)}
+/* cabeçalho de cada card numa faixa de plástico colorido: azul no grid, laranja nas pistas */
+.pane .ph{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 14px 9px;margin-bottom:8px;border-bottom:3px solid var(--line);box-shadow:inset 0 -4px 0 #0002,inset 0 3px 0 #fff5}
+.pane.pb .ph{background:linear-gradient(#4aa0ff,#1f74e8)}
+.pane.po .ph{background:linear-gradient(#ffa64a,#ff7a0a)}
+.pane .ph h2{margin:0;font-family:var(--toy);font-weight:400;text-transform:uppercase;letter-spacing:.03em;font-size:clamp(20px,1.9vw,25px);line-height:1;color:#fff;-webkit-text-stroke:4px var(--line);paint-order:stroke fill;text-shadow:0 3px 0 var(--line)}
+.pane .ph .cnt{color:#fff;font-weight:600;font-size:.9em;white-space:nowrap;font-variant-numeric:tabular-nums;text-shadow:0 1px 0 var(--line)}
 /* vagas da largada */
 #slots{display:flex;flex-direction:column;gap:5px;padding:0 10px}
 .slot{display:grid;grid-template-columns:1.3em 56px minmax(0,1fr) 26px;align-items:center;gap:8px;height:clamp(36px,6.5vh,50px);padding:0 6px;border-radius:10px;background:var(--field);box-shadow:inset 4px 0 0 var(--c1,transparent);box-sizing:border-box}
@@ -140,12 +157,20 @@ button{font-family:inherit}
 .dr .ib.add.on{color:var(--blue)}
 .dr .ib.del:hover,.dr .ib.del:focus-visible{color:#e5484d}
 .dr .ib:disabled{opacity:.3;cursor:default;background:none}
+.drvbox .dg{flex:none;padding:7px 2px 1px;font-size:.72em;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-dim)}
+.drvbox .dg:first-child{padding-top:0}
+/* dificuldade da IA, uma só para a corrida: rótulo, − nível + */
+.ailvl{display:flex;align-items:center;gap:8px;padding:10px 10px 0 16px}
+.ailvl .lab{font-size:.8em;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-dim);white-space:nowrap}
+.ailvl .sq{width:28px;height:28px;font-size:17px}
+.ailvl .sq:disabled{opacity:.35;cursor:default}
+.ailvl .val{flex:1;min-width:0;text-align:center;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* coluna da esquerda: grid e, embaixo, o botão de configurações */
 .lcol{display:flex;flex-direction:column;gap:10px;min-width:0;min-height:0}
 .lcol .pb{flex:1}
-.cfg{all:unset;cursor:pointer;flex:none;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:clamp(46px,7.5vh,60px);border-radius:14px;color:var(--text);font-family:var(--disp);font-weight:700;font-style:italic;text-transform:uppercase;letter-spacing:.05em;font-size:clamp(18px,1.8vw,23px);box-shadow:0 8px 24px #0004,inset 0 -3px 0 var(--blue);transition:transform .12s}
+.cfg{all:unset;cursor:pointer;flex:none;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:clamp(46px,7.5vh,60px);border-radius:16px;background:var(--sheet);border:3px solid var(--line);color:var(--text);font-family:var(--toy);text-transform:uppercase;letter-spacing:.04em;font-size:clamp(18px,1.8vw,23px);box-shadow:0 6px 0 var(--drop),inset 0 -5px 0 var(--rule);transition:transform .08s,box-shadow .08s}
 .cfg svg{width:24px;height:24px;color:var(--blue)}
-.cfg:hover{transform:translateY(-1px)}.cfg:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.cfg:hover{transform:translateY(-1px)}.cfg:active{transform:translateY(4px);box-shadow:0 2px 0 var(--drop),inset 0 -5px 0 var(--rule)}.cfg:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 /* centro: as pistas escolhidas em retratos (Thumbs) com o nome por cima, numa grade que se ajusta ao número de pistas
    (fitStage); a corrida ao vivo opcional (Demo) põe o canvas 3D exatamente sobre #stageView. Embaixo, a ficha da pista */
 .stage{display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0}
@@ -154,17 +179,17 @@ button{font-family:inherit}
 .tc img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .3s}
 .tc img.on{opacity:1}
 #stageView.live .tc img{opacity:0;transition:none}
-.tc .tt{position:absolute;left:0;right:0;bottom:3%;padding:0 .3em;text-align:center;font-family:var(--disp);font-style:italic;font-weight:800;text-transform:uppercase;letter-spacing:.02em;line-height:1;font-size:clamp(20px,9cqw,56px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 2px 0 #2a1446,0 4px 14px #000a}
+.tc .tt{position:absolute;left:0;right:0;bottom:3%;padding:.1em .3em;text-align:center;font-family:var(--toy);font-weight:400;text-transform:uppercase;letter-spacing:.02em;line-height:1.1;font-size:clamp(20px,8cqw,52px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-webkit-text-stroke:.16em var(--line);paint-order:stroke fill;text-shadow:0 .08em 0 var(--line)}
 .tc.none{cursor:default}.tc.none .tt{top:50%;bottom:auto;transform:translateY(-50%);opacity:.85}
 .tc.wait::before{content:"";position:absolute;inset:12% 8% 22%;border-radius:12px;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.22) 50%,transparent 70%) 0 0/250% 100%,rgba(255,255,255,.1);animation:tcWait 1.3s linear infinite}
 @keyframes tcWait{to{background-position:-250% 0,0 0}}
 @media (prefers-reduced-motion:reduce){.tc.wait::before{animation:none}}
-.many .tc{background:var(--sheet);border:1px solid var(--glass-brd);box-shadow:0 6px 18px #0004;transition:transform .12s}
+.many .tc{background:var(--sheet);border:3px solid var(--glass-brd);border-radius:16px;box-shadow:0 5px 0 var(--drop);transition:transform .12s}
 .many .tc:hover{transform:translateY(-2px)}
-.many .tc .tt{bottom:0;padding:.9em .45em .4em;font-size:clamp(12px,10cqw,30px);background:linear-gradient(transparent,rgba(26,10,42,.72));text-shadow:0 1px 0 #2a1446,0 2px 8px #000a}
-.many .tc.cur{box-shadow:0 0 0 3px var(--orange),0 6px 18px #0004}
-.tc .no{position:absolute;left:6px;top:6px;z-index:1;min-width:1.5em;height:1.5em;line-height:1.5em;padding:0 .2em;box-sizing:border-box;border-radius:99px;text-align:center;font-family:var(--disp);font-weight:700;font-size:clamp(11px,8cqw,17px);background:#231000;color:#ffb054;box-shadow:0 0 0 2px #ffb054}
-.tc.cur .no{background:var(--orange);color:#231000;box-shadow:none}
+.many .tc .tt{bottom:0;padding:.7em .45em .35em;font-size:clamp(12px,9cqw,28px);background:linear-gradient(transparent,rgba(26,35,80,.55))}
+.many .tc.cur{border-color:var(--orange);box-shadow:0 0 0 3px var(--line),0 5px 0 3px var(--drop)}
+.tc .no{position:absolute;left:6px;top:6px;z-index:1;min-width:1.5em;height:1.5em;line-height:1.5em;padding:0 .2em;box-sizing:border-box;border-radius:99px;text-align:center;font-family:var(--toy);font-size:clamp(11px,8cqw,17px);background:#fff;color:var(--line);box-shadow:0 0 0 2px var(--line)}
+.tc.cur .no{background:var(--orange);color:#fff;-webkit-text-stroke:2px var(--line);paint-order:stroke fill}
 .tc:focus-visible{outline:3px solid var(--head);outline-offset:2px}
 .tinfo{text-align:center;color:#fff;min-width:0}
 .tinfo .tm{display:flex;justify-content:center;gap:5px 6px;flex-wrap:wrap;min-height:1.7em;font-size:clamp(12.5px,1.1vw,15px)}
@@ -185,17 +210,15 @@ button{font-family:inherit}
 .radios button[aria-checked="true"]{background:rgba(255,138,28,.16);box-shadow:inset 0 0 0 1.5px var(--orange)}
 .radios button[aria-checked="true"]::before{border-color:var(--orange);background:radial-gradient(circle,var(--orange) 0 3px,transparent 3.5px)}
 .radios button:disabled{cursor:default;opacity:.6}
-.go{all:unset;cursor:pointer;box-sizing:border-box;flex:none;display:grid;place-items:center;text-align:center;width:100%;min-height:clamp(54px,9vh,76px);padding:6px 22px;border-radius:12px;font-family:var(--disp);font-style:italic;font-weight:800;text-transform:uppercase;letter-spacing:.03em;font-size:clamp(26px,2.9vw,38px);line-height:1;color:#231000;background:linear-gradient(180deg,#ffb65c,#ff7a00);box-shadow:0 4px 0 #a84a00,0 10px 22px #ff7a0055,inset 0 2px 0 #fff6;transition:transform .08s,box-shadow .08s,filter .12s}
+/* Largar: botão de brinquedo laranja, com contorno, brilho em cima e afundando no clique */
+.go{all:unset;cursor:pointer;box-sizing:border-box;flex:none;display:grid;place-items:center;text-align:center;width:100%;min-height:clamp(54px,9vh,76px);padding:6px 22px;border-radius:18px;border:3px solid var(--line);font-family:var(--toy);text-transform:uppercase;letter-spacing:.04em;font-size:clamp(26px,2.9vw,38px);line-height:1;color:#fff;-webkit-text-stroke:5px var(--line);paint-order:stroke fill;text-shadow:0 3px 0 var(--line);background:linear-gradient(180deg,#ffc06a 0 46%,#ff8a1c 46%,#f06a00);box-shadow:0 6px 0 var(--line),inset 0 3px 0 #fff8,inset 0 -5px 0 #b84c0055;transition:transform .08s,box-shadow .08s,filter .12s}
 .go:hover,.go:focus-visible{filter:brightness(1.08)}
-.go:focus-visible{outline:3px solid #fff;outline-offset:2px}
-.go:active{transform:translateY(3px);box-shadow:0 1px 0 #a84a00,0 4px 10px #ff7a0055,inset 0 2px 0 #fff6}
-.go:disabled{cursor:default;filter:saturate(.25);font-size:clamp(16px,1.6vw,20px);font-style:normal;box-shadow:none;transform:none;opacity:.8}
+.go:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.go:active{transform:translateY(5px);box-shadow:0 1px 0 var(--line),inset 0 3px 0 #fff8,inset 0 -5px 0 #b84c0055}
+.go:disabled{cursor:default;filter:saturate(.25);font-size:clamp(16px,1.6vw,20px);-webkit-text-stroke:3px var(--line);box-shadow:none;transform:none;opacity:.8}
 .home .mmsg{position:fixed;left:50%;right:auto;bottom:28px;transform:translateX(-50%);margin:0;padding:6px 16px;border-radius:10px;background:#c4260e;color:#fff;font-weight:600;box-shadow:0 6px 18px #0006;z-index:5}
 /* pistas */
 .trkbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:0 10px 8px}
-.trkbar .find{flex:1 1 7em;min-width:0;box-sizing:border-box;font:inherit;color:var(--text);background:var(--field);border:1.5px solid var(--rule);border-radius:9px;padding:5px 10px;height:32px}
-.trkbar .find::placeholder{color:var(--ink-dim)}
-.trkbar .find:focus{border-color:var(--orange);outline:none}
 .trkbar .rnd{display:flex;align-items:center;gap:5px;font-variant-numeric:tabular-nums}
 .trkbar .rnd input{width:56px;height:32px;box-sizing:border-box;padding:0 4px 0 10px;font:inherit;font-weight:600;text-align:center;color:var(--text);background:var(--field);border:1.5px solid var(--rule);border-radius:9px}
 .trkbar .rnd .lk{font-size:1.05em;padding:3px 8px;color:var(--btn)}
@@ -214,7 +237,7 @@ button{font-family:inherit}
 #view.menu.swap{opacity:0;transition:none}
 .hint{color:var(--ink-dim);font-size:15px;margin:0;line-height:1.5}
 .optgrid{display:grid;grid-template-columns:minmax(180px,1fr) auto minmax(200px,1fr) auto;gap:12px 14px;align-items:center;max-width:900px;font-size:clamp(16px,1.8vw,23px)}
-.optgrid .h{grid-column:1/-1;color:var(--head);margin-top:6px;font-family:var(--disp);font-style:italic;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:1.12em}
+.optgrid .h{grid-column:1/-1;color:var(--head);margin-top:6px;font-family:var(--toy);font-weight:400;text-transform:uppercase;letter-spacing:.04em;font-size:1.12em}
 .optcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:10px 48px;align-items:start}
 .optcols .optgrid{gap:clamp(5px,1.2vh,12px) 12px;grid-template-columns:minmax(150px,1fr) auto minmax(120px,1fr) auto;font-size:clamp(15px,1.5vw,19px)}
 .optgrid>span:first-child,.optgrid .h~span{min-width:0}
@@ -279,7 +302,7 @@ input.nm.tg{width:4.5em;justify-self:start;letter-spacing:.15em;text-transform:u
 @media (prefers-reduced-motion:reduce){.pc.urg,.pc .hr.warn svg{animation:none}.pc.urg{background:rgba(150,18,10,.5);box-shadow:0 0 0 3px #ff3b2f}}
 #intro{position:fixed;left:50%;top:calc((100% - var(--hudh,84px))/2);transform:translate(-50%,-50%);background:rgba(55,55,55,.82);color:#fff;padding:36px 52px;font-size:clamp(18px,2.2vw,28px);line-height:1.3;min-width:min(340px,80vw);box-sizing:border-box;white-space:pre-line}
 #intro b{color:#ff0;font-weight:400}
-#big{position:fixed;left:50%;top:calc((100% - var(--hudh,84px))*.45);transform:translate(-50%,-50%);font-size:clamp(46px,9vw,110px);color:#ff0;text-shadow:3px 3px 0 #000,-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000;pointer-events:none;white-space:nowrap}
+#big{position:fixed;left:50%;top:calc((100% - var(--hudh,84px))*.45);transform:translate(-50%,-50%);font-family:var(--toy);font-size:clamp(46px,9vw,110px);color:#ffd23a;-webkit-text-stroke:.12em #1a2350;paint-order:stroke fill;text-shadow:0 .07em 0 #1a2350;pointer-events:none;white-space:nowrap}
 #msg{position:fixed;left:50%;top:calc((100% - var(--hudh,84px))*.2);transform:translateX(-50%);font-size:clamp(20px,3vw,34px);color:#fff;text-shadow:2px 2px 0 #000;pointer-events:none;white-space:nowrap}
 /* semáforo da largada: as luzes vermelhas acendem uma por segundo e todas ficam verdes no "já" */
 #lights{position:fixed;right:16px;top:16px;display:flex;gap:clamp(10px,1.6vw,18px);padding:clamp(10px,1.6vw,16px) clamp(14px,2.2vw,24px);background:#151515;border:4px solid #333;border-radius:14px;box-shadow:0 6px 0 #0006;pointer-events:none}
@@ -382,7 +405,7 @@ input.nm.tg{width:4.5em;justify-self:start;letter-spacing:.15em;text-transform:u
 .dsel:focus-visible,.drvBody button:focus-visible{outline:2px solid var(--head);outline-offset:2px}
 .drvcols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:18px 40px;font-size:clamp(16px,1.6vw,20px)}
 .dcol{display:flex;flex-direction:column;gap:clamp(6px,1.3vh,12px);min-width:0}
-.dcol .h{color:var(--head);margin-top:4px;font-family:var(--disp);font-style:italic;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:1.12em}
+.dcol .h{color:var(--head);margin-top:4px;font-family:var(--toy);font-weight:400;text-transform:uppercase;letter-spacing:.04em;font-size:1.12em}
 #drvPrev{width:auto;max-width:100%;height:min(240px,26vh);aspect-ratio:48/34;align-self:center;background:radial-gradient(ellipse at 50% 70%,var(--prev-glow) 0,transparent 70%)}
 .dcap{text-align:center;color:var(--ink-dim);font-size:.85em}
 .frow{display:grid;grid-template-columns:110px minmax(0,1fr);align-items:center;gap:12px}
@@ -416,8 +439,8 @@ input.nm.tg{width:4.5em;justify-self:start;letter-spacing:.15em;text-transform:u
 .chip2{all:unset;cursor:pointer;border:1.5px solid var(--btn);border-radius:99px;padding:3px 12px;font-size:.8em;color:var(--btn)}
 .chip2[aria-pressed=true]{background:var(--btn);color:var(--on-btn)}.chip2:focus-visible{outline:2px solid var(--head);outline-offset:2px}
 .dlgback{position:fixed;inset:0;background:var(--dim-back);display:grid;place-items:center;z-index:50;padding:16px}
-.dlg{font-family:var(--ui);background:var(--sheet);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);border:1px solid var(--glass-brd);border-radius:18px;box-shadow:0 16px 40px #0007,inset 0 3px 0 var(--orange);width:min(560px,100%);max-height:100%;overflow:auto;padding:16px 28px 10px;box-sizing:border-box;font-size:clamp(15px,1.7vw,20px)}
-.dlg h2{font-family:var(--disp);font-style:italic;font-weight:800;text-transform:uppercase;letter-spacing:.02em;color:var(--text);margin:6px 0 10px;padding-bottom:10px;border-bottom:1px solid var(--rule);font-size:1.5em;line-height:1}
+.dlg{font-family:var(--ui);background:var(--sheet);border:3px solid var(--glass-brd);border-radius:22px;box-shadow:0 8px 0 var(--drop),0 16px 40px #0006,inset 0 6px 0 var(--orange);width:min(560px,100%);max-height:100%;overflow:auto;padding:16px 28px 10px;box-sizing:border-box;font-size:clamp(15px,1.7vw,20px)}
+.dlg h2{font-family:var(--toy);font-weight:400;text-transform:uppercase;letter-spacing:.02em;color:var(--text);margin:6px 0 10px;padding-bottom:10px;border-bottom:1px solid var(--rule);font-size:1.5em;line-height:1}
 .dlg p{color:var(--ink)}
 .dlg.wide{width:min(1000px,100%)}
 .cpk{display:grid;grid-template-columns:150px minmax(0,1fr) 230px;gap:20px;align-items:start}
@@ -483,6 +506,7 @@ table.stats tr.tot td{border-top:1px solid var(--rule)}table.stats tr.gap td{pad
       <div class="ph"><h2>Grid de largada</h2><span class="cnt" id="slotCount"></span></div>
       <div class="roomrow" id="roomRow"></div>
       <div id="slots"></div>
+      <div class="ailvl" id="aiLvl" title="Dificuldade dos pilotos do computador, a mesma para todos na corrida"><span class="lab">IA</span><button class="sq" id="aiMinus" aria-label="IA mais fácil">−</button><span class="val" id="aiVal" role="status"></span><button class="sq fill" id="aiPlus" aria-label="IA mais difícil">+</button></div>
       <div class="bench">
         <div class="bh"><span>Pilotos</span><button class="lk" id="mkDriver">+ Criar piloto</button></div>
         <div class="drvbox" id="drvList" role="list" aria-label="Pilotos"></div>
@@ -491,7 +515,37 @@ table.stats tr.tot td{border-top:1px solid var(--rule)}table.stats tr.gap td{pad
     <button class="cfg glass" id="goOptions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Configurações</span></button>
     </div>
     <section class="stage" aria-label="Pista">
-      <h1 class="logo">GRL ONLINE</h1>
+      <h1 class="logo"><svg viewBox="40 0 440 236" role="img" aria-label="GRL Online">
+        <defs>
+          <text id="lg-G" x="168" y="148" font-size="168" text-anchor="middle" transform="rotate(-8 168 100)">G</text>
+          <text id="lg-R" x="263" y="146" font-size="168" text-anchor="middle" transform="rotate(4 263 100)">R</text>
+          <text id="lg-L" x="349" y="150" font-size="168" text-anchor="middle" transform="rotate(-6 349 100)">L</text>
+          <linearGradient id="lg-o" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd08a"/><stop offset=".47" stop-color="#ffa040"/><stop offset=".48" stop-color="#ff7a0a"/><stop offset="1" stop-color="#e04e00"/></linearGradient>
+          <linearGradient id="lg-y" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff5b0"/><stop offset=".47" stop-color="#ffdc40"/><stop offset=".48" stop-color="#ffc400"/><stop offset="1" stop-color="#f09a00"/></linearGradient>
+          <linearGradient id="lg-b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a6d4ff"/><stop offset=".47" stop-color="#4aa0ff"/><stop offset=".48" stop-color="#2a7cf0"/><stop offset="1" stop-color="#1450c0"/></linearGradient>
+          <pattern id="lg-ck" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#fff"/><rect width="7" height="7" fill="#1a2350"/><rect x="7" y="7" width="7" height="7" fill="#1a2350"/></pattern>
+        </defs>
+        <g stroke="#1a2350" stroke-width="4" stroke-linejoin="round" fill="url(#lg-ck)">
+          <path d="M180 172C150 166 112 188 72 178L84 224C118 234 150 212 180 214Z"/>
+          <path d="M340 172C370 166 408 188 448 178L436 224C402 234 370 212 340 214Z"/>
+        </g>
+        <g stroke-linecap="round" fill="none">
+          <path d="M58 70h34M46 98h40M58 126h28" stroke="#1a2350" stroke-width="15"/>
+          <path d="M58 70h34M46 98h40M58 126h28" stroke="#fff" stroke-width="7"/>
+        </g>
+        <path d="M428 20l6 15 15 6-15 6-6 15-6-15-15-6 15-6z" fill="#ffd23a" stroke="#1a2350" stroke-width="4" stroke-linejoin="round"/>
+        <g stroke-linejoin="round" stroke-linecap="round">
+          <g fill="#1a2350" stroke="#1a2350" stroke-width="24" transform="translate(0 9)"><use href="#lg-G"/><use href="#lg-R"/><use href="#lg-L"/></g>
+          <g fill="#1a2350" stroke="#1a2350" stroke-width="24"><use href="#lg-G"/><use href="#lg-R"/><use href="#lg-L"/></g>
+          <g fill="#fff" stroke="#fff" stroke-width="11"><use href="#lg-G"/><use href="#lg-R"/><use href="#lg-L"/></g>
+          <use href="#lg-G" fill="url(#lg-o)"/><use href="#lg-R" fill="url(#lg-y)"/><use href="#lg-L" fill="url(#lg-b)"/>
+        </g>
+        <rect x="175" y="162" width="170" height="60" rx="12" fill="#1a2350" transform="translate(0 6)"/>
+        <rect x="175" y="162" width="170" height="60" rx="12" fill="#fff" stroke="#1a2350" stroke-width="4"/>
+        <rect x="182" y="169" width="156" height="46" rx="7" fill="none" stroke="#2a7cf0" stroke-width="2.5"/>
+        <g fill="#b9c3d6" stroke="#1a2350" stroke-width="1.5"><circle cx="191" cy="192" r="3.5"/><circle cx="329" cy="192" r="3.5"/></g>
+        <text x="260" y="205" font-size="34" text-anchor="middle" letter-spacing="2" fill="#1f5fd0">ONLINE</text>
+      </svg></h1>
       <div id="stageView" aria-label="Pistas escolhidas"></div>
       <div class="tinfo"><div class="tm" id="trkMeta"></div></div>
     </section>
@@ -503,10 +557,8 @@ table.stats tr.tot td{border-top:1px solid var(--rule)}table.stats tr.gap td{pad
     </section>
     <section class="pane glass po trk" aria-label="Pistas">
       <div class="ph"><h2>Pistas</h2><span class="cnt" id="selCount"></span></div>
-      <div class="trkbar"><input class="find" id="trkFind" type="search" placeholder="Buscar pista" aria-label="Buscar pista" autocomplete="off">
-        <span class="rnd"><button class="lk" id="rndGo" title="Escolhe pistas ao acaso">Sortear</button><input type="number" id="rndVal" min="1" max="36" value="1" inputmode="numeric" aria-label="Quantas pistas sortear" title="Quantas pistas sortear"></span></div>
-      <div id="trkGrid" role="listbox" aria-label="Pistas" title="Clique para escolher a pista. Ctrl+clique junta várias num campeonato."></div>
-      <p class="pf" id="trkHint"></p>
+      <div class="trkbar"><span class="rnd"><button class="lk" id="rndGo" title="Escolhe pistas ao acaso">Sortear</button><input type="number" id="rndVal" min="1" max="36" value="1" inputmode="numeric" aria-label="Quantas pistas sortear" title="Quantas pistas sortear"></span></div>
+      <div id="trkGrid" role="listbox" aria-label="Pistas"></div>
     </section>
     <button class="go" id="goStart">Largar</button>
     </div>
@@ -1311,24 +1363,29 @@ const Sound={
 
 // ====================================================================== dados do jogador (pilotos, opções)
 const DEF_DRIVERS=[ // pilotos da pasta drivers/ da instalação
-  {name:'Blue',human:false,c1:'#0065d4',c2:'#ffffff',skill:100},
-  {name:'Green',human:false,c1:'#008000',c2:'#ffff00',skill:100},
-  {name:'Orange',human:false,c1:'#ff8b00',c2:'#007eb0',skill:10},
-  {name:'Red',human:false,c1:'#af0000',c2:'#ffffff',skill:74},
-  {name:'Yellow',human:false,c1:'#ffff00',c2:'#000000',skill:76},
+  {name:'Blue',human:false,c1:'#0065d4',c2:'#ffffff'},
+  {name:'Green',human:false,c1:'#008000',c2:'#ffff00'},
+  {name:'Orange',human:false,c1:'#ff8b00',c2:'#007eb0'},
+  {name:'Red',human:false,c1:'#af0000',c2:'#ffffff'},
+  {name:'Yellow',human:false,c1:'#ffff00',c2:'#000000'},
 ];
+// Dificuldade da IA, uma só para a corrida inteira (no original cada piloto tem a sua habilidade, 0–100 %, que multiplica
+// a antecipação em 0x40b890); os 5 níveis equivalem às habilidades 0, 25, 50, 75 e 100 % (0 vira 1 %, como antes)
+const AI_LVLS=['Muito fácil','Fácil','Regular','Difícil','Muito difícil'];
+const aiSkill=()=>clamp(Opts.aiLvl*25,1,100)/100;
 const firstVisit=!store.get('gr.drivers',null);
 let Drivers=store.get('gr.drivers',null)||JSON.parse(JSON.stringify(DEF_DRIVERS));
 let Slots=store.get('gr.slots',null)||[{d:'Yellow',car:'General'},{d:'Blue',car:'General'},{d:'Red',car:'General'},{d:'Green',car:'General'},{d:'Orange',car:'General'}];
 Slots.forEach(s=>{ if(!CARS.some(c=>c.name===s.car)) s.car='General'; }); // Sidamob e Onewheeler saíram do jogo
-const Opts=Object.assign({lenMode:'km',km:1,laps:4,mins:3,order:'rev',pts:[8,6,4,2,1,0],fl:3,shadows:true,theme:'auto',volEng:80,volSkid:80,volFx:80,tyre:30,fuel:30,fuelKg:50,dmg:30},store.get('gr.opts',{}));
+const Opts=Object.assign({lenMode:'km',km:1,laps:4,mins:3,order:'rev',pts:[8,6,4,2,1,0],fl:3,shadows:true,theme:'auto',volEng:80,volSkid:80,volFx:80,tyre:30,fuel:30,fuelKg:50,dmg:30,aiLvl:2},store.get('gr.opts',{}));
+if(!(Opts.aiLvl>=0&&Opts.aiLvl<=4)) Opts.aiLvl=2; Opts.aiLvl=Math.round(Opts.aiLvl);
 if(Opts.vol!=null){ if(store.get('gr.opts',{}).volEng==null) Opts.volEng=Opts.volSkid=Opts.volFx=Opts.vol; delete Opts.vol; } // volume único antigo
 // tema claro/escuro das telas fora da corrida; "do sistema" segue o navegador
 const darkMQ=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
 function applyTheme(){ const d=Opts.theme==='dark'||(Opts.theme!=='light'&&!!(darkMQ&&darkMQ.matches)); document.documentElement.dataset.theme=d?'dark':'light'; }
 applyTheme(); if(darkMQ&&darkMQ.addEventListener) darkMQ.addEventListener('change',applyTheme);
 try{ localStorage.removeItem('gr.snd'); localStorage.removeItem('gr.trkfiles'); }catch(e){} // sons e pistas carregados pelo jogador (recursos removidos)
-Drivers.forEach(d=>{ delete d.pad; });
+Drivers.forEach(d=>{ delete d.pad; delete d.skill; }); // habilidade por piloto: virou a dificuldade da corrida (Opts.aiLvl)
 // sigla de 3 letras do piloto (classificação ao vivo): a escolhida, ou as 3 primeiras letras do nome sem acento
 const cleanTag=s=>String(s||'').normalize('NFD').replace(/[^A-Za-z0-9]/g,'').toUpperCase().slice(0,3);
 function autoTag(name,taken=[]){ const l=cleanTag(name).padEnd(3,'X');
@@ -1922,7 +1979,7 @@ function newRace(T,entrants,headless){
   else { order.sort((a,b)=>(pts[b.drv.name]||0)-(pts[a.drv.name]||0)); if(Opts.order==='rev') order.reverse(); }
   const starts=T.starts.length?T.starts:[{x:T.rx[0],y:T.ry[0],a:Math.atan2(T.ty[0],T.tx[0])}];
   const cars=order.map((e,i)=>{ const s=starts[i%starts.length]; const g={x:s.x+(i>=starts.length?-Math.cos(s.a)*4:0),y:s.y+(i>=starts.length?-Math.sin(s.a)*4:0),a:s.a};
-    const c=new Car(e.spec,e.drv,g,T); if(!e.drv.human) c.ai=new AI(c,clamp(e.drv.skill??80,1,100)/100,T); return c; });
+    const c=new Car(e.spec,e.drv,g,T); if(!e.drv.human) c.ai=new AI(c,e.skill??aiSkill(),T); return c; });
   T.ton.set(T.ton0); T.tonDirty.length=0; // cada corrida começa com o piso original
   const R={T,cars,laps:raceLaps(T),timeLimit:Opts.lenMode==='min'?Opts.mins*60:null,phase:'intro',t:0,cd:0,order:cars.slice(),firstFin:null,endAt:null,fastest:null,headless,msg:null};
   R.movers=T.objs.filter(o=>o.type===36).map(o=>({x:o.x,y:o.y,a:o.a,vx:0,vy:0,moved:false})); // cones móveis voltam ao lugar a cada corrida
@@ -2161,7 +2218,7 @@ function alertMenu(t){ const h=$('menuMsg'); h.textContent=t; h.hidden=false; cl
 function backToMenu(){ Game.season=null; buildMenu(); show('menu'); }
 
 // ---------------------------------------------------------------- menu principal
-let trkQ='', selected=store.get('gr.sel',['b:Agari']), rndN=1, previewId=null;
+let selected=store.get('gr.sel',['b:Agari']), rndN=1, previewId=null;
 const flagCss=(a,b)=>'linear-gradient(135deg,'+a+' 50%,'+b+' 50%)';
 const isGuest=()=>Net.role==='guest'&&Net.state!=='off';
 
@@ -2205,7 +2262,7 @@ const Thumbs={
     return {v:THUMB_V,img,len:T.lapLen,pits:!!T.hasPits};
   },
 };
-// monta os cartões das pistas; só refaz quando a lista, a atual ou o anfitrião mudam (buildMenu roda a cada tecla da busca)
+// monta os cartões das pistas; só refaz quando a lista, a atual ou o anfitrião mudam (buildMenu roda a cada clique no lobby)
 let stageKey='';
 function buildStage(){
   const v=$('stageView'), list=stageList(), cur=stageCur(list), many=list.length>1, guest=isGuest();
@@ -2269,7 +2326,7 @@ const Demo={
     const guest=isGuest(), e=stageCur(stageList());
     this.cur=e||null; if(!e) return;
     const rows=(guest?(Net.rows||[]):raceRows()).slice(0,6);
-    const ck=e.id+'#'+rows.map(r=>[r.name,r.car,r.c1,r.c2,r.kind==='ai'&&r.drv?r.drv.skill:''].join(',')).join('|');
+    const ck=e.id+'#'+Opts.aiLvl+'#'+rows.map(r=>[r.name,r.car,r.c1,r.c2,r.kind].join(',')).join('|');
     this.busy=true; const cv=$('view');
     try{
       if(this.stale||this.key!==e.id||Gfx.T!==e.T){
@@ -2278,7 +2335,7 @@ const Demo={
         Gfx.build(T); this.key=e.id; this.stale=false; this.ck=''; this.R=null; }
       if(this.ck!==ck){ this.ck=ck; const T=e.T, sv=Game.season; Game.season=null;
         Gfx.clearCars();
-        const R=newRace(T,rows.map(r=>({drv:{name:r.name,tag:r.tag,human:false,skill:r.kind==='ai'&&r.drv?(r.drv.skill??80):90,c1:r.c1,c2:r.c2},spec:carByName(r.car)})),true);
+        const R=newRace(T,rows.map(r=>({drv:{name:r.name,tag:r.tag,human:false,c1:r.c1,c2:r.c2},skill:r.kind==='ai'?aiSkill():.9,spec:carByName(r.car)})),true);
         Game.season=sv; R.phase='run'; R.laps=1e9; R.timeLimit=null; R.demo=true; T.rules={tyre:0,fuel:0,fuelKg:0,dmg:0};
         Gfx.addCars(R); this.R=R; }
       Gfx.sway=this.moving(); cv.hidden=false; this.sz=''; this.fit(); this.lastDraw=0; stageInfo(e,[e]);   // sz='': Gfx.build mediu o canvas escondido
@@ -2320,30 +2377,32 @@ function buildMenu(){
   $('slotCount').textContent=rows.length+' de 6';
   buildRoomRow(guest);
   for(const id of ['drvList','mkDriver','lenMinus','lenPlus']) $(id).disabled=guest;
+  $('aiVal').textContent=guest?'do anfitrião':AI_LVLS[Opts.aiLvl]; $('aiLvl').classList.toggle('locked',guest);
+  $('aiMinus').disabled=guest||Opts.aiLvl<=0; $('aiPlus').disabled=guest||Opts.aiLvl>=AI_LVLS.length-1;
   $('drvList').parentElement.classList.toggle('locked',guest); document.querySelector('.trkbar').classList.toggle('locked',guest);
   $('lenMode').querySelectorAll('button').forEach(b=>{ b.disabled=guest; b.setAttribute('aria-checked',String(!guest&&b.dataset.m===Opts.lenMode)); });
   $('goStart').textContent=guest?'Aguardando o anfitrião':Net.open()?'Largar online':'Largar'; $('goStart').disabled=guest;
-  // lista de pilotos: cada linha com pôr/tirar do grid, editar, estatísticas e excluir
+  // lista de pilotos, em dois grupos (humanos e IA): cada linha com pôr/tirar do grid, editar, estatísticas e excluir
   const dl=$('drvList'); dl.innerHTML='';
   const ib=(cls,ico,tip,fn)=>{ const b=el('button','ib '+cls); b.innerHTML=ico; b.title=tip; b.setAttribute('aria-label',tip); b.onclick=fn; b.disabled=guest; return b; };
-  Drivers.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(d=>{ const row=el('div','dr'), f=el('i','cl'), nm=el('span','nm'), used=Slots.some(s=>s.d===d.name);
-    row.setAttribute('role','listitem'); f.style.background=flagCss(d.c1,d.c2); nm.textContent=d.name; nm.title=d.name; if(!d.human) nm.appendChild(el('span','kd','IA')); if(used) row.classList.add('used');
+  for(const [gt,gh] of [['Humanos',true],['IA',false]]){ const ds=Drivers.filter(d=>!!d.human===gh).sort((a,b)=>a.name.localeCompare(b.name)); if(!ds.length) continue;
+  const hd=el('div','dg',gt); hd.setAttribute('role','presentation'); dl.appendChild(hd);
+  ds.forEach(d=>{ const row=el('div','dr'), f=el('i','cl'), nm=el('span','nm'), used=Slots.some(s=>s.d===d.name);
+    row.setAttribute('role','listitem'); f.style.background=flagCss(d.c1,d.c2); nm.textContent=d.name; nm.title=d.name; if(used) row.classList.add('used');
     const add=ib('add'+(used?' on':''),used?ICO_DRV.out:ICO_DRV.in,used?'Tirar '+d.name+' do grid':'Pôr '+d.name+' no grid',()=>{
       if(Slots.some(s=>s.d===d.name)) Slots=Slots.filter(s=>s.d!==d.name); else if(Slots.length<6) Slots.push({d:d.name,car:Slots[0]?Slots[0].car:'General'}); else { alertMenu('O grid está cheio: tire um piloto antes.'); return; } saveAll(); buildMenu(); });
     add.setAttribute('aria-pressed',String(used));
     const del=ib('del',ICO_DRV.del,'Excluir '+d.name,()=>confirmDelete(d,buildMenu)); if(Drivers.length<=1) del.disabled=true;
     row.append(f,nm,add,ib('edit',ICO_DRV.edit,'Editar '+d.name,()=>{ drvIdx=Drivers.indexOf(d); buildDriver(); show('drivers'); }),ib('st',ICO_DRV.st,'Estatísticas de '+d.name,()=>showStats(d)),del);
-    dl.appendChild(row); });
+    dl.appendChild(row); }); }
   // pistas
   const grid=$('trkGrid'), top=grid.scrollTop; grid.innerHTML='';
   if(guest){ $('lenVal').textContent=Net.len||'–'; for(const n of (Net.tracks||[])){ const b=el('button','sel'); b.appendChild(el('span',null,n)); b.disabled=true; grid.appendChild(b); }
-    $('selCount').textContent='pista do anfitrião'; $('trkHint').textContent='O anfitrião escolhe as pistas e a duração.'; buildStage(); Demo.sync(); return; }
-  // todas as pistas juntas, em ordem alfabética; a busca filtra pelo nome (sem acentos nem maiúsculas)
+    $('selCount').textContent='pista do anfitrião'; buildStage(); Demo.sync(); return; }
+  // todas as pistas juntas, em ordem alfabética
   selected=selected.filter(id=>Tracks.some(t=>t.id===id));
-  const norm=x=>x.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(), q=norm(trkQ.trim());
-  const list=Tracks.filter(t=>!q||norm(t.name).includes(q)).sort((a,b)=>a.name.localeCompare(b.name));
+  const list=Tracks.slice().sort((a,b)=>a.name.localeCompare(b.name));
   const cur=selected.includes(previewId)?previewId:selected[0];   // a pista mostrada na vitrine
-  if(!list.length){ const p=el('p','hint','Nenhuma pista com esse nome.'); p.style.cssText='padding:6px 4px;grid-column:1/-1'; grid.appendChild(p); }
   for(const t of list){ const b=el('button'), k=selected.indexOf(t.id); b.appendChild(el('span',null,t.name)); b.setAttribute('role','option'); b.setAttribute('aria-selected',String(k>=0));
     if(k>=0){ b.classList.add('sel'); if(selected.length>1){ b.dataset.n=k+1; if(t.id===cur) b.classList.add('cur'); } }
     // clique liga e desliga a pista (mais de uma = campeonato, na ordem dos cliques); duplo clique não larga
@@ -2351,7 +2410,6 @@ function buildMenu(){
     grid.appendChild(b); }
   grid.scrollTop=top;
   $('selCount').textContent=selected.length>1?'campeonato · '+selected.length+' pistas':selected.length?'1 pista':'nenhuma';
-  $('trkHint').textContent=(coarse?'Toque':'Clique')+' para escolher ou tirar uma pista; com mais de uma, vira campeonato.';
   { const r=$('rndVal'); r.max=Tracks.length; if(document.activeElement!==r) r.value=rndN; }
   buildStage(); Net.lobbyOut(); Demo.sync();
 }
@@ -2389,13 +2447,14 @@ $('lenMinus').onclick=()=>{ if(Opts.lenMode==='laps') Opts.laps=Math.max(1,Opts.
 $('lenPlus').onclick=()=>{ if(Opts.lenMode==='laps') Opts.laps=Math.min(255,Opts.laps+1); else if(Opts.lenMode==='km') Opts.km=Math.min(100,Opts.km+1); else Opts.mins=Math.min(60,Opts.mins+1); saveAll(); buildMenu(); };
 $('lenMode').onclick=e=>{ const b=e.target.closest('button'); if(!b||b.disabled) return; Opts.lenMode=b.dataset.m; saveAll(); buildMenu(); };
 $('mkDriver').onclick=()=>{ newDriver(); show('drivers'); };
+$('aiMinus').onclick=()=>{ Opts.aiLvl=Math.max(0,Opts.aiLvl-1); saveAll(); buildMenu(); };
+$('aiPlus').onclick=()=>{ Opts.aiLvl=Math.min(AI_LVLS.length-1,Opts.aiLvl+1); saveAll(); buildMenu(); };
 $('goOptions').onclick=()=>{ buildOptions(); show('options'); };
 // ícones da lista de pilotos do lobby (traço de 2,2 px, cor pelo CSS)
 const ICO_DRV=(()=>{ const s=p=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+p+'</svg>', u='<circle cx="9" cy="8" r="4"/><path d="M2 20a7 7 0 0 1 14 0"/>';
   return { in:s(u+'<path d="M19 8v6M16 11h6"/>'), out:s(u+'<path d="M16 11h6"/>'), edit:s('<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>'),
     st:s('<path d="M3 20h18M6 20v-7M11 20V5M16 20v-9M21 20v-4"/>'), del:s('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>') }; })();
 $('goStart').onclick=goStart;
-$('trkFind').oninput=e=>{ trkQ=e.target.value; buildMenu(); };
 // quantas pistas sortear: campo numérico de 1 até o total de pistas
 const rndRead=()=>{ const r=$('rndVal'), v=Math.round(+r.value); if(v>=1) rndN=Math.min(Tracks.length,v); return rndN; };
 $('rndVal').oninput=rndRead; $('rndVal').onchange=()=>{ $('rndVal').value=rndRead(); };
@@ -2519,7 +2578,7 @@ function newDriver(){ let n=1; while(drvByName('Piloto '+n)) n++;
   const used=new Set(Drivers.filter(x=>x.human&&x.keys).flatMap(x=>Object.values(x.keys)));
   const pre=(KEY_PRESETS.find(([,k])=>!Object.values(k).some(c=>used.has(c)))||KEY_PRESETS[0])[1];
   const pick=()=>SWATCHES[4+Math.floor(Math.random()*14)];
-  Drivers.push({name:'Piloto '+n,tag:autoTag('Piloto '+n,Drivers.map(x=>x.tag)),human:true,c1:pick(),c2:'#ffffff',keys:Object.assign({},pre),skill:80}); drvIdx=Drivers.length-1; saveAll(); buildDriver();
+  Drivers.push({name:'Piloto '+n,tag:autoTag('Piloto '+n,Drivers.map(x=>x.tag)),human:true,c1:pick(),c2:'#ffffff',keys:Object.assign({},pre)}); drvIdx=Drivers.length-1; saveAll(); buildDriver();
   setTimeout(()=>{ const nm=$('drvName'); if(nm){ nm.focus(); nm.select(); } },0); }
 function keyOwner(d,code){ return Drivers.find(x=>x!==d&&x.human&&x.keys&&Object.values(x.keys).includes(code)); }
 function buildDriver(){
@@ -2557,9 +2616,6 @@ function buildDriver(){
     b.onclick=()=>{ if(!!d.human===v) return; d.human=v; if(v&&!d.keys) d.keys=Object.assign({},KEY_PRESETS[0][1]); waitKey=null; saveAll(); buildDriver(); }; seg.appendChild(b); }
   tyRow.appendChild(seg);
   L.append(cv,cap,nmRow,tgRow,tyRow);
-  if(!d.human){ const r=el('div','frow'); const sl=el('label',null,'Habilidade'); sl.htmlFor='drvSkill';
-    const w=el('div','rng'); const inp=el('input'); inp.type='range'; inp.min=0; inp.max=100; inp.step=1; inp.value=d.skill??80; inp.id='drvSkill'; const out=el('output',null,(d.skill??80)+'%');
-    inp.oninput=()=>{ d.skill=+inp.value; out.textContent=inp.value+'%'; }; inp.onchange=saveAll; w.append(inp,out); r.append(sl,w); L.appendChild(r); }
   cols.appendChild(L);
 
   // coluna direita: cores e controles
@@ -2699,7 +2755,7 @@ const Net={
     const p=this.players; this.lobbyOut(); if(Game.mode==='menu') buildNet(); else if(Game.R&&Game.R.net) say(Game.R,'Um jogador saiu; o computador assume o carro.');
   },
   toAi(id){ const R=Game.R; if(!R||R.net!=='host') return; const c=R.cars.find(c=>c.drv.remote===id); if(!c) return;
-    c.drv=Object.assign({},c.drv,{remote:null,human:false}); c.human=false; c.ai=new AI(c,.8,R.T); c.ai.i=nearAi(R.T,c); },
+    c.drv=Object.assign({},c.drv,{remote:null,human:false}); c.human=false; c.ai=new AI(c,aiSkill(),R.T); c.ai.i=nearAi(R.T,c); },
   lobbyOut(){ if(this.role!=='host'||!this.open()) return;
     this.send({t:'lobby',rows:raceRows().map(r=>({id:r.id||null,name:r.name,car:r.car,c1:r.c1,c2:r.c2,kind:r.kind})),tracks:selected.map(id=>(Tracks.find(t=>t.id===id)||{}).name).filter(Boolean),len:lenText(),racing:this.state==='race'}); },
   remoteInput(id){ const i=this.inputs[id]||{c:1,s:0}; return {c:i.c,steer:i.s,throttle:Math.max(0,i.c)/100,brake:Math.max(0,-i.c)/100}; },
@@ -2891,7 +2947,7 @@ if(firstVisit) dialog((box,close)=>{
 
 window.__gr={Tracks,loadTrack,CARS,drawCarIcon,simulate:async(name,secs,carName)=>{
   const e=Tracks.find(t=>t.name===name); const T=await loadTrack(e);
-  const ents=Drivers.slice(0,6).map(d=>({drv:Object.assign({},d,{human:false,skill:100}),spec:carByName(carName||'General')}));
+  const ents=Drivers.slice(0,6).map(d=>({drv:Object.assign({},d,{human:false}),skill:1,spec:carByName(carName||'General')}));
   Game.season=null; const R=newRace(T,ents,true); R.phase='run'; const n=Math.round(secs/DT); const tr=R.cars.map(()=>[]); for(let i=0;i<n;i++){ raceStep(R); if(i%25===0) R.cars.forEach((c,k)=>tr[k].push(c.x,c.y)); } window.__lastTrace={T,tr,names:R.cars.map(c=>c.name)};
   return {lapLen:Math.round(T.lapLen),cps:T.cps.length,cars:R.cars.map(c=>[c.name,c.lapsDone,c.best&&+c.best.toFixed(2)]),dbg:R.cars.filter(c=>c.lapsDone<2).map(c=>({n:c.name,x:+c.x.toFixed(1),y:+c.y.toFixed(1),idx:c.idx,N:T.N,next:c.nextCp,v:+Math.hypot(c.vx,c.vy).toFixed(1),h:+T.heightAt(c.x,c.y).toFixed(2),wet:T.wet(c.x,c.y),ai:c.ai&&c.ai.rev,wl:T.water,rx:+T.rx[c.idx].toFixed(1),ry:+T.ry[c.idx].toFixed(1)}))}; },
   Net,Gfx,Sky,start:async name=>{ selected=[Tracks.find(t=>t.name===name).id]; goStart(); }, Game, Opts, newRace, raceStep, Sound, collide, carHit, AI, buildHud, updateHud, autoTag, get Drivers(){ return Drivers; }};
