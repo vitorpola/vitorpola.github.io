@@ -1725,7 +1725,8 @@ const Gfx={
   coneSync(){ const T=this.T; for(const {m,k} of this.cones||[]){ k.position.set(m.x,T.heightAt(m.x,m.y),m.y); if(m.spin) k.rotation.set(0,-m.a-m.spin,0); } },
   // equipe do box em U, como no original: 4 de um lado, 3 do outro e 1 no fim, na cor do carro
   addCrews(R){ const T=this.T;
-    this.crews=T.hasPits?T.pitBoxes.map((b,i)=>{ const car=R.cars.find(c=>c.boxI===i), col=car?car.c1:0xf2c200, ca=Math.cos(b.a), sa=Math.sin(b.a);
+    // box dividido (mais carros que boxes): a equipe veste a cor do carro deste computador, para cada um achar o seu
+    this.crews=T.hasPits?T.pitBoxes.map((b,i)=>{ const car=R.cars.find(c=>c.boxI===i&&isMine(R,c))||R.cars.find(c=>c.boxI===i), col=car?car.c1:0xf2c200, ca=Math.cos(b.a), sa=Math.sin(b.a);
       return CREW_U.map(([f,s])=>{ const g=new THREE.Group(), body=new THREE.Mesh(new THREE.BoxGeometry(.45,1.1,.3),this.mat(col)), head=new THREE.Mesh(new THREE.SphereGeometry(.2,6,5),this.mat(0xf0c8a0));
         body.position.y=.55; head.position.y=1.3; body.castShadow=true; g.add(body,head);
         const x=b.x+ca*f-sa*s, y=b.y+sa*f+ca*s; g.position.set(x,T.heightAt(x,y),y); this.root.add(g); return g; }); }):[];
@@ -2203,12 +2204,14 @@ async function startRace(entry){
   raceIntro(Game.R);
   buildHud(); show('race'); $('view').focus();
 }
-function raceIntro(R){ const T=R.T, rec=store.get('gr.rec.'+Game.entry.id,null);
-  $('intro').innerHTML=esc(T.name)+'\n\n<b>Distância da corrida</b>\n'+(R.timeLimit?Opts.mins+' minutos':R.laps+(R.laps===1?' volta':' voltas')+'\n'+(R.laps*T.lapLen/1000).toFixed(3)+' km')+'\n\n<b>Recorde da pista</b>\n'+(rec?fmt(rec.t)+'s':'–'); }
+// recorde da pista: o deste computador; no online, o convidado mostra o do anfitrião (R.hostRec, vindo no "start")
+const trackRec=R=>R.net==='guest'?(R.hostRec||null):store.get('gr.rec.'+Game.entry.id,null);
+function raceIntro(R){ const T=R.T, rec=trackRec(R), mins=R.timeLimit?Math.round(R.timeLimit/60):0;
+  $('intro').innerHTML=esc(T.name)+'\n\n<b>Distância da corrida</b>\n'+(R.timeLimit?mins+(mins===1?' minuto':' minutos'):R.laps+(R.laps===1?' volta':' voltas')+'\n'+(R.laps*T.lapLen/1000).toFixed(3)+' km')+'\n\n<b>Recorde da pista</b>\n'+(rec?fmt(rec.t)+'s':'–'); }
 // aborted: corrida encerrada pela pausa; a classificação é a ordem do momento e todos pontuam pela posição
 function finishRace(R,aborted){
   R.phase='done';
-  const e=Game.entry, key='gr.rec.'+e.id; let rec=store.get(key,null), nr=false;
+  const e=Game.entry, key='gr.rec.'+e.id; let rec=trackRec(R), nr=false;
   for(const c of R.cars) if(c.best!=null&&(!rec||c.best<rec.t)){ rec={t:c.best,name:c.name}; nr=true; }
   if(nr&&!R.net) store.set(key,rec);
   const S=Game.season; const P=Opts.pts;
@@ -2227,7 +2230,8 @@ function finishRace(R,aborted){
   if(S&&S.list.length>1){ const rows=Object.entries(S.points).sort((a,b)=>b[1]-a[1]||(S.wins[b[0]]||0)-(S.wins[a[0]]||0));
     h+='<h3 class="sub">'+(more?'Campeonato<small>após '+(S.idx+1)+' de '+S.list.length+' pistas</small>':'Classificação final do campeonato')+'</h3><div class="tablewrap"><table><tr><th></th><th>Piloto</th><th class="n">Vitórias</th><th class="n">Pontos</th></tr>'+rows.map(([n,p],i)=>'<tr'+(i<3?' class="p'+(i+1)+'"':'')+'><td class="po"><b>'+(i+1)+'</b></td><td class="pn">'+(col[n]||flag('#888','#888'))+esc(n)+'</td><td class="n">'+(S.wins[n]||0)+'</td><td class="n pts">'+p+'</td></tr>').join('')+'</table></div>'; }
   if(R.net==='host') Net.state='lobby';
-  if(R.net==='guest'){ h+='<div class="acts"><button id="rLobby">Voltar à sala</button></div>'; $('resBox').innerHTML=h; show('results'); $('rLobby').onclick=()=>Net.backToLobby(); return; }
+  if(R.net==='guest'){ h+='<div class="acts"><button id="rLobby">Voltar à sala</button></div>'; $('resBox').innerHTML=h; show('results'); $('rLobby').onclick=()=>Net.backToLobby();
+    if(S&&S.list.length>1&&!more) Fireworks.start(); return; }
   h+='<div class="acts">'+(more?'<button id="rNext">Próxima pista</button>':'<button id="rAgain">Correr de novo</button>')+'<button id="rMenu">'+'Menu'+'</button></div>';
   $('resBox').innerHTML=h; show('results');
   if(S&&S.list.length>1&&!more) Fireworks.start();   // fim do campeonato (não existe no original)
@@ -2553,29 +2557,29 @@ function buildMenu(){
         rm=el('button','rm','×'); rm.title='Tirar da corrida'; rm.setAttribute('aria-label','Tirar '+r.name+' da corrida'); rm.onclick=()=>{ Slots=Slots.filter(x=>x!==s); saveAll(); buildMenu(); }; }
       else if(mine){ const me=Net.me();
         car.title=cv.title='Trocar de carro'; car.onclick=cv.onclick=()=>pickCar(me.car,drvByName(me.drv),n=>{ Net.prefs.car=n; Net.savePrefs(); Net.helloAgain(); },()=>{ saveAll(); Net.helloAgain(); });
-        const hs=Drivers.filter(d=>d.human); dn.title='Trocar piloto'; dn.onclick=()=>{ const k=hs.findIndex(d=>d.name===me.drv); Net.prefs.drv=hs[(k+1)%hs.length].name; Net.savePrefs(); Net.helloAgain(); }; }
+        dn.title='Abrir a ficha do piloto (nome, sigla, cores, teclas)'; dn.onclick=()=>{ drvIdx=Math.max(0,Drivers.indexOf(drvByName(me.drv))); buildDriver(); show('drivers'); }; }
       else { car.disabled=true; dn.disabled=true; cv.style.cursor='default'; }
       who.append(dn,car); row.append(el('span','pos',String(i+1)),cv,who,rm); }
     else { row.classList.add('empty'); row.textContent=!guest&&i===rows.length?'Vaga livre: escolha um piloto abaixo':'Vaga livre'; }
     sl.appendChild(row); }
   $('slotCount').textContent=rows.length+' de 6';
   buildRoomRow(guest);
-  for(const id of ['drvList','mkDriver','lenMinus','lenPlus']) $(id).disabled=guest;
+  for(const id of ['lenMinus','lenPlus']) $(id).disabled=guest;
   $('aiVal').textContent=guest?'do anfitrião':AI_LVLS[Opts.aiLvl]; $('aiLvl').classList.toggle('locked',guest);
   $('aiMinus').disabled=guest||Opts.aiLvl<=0; $('aiPlus').disabled=guest||Opts.aiLvl>=AI_LVLS.length-1;
-  $('drvList').parentElement.classList.toggle('locked',guest); document.querySelector('.trkbar').classList.toggle('locked',guest);
+  document.querySelector('.trkbar').classList.toggle('locked',guest);
   $('lenMode').querySelectorAll('button').forEach(b=>{ b.disabled=guest; b.setAttribute('aria-checked',String(!guest&&b.dataset.m===Opts.lenMode)); });
   $('goStart').textContent=guest?'Aguardando o anfitrião':Net.open()?'Largar online':'Largar'; $('goStart').disabled=guest;
   // lista de pilotos, em dois grupos (humanos e IA): cada linha com pôr/tirar do grid, editar, estatísticas e excluir
   const dl=$('drvList'); dl.innerHTML='';
-  const ib=(cls,ico,tip,fn)=>{ const b=el('button','ib '+cls); b.innerHTML=ico; b.title=tip; b.setAttribute('aria-label',tip); b.onclick=fn; b.disabled=guest; return b; };
+  const ib=(cls,ico,tip,fn)=>{ const b=el('button','ib '+cls); b.innerHTML=ico; b.title=tip; b.setAttribute('aria-label',tip); b.onclick=fn; return b; };
   for(const [gt,gh] of [['Humanos',true],['IA',false]]){ const ds=Drivers.filter(d=>!!d.human===gh).sort((a,b)=>a.name.localeCompare(b.name)); if(!ds.length) continue;
   const hd=el('div','dg',gt); hd.setAttribute('role','presentation'); dl.appendChild(hd);
   ds.forEach(d=>{ const row=el('div','dr'), f=el('i','cl'), nm=el('span','nm'), used=Slots.some(s=>s.d===d.name);
     row.setAttribute('role','listitem'); f.style.background=flagCss(d.c1,d.c2); nm.textContent=d.name; nm.title=d.name; if(used) row.classList.add('used');
     const add=ib('add'+(used?' on':''),used?ICO_DRV.out:ICO_DRV.in,used?'Tirar '+d.name+' do grid':'Pôr '+d.name+' no grid',()=>{
       if(Slots.some(s=>s.d===d.name)) Slots=Slots.filter(s=>s.d!==d.name); else if(Slots.length<6) Slots.push({d:d.name,car:Slots[0]?Slots[0].car:'General'}); else { alertMenu('O grid está cheio: tire um piloto antes.'); return; } saveAll(); buildMenu(); });
-    add.setAttribute('aria-pressed',String(used));
+    add.setAttribute('aria-pressed',String(used)); if(guest){ add.disabled=true; add.title='Na sala de outro jogador, o grid é do anfitrião'; }
     const del=ib('del',ICO_DRV.del,'Excluir '+d.name,()=>confirmDelete(d,buildMenu)); if(Drivers.length<=1) del.disabled=true;
     row.append(f,nm,add,ib('edit',ICO_DRV.edit,'Editar '+d.name,()=>{ drvIdx=Drivers.indexOf(d); buildDriver(); show('drivers'); }),ib('st',ICO_DRV.st,'Estatísticas de '+d.name,()=>showStats(d)),del);
     dl.appendChild(row); }); }
@@ -2701,8 +2705,10 @@ const saveStats=()=>store.set('gr.stats',Stats);
 const statOf=n=>Stats[n]||(Stats[n]={r:[0,0,0,0,0,0],s:[0,0,0,0,0,0],pts:0,fl:0});
 function recordRace(R,S,more){
   if(R.headless) return;
-  R.order.forEach((c,i)=>{ if(R.net&&!(c.human&&!c.drv.remote)) return; const st=statOf(c.name); if(i<6) st.r[i]++; st.pts+=c.pts||0; if(R.fastest&&c.best!=null&&c.best===R.fastest.t) st.fl++; });
-  if(S&&S.list.length>1&&!more){ R.order.map(c=>c.name).sort((a,b)=>(S.points[b]||0)-(S.points[a]||0)).forEach((n,i)=>{ if(i<6) statOf(n).s[i]++; }); }
+  // no online só contam os pilotos deste computador, pelo nome do piloto aqui (o anfitrião pode ter renomeado um nome repetido)
+  const own=c=>!R.net||(c.human&&!c.drv.remote), sn=c=>c.statName||c.name;
+  R.order.forEach((c,i)=>{ if(!own(c)) return; const st=statOf(sn(c)); if(i<6) st.r[i]++; st.pts+=c.pts||0; if(R.fastest&&c.best!=null&&c.best===R.fastest.t) st.fl++; });
+  if(S&&S.list.length>1&&!more){ R.order.slice().sort((a,b)=>(S.points[b.name]||0)-(S.points[a.name]||0)).forEach((c,i)=>{ if(i<6&&own(c)) statOf(sn(c)).s[i]++; }); }
   saveStats();
 }
 
@@ -2757,7 +2763,7 @@ function confirmDelete(d,after=buildDriver){
     box.appendChild(el('h2',null,'Excluir piloto'));
     box.appendChild(el('p',null,'Excluir '+d.name+'? As estatísticas dele também serão apagadas.'));
     const acts=el('div','dacts'), yes=el('button','lk','Excluir'), no=el('button','lk','Cancelar'); yes.style.color='var(--head)';
-    yes.onclick=()=>{ Slots=Slots.filter(s=>s.d!==d.name); delete Stats[d.name]; saveStats(); Drivers.splice(Drivers.indexOf(d),1); saveAll(); close(); after(); };
+    yes.onclick=()=>{ Slots=Slots.filter(s=>s.d!==d.name); delete Stats[d.name]; saveStats(); Drivers.splice(Drivers.indexOf(d),1); saveAll(); close(); after(); Net.helloAgain(); };
     no.onclick=close; acts.append(yes,no); box.appendChild(acts);
   });
 }
@@ -2772,7 +2778,7 @@ function newDriver(){ let n=1; while(drvByName('Piloto '+n)) n++;
 function keyOwner(d,code){ return !code?null:Drivers.find(x=>x!==d&&x.human&&x.keys&&Object.values(x.keys).includes(code)); }
 function buildDriver(){
   const g=$('drvBody'); g.innerHTML=''; drvIdx=clamp(drvIdx,0,Drivers.length-1); const d=Drivers[drvIdx];
-  const slot=Slots.find(s=>s.d===d.name), car=carByName(slot?slot.car:'General');
+  const slot=Slots.find(s=>s.d===d.name), net=isGuest()&&Net.me().drv===d.name, car=carByName(net?Net.me().car:slot?slot.car:'General');
 
   // linha do topo: escolher piloto
   const top=el('div','drvtop'); const lab=el('label',null,'Piloto'); lab.htmlFor='drvSel';
@@ -2786,12 +2792,12 @@ function buildDriver(){
   // coluna esquerda: carro, nome, tipo
   const L=el('div','dcol');
   const cv=el('canvas'); cv.id='drvPrev'; cv.width=480; cv.height=340; drawCarIcon(cv,car,d.c1,d.c2);
-  const cap=el('div','dcap',slot?car.name+' · posição '+(Slots.indexOf(slot)+1)+' na largada':car.name+' · fora da corrida');
+  const cap=el('div','dcap',net?car.name+' · seu piloto na sala '+Net.code:slot?car.name+' · posição '+(Slots.indexOf(slot)+1)+' na largada':car.name+' · fora da corrida');
   const nmRow=el('div','frow'); const nl=el('label',null,'Nome'); nl.htmlFor='drvName';
   const nm=el('input','nm'); nm.id='drvName'; nm.value=d.name; nm.maxLength=14;
   nm.onchange=()=>{ const v=nm.value.trim(); if(!v||Drivers.some(x=>x!==d&&x.name===v)){ nm.value=d.name; return; }
     if(v===d.name) return; if(d.tag===autoTag(d.name,Drivers.filter(x=>x!==d).map(x=>x.tag))) d.tag=autoTag(v,Drivers.filter(x=>x!==d).map(x=>x.tag)); // sigla automática acompanha o nome
-    Slots.forEach(s=>{ if(s.d===d.name) s.d=v; }); if(Stats[d.name]){ Stats[v]=Stats[d.name]; delete Stats[d.name]; saveStats(); } d.name=v; saveAll(); buildDriver(); };
+    Slots.forEach(s=>{ if(s.d===d.name) s.d=v; }); if(Net.prefs.drv===d.name){ Net.prefs.drv=v; Net.savePrefs(); } if(Stats[d.name]){ Stats[v]=Stats[d.name]; delete Stats[d.name]; saveStats(); } d.name=v; saveAll(); buildDriver(); };
   nm.onkeydown=e=>{ if(e.key==='Enter') nm.blur(); };
   nmRow.append(nl,nm);
   const tgRow=el('div','frow'); const tl=el('label',null,'Sigla'); tl.htmlFor='drvTag';
@@ -2870,10 +2876,11 @@ function setBind(code){
 $('drvNew').onclick=newDriver;
 $('drvDel').onclick=()=>{ if(Drivers.length<=1) return; confirmDelete(Drivers[drvIdx]); };
 $('drvStats').onclick=()=>showStats(Drivers[drvIdx]);
-$('drvOk').onclick=()=>{ waitKey=null; const nm=$('drvName'); if(nm) nm.onchange(); buildMenu(); show('menu'); };
+$('drvOk').onclick=()=>{ waitKey=null; const nm=$('drvName'); if(nm) nm.onchange();
+  const d=Drivers[drvIdx]; if(isGuest()&&d&&d.human){ Net.prefs.drv=d.name; Net.savePrefs(); } Net.helloAgain(); buildMenu(); show('menu'); };
 // ====================================================================== jogo online (P2P: o navegador do anfitrião roda a física)
 const PEERJS_SRC='https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
-const NET_V=2, NET_MAX=6, NET_CODECH='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const NET_V=3, NET_MAX=6, NET_CODECH='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const r2=v=>Math.round(v*100)/100, r3=v=>Math.round(v*1000)/1000;
 function loadPeerLib(){
   if(window.Peer) return Promise.resolve();
@@ -2936,6 +2943,7 @@ const Net={
     if(d.t==='in'){ this.inputs[c.peer]={c:clamp(+d.c||0,-100,100),s:clamp(+d.s||0,-1,1),b:d.b?1:0}; return; }
     if(d.t==='ready'){ this.ready.add(c.peer); return; }
     if(d.t==='leave'){ this.toAi(c.peer); return; }
+    if(d.t==='rs'){ const R=Game.R, car=R&&R.net==='host'&&R.phase==='run'&&R.cars.find(x=>x.drv.remote===c.peer); if(car&&Math.hypot(car.vx,car.vy)<2) resetCar(R,car); return; }
     if(d.t==='ping'){ c.send({t:'pong',k:d.k}); return; }
   },
   drop(id){
@@ -2958,7 +2966,7 @@ const Net={
     Game.entry=entry;
     Gfx.build(T); const R=newRace(T,ents,false); R.net='host'; R.phase='wait'; R.waitT=0; Game.R=R;
     this.state='race'; this.lobbyOut();
-    this.send({t:'start',track:trackDesc(entry),laps:R.laps,tl:R.timeLimit,rules:T.rules,cars:R.cars.map(c=>({name:c.name,tag:c.tag,car:c.spec.name,c1:c.c1,c2:c.c2,pid:c.drv.remote||(c.drv.human?'host':null),x:r2(c.x),y:r2(c.y),a:r3(c.a)}))});
+    this.send({t:'start',track:trackDesc(entry),laps:R.laps,tl:R.timeLimit,rules:T.rules,rec:trackRec(R),cars:R.cars.map(c=>({name:c.name,tag:c.tag,car:c.spec.name,c1:c.c1,c2:c.c2,pid:c.drv.remote||(c.drv.human?'host':null),box:c.boxI??null,x:r2(c.x),y:r2(c.y),a:r3(c.a)}))});
     Gfx.addCars(R); raceIntro(R); buildHud(); show('race'); $('view').focus();
   },
   hostStep(R){
@@ -2968,10 +2976,12 @@ const Net={
       c:R.cars.map(c=>[r2(c.x),r2(c.y),r3(c.a),r2(c.vx),r2(c.vy),r3(c.delta),r2(c.ws),...c.wheels.map(w=>r2(w.slide))]),
       o:R.order.map(c=>R.cars.indexOf(c)),
       x:R.cars.map(c=>{ const v=[c.fuel,c.tyre,c.dmg,c.thr,Math.round(c.skNet||0),Math.round(c.dmgNet||0),Math.round(c.boost*1000),c.boosting?1:0]; c.skNet=0; c.dmgNet=0; return v; }),
-      st:R.cars.map(c=>[c.lapsDone,r3(c.lapStart),c.best,c.finished?c.finishT:null,c.wrong>1?1:0,c.laps.length?r3(c.laps[c.laps.length-1]):null]),
+      st:R.cars.map(c=>{ const P=c.pit; return [c.lapsDone,r3(c.lapStart),c.best,c.finished?c.finishT:null,c.wrong>1?1:0,c.laps.length?r3(c.laps[c.laps.length-1]):null,
+        c.cpTs.length,c.cpTs.length?r3(c.cpTs[c.cpTs.length-1]):null,P?[P.t,+P.fuel,+P.tyre,+P.rep,+P.boost,+P.done]:null]; }),
       f:R.fastest, e:R.endCd&&R.endAt!=null?r2(R.endAt-R.t):null});
   },
-  sendEnd(R){ this.send({t:'end',o:R.order.map(c=>R.cars.indexOf(c)),f:R.fastest,laps:R.laps,
+  sendEnd(R){ const S=Game.season; this.send({t:'end',o:R.order.map(c=>R.cars.indexOf(c)),f:R.fastest,laps:R.laps,
+    ss:S&&S.list.length>1?{n:S.list.length,i:S.idx,p:S.points,w:S.wins}:null,
     st:R.cars.map(c=>[c.lapsDone,c.best,c.finished,c.finishT,c.pts,c.laps.length?c.laps[c.laps.length-1]:null])}); },
   backToLobby(){
     if(this.role==='host'){ if(Game.R&&Game.R.net==='host'&&Game.R.phase!=='done') this.send({t:'abort'}); this.state='lobby'; this.players.forEach(p=>p.inRace=false); }
@@ -3009,10 +3019,11 @@ const Net={
     Sound.init(); show('loading'); this.state='race'; this.buf=[]; this.rt=null; this.lastIn=''; this.say('');
     let T; try{ T=await loadTrack(entry); }catch(e){ this.send({t:'leave'}); this.state='lobby'; show('menu'); this.say('Não consegui abrir a pista do anfitrião.'); return; }
     const myDrv=drvByName(this.me().drv);
-    const cars=d.cars.map(ci=>{ const mine=ci.pid===this.myId; const c=new Car(carByName(ci.car),{name:ci.name,tag:ci.tag,c1:ci.c1,c2:ci.c2,human:mine,keys:mine&&myDrv?myDrv.keys:{}},{x:ci.x,y:ci.y,a:ci.a},T); c.mine=mine; return c; });
+    const cars=d.cars.map(ci=>{ const mine=ci.pid===this.myId; const c=new Car(carByName(ci.car),{name:ci.name,tag:ci.tag,c1:ci.c1,c2:ci.c2,human:mine,keys:mine&&myDrv?myDrv.keys:{}},{x:ci.x,y:ci.y,a:ci.a},T); c.mine=mine;
+      if(T.hasPits&&ci.box!=null) c.boxI=ci.box; if(mine&&myDrv) c.statName=myDrv.name; return c; });   // box de cada carro: cores da equipe e destaque do seu box
     Game.entry=entry; Game.season=null;
     T.rules=d.rules||NO_RULES;
-    Gfx.build(T); const R={T,cars,laps:d.laps,timeLimit:d.tl??null,phase:'wait',t:0,cd:0,order:cars.slice(),firstFin:null,endAt:null,fastest:null,headless:false,msg:null,net:'guest'}; Game.R=R;
+    Gfx.build(T); const R={T,cars,laps:d.laps,timeLimit:d.tl??null,phase:'wait',t:0,cd:0,order:cars.slice(),firstFin:null,endAt:null,fastest:null,headless:false,msg:null,net:'guest',hostRec:d.rec||null}; Game.R=R;
     Gfx.addCars(R); raceIntro(R); buildHud(); show('race'); $('view').focus();
     this.send({t:'ready'});
   },
@@ -3035,7 +3046,9 @@ const Net={
     if(R.phase==='count'){ const lit=Math.min(3,Math.floor(R.cd)+1); if(lit!==R.lit){ R.lit=lit; Sound.beep(440); } }
     if(wasCount&&R.phase==='run'&&!R.goFlash){ Sound.beep(880); R.goFlash=1; R.greenT=R.t+1; }
     R.endCd=last.e!=null; R.endAt=last.e!=null?R.t+last.e:null;
-    last.st.forEach((s,j)=>{ const c=R.cars[j]; if(!c) return; c.lapsDone=s[0]; c.lapStart=s[1]; c.best=s[2]; c.finished=s[3]!=null; c.finishT=s[3]; c.wrong=s[4]?2:0; if(s[5]!=null&&c.laps[c.laps.length-1]!==s[5]) c.laps.push(s[5]); });
+    last.st.forEach((s,j)=>{ const c=R.cars[j]; if(!c) return; c.lapsDone=s[0]; c.lapStart=s[1]; c.best=s[2]; c.finished=s[3]!=null; c.finishT=s[3]; c.wrong=s[4]?2:0; if(s[5]!=null&&c.laps[c.laps.length-1]!==s[5]) c.laps.push(s[5]);
+      if(s[6]!=null) while(c.cpTs.length<s[6]) c.cpTs.push(s[7]);   // tempos nos checkpoints: intervalos da classificação ao vivo
+      const P=s[8]; c.pit=P?{t:P[0],fuel:!!P[1],tyre:!!P[2],rep:!!P[3],boost:!!P[4],done:!!P[5]}:null; });
     R.order=last.o.map(j=>R.cars[j]).filter(Boolean); R.fastest=last.f;
     if(me){ if(me.finished&&!me.saidFin){ me.saidFin=1; say(R,'Você terminou em '+(R.order.indexOf(me)+1)+'º lugar'); }
       else if(!me.finished&&me.lapsDone!==(me.lastL??me.lapsDone)&&me.lapsDone===R.laps-1){ say(R,'Última volta!'); Sound.ding(true); }
@@ -3045,7 +3058,9 @@ const Net={
   guestEnd(d){
     const R=Game.R; if(!R||R.net!=='guest') return;
     d.st.forEach((s,j)=>{ const c=R.cars[j]; if(!c) return; c.lapsDone=s[0]; c.best=s[1]; c.finished=s[2]; c.finishT=s[3]; c.pts=s[4]; });
-    R.order=d.o.map(j=>R.cars[j]).filter(Boolean); R.fastest=d.f; this.state='lobby'; finishRace(R);
+    R.order=d.o.map(j=>R.cars[j]).filter(Boolean); R.fastest=d.f; this.state='lobby';
+    const ss=d.ss; Game.season=ss?{list:new Array(ss.n).fill(null),idx:ss.i,points:ss.p||{},wins:ss.w||{}}:null;   // classificação do campeonato do anfitrião
+    finishRace(R);
   },
 };
 function trackDesc(e){
@@ -3100,7 +3115,9 @@ window.addEventListener('keydown',e=>{
   if(Game.mode==='race'||Game.mode==='paused'){
     if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
     if(e.code==='Escape'||e.code==='KeyP'){ if(Game.mode==='race') show('paused'); else resumeRace(); }
-    if(e.code==='Backspace'&&Game.mode==='race'&&Game.R&&Game.R.phase==='run'){ for(const c of Game.R.cars) if(c.human&&Math.hypot(c.vx,c.vy)<2) resetCar(Game.R,c); }
+    // devolve à pista o carro parado; no online cada um só o seu (o convidado pede ao anfitrião, que roda a física)
+    if(e.code==='Backspace'&&Game.mode==='race'&&Game.R&&Game.R.phase==='run'){ const R=Game.R;
+      if(R.net==='guest') Net.send({t:'rs'}); else for(const c of R.cars) if(isMine(R,c)&&Math.hypot(c.vx,c.vy)<2) resetCar(R,c); }
   }
 });
 window.addEventListener('keyup',e=>keys.delete(e.code));
